@@ -6,13 +6,13 @@ import { Button } from '@/components/ui/button';
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex items-center justify-center overflow-hidden">
+    <main className="flex flex-col grow items-center justify-center overflow-hidden">
       {/* Content with Motion */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: 'easeOut' }}
-        className="relative z-10 flex flex-col items-center justify-center text-center"
+        className="flex flex-col items-center justify-center text-center"
       >
         {/* Main Title - Match Header Style */}
         <h1

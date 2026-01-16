@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Noto_Sans_KR, Exo_2 } from 'next/font/google';
 import './globals.css';
+import { ParticlesBackground } from '@/components/ParticlesBackground';
 
 const notoSansKR = Noto_Sans_KR({
   variable: '--font-noto-sans-kr',
@@ -31,6 +32,7 @@ export default function RootLayout({
         className={`${notoSansKR.variable} ${exo2.variable} antialiased bg-black`}
       >
         {children}
+        <ParticlesBackground />
       </body>
     </html>
   );
