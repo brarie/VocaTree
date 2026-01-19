@@ -1,10 +1,8 @@
 package com.monovoca.server.user.domain.repository
 
-import com.monovoca.server.user.domain.model.User
 import com.monovoca.server.user.domain.model.vo.Email
-import com.monovoca.server.user.domain.model.vo.EncryptedPassword
-import com.monovoca.server.user.domain.model.vo.Nickname
 import com.monovoca.server.user.domain.model.vo.Username
+import com.monovoca.server.user.fixture.UserFixture
 import io.kotest.core.extensions.ApplyExtension
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.extensions.spring.SpringExtension
@@ -21,11 +19,9 @@ class UserQueryRepositoryTest(
 ) : DescribeSpec({
     describe("existsByUsername") {
         it("username이 존재하면 true를 반환한다.") {
-            val user = User(
-                username = Username("testuser1"),
-                email = Email("monovoca@naver.com"),
-                nickname = Nickname("테스트유저"),
-                password = EncryptedPassword.fromHash("12345678")
+            val user = UserFixture.create(
+                username = "testuser1",
+                email = "monovoca@naver.com"
             )
             userCommandRepository.save(user)
             val exists = userQueryRepository.existsByUsername(Username("testuser1"))
@@ -38,11 +34,9 @@ class UserQueryRepositoryTest(
     }
     describe("existsByEmail") {
         it("email이 존재하면 true를 반환한다.") {
-            val user = User(
-                username = Username("testuser1"),
-                email = Email("monovoca@naver.com"),
-                nickname = Nickname("테스트유저"),
-                password = EncryptedPassword.fromHash("12345678")
+            val user = UserFixture.create(
+                username = "testuser1",
+                email = "monovoca@naver.com"
             )
             userCommandRepository.save(user)
             val exists = userQueryRepository.existsByEmail(Email("monovoca@naver.com"))

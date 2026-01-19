@@ -1,5 +1,7 @@
 package com.monovoca.server.user.domain.model.vo
 
+import org.springframework.security.crypto.password.PasswordEncoder
+
 object RawPasswordPolicy {
     const val regex = "^[A-Za-z\\d!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]{8,20}$"
     val pattern = regex.toRegex()
@@ -10,12 +12,12 @@ object RawPasswordPolicy {
 value class EncryptedPassword private constructor(val value: String) {
 
     companion object {
-        fun encrypt(rawPassword: String, encryptor: (String) -> String): EncryptedPassword {
+        fun encrypt(rawPassword: String, encoder: PasswordEncoder): EncryptedPassword {
             require(RawPasswordPolicy.pattern.matches(rawPassword)) {
                 RawPasswordPolicy.message
             }
 
-            return EncryptedPassword(encryptor(rawPassword))
+            return EncryptedPassword(encoder.encode(rawPassword))
         }
 
         fun fromHash(hashedPassword: String): EncryptedPassword {
@@ -24,6 +26,6 @@ value class EncryptedPassword private constructor(val value: String) {
         }
     }
 
-    fun match(rawPassword: String, encryptor: (String) -> String): Boolean =
-        value == encryptor(rawPassword)
+    fun matches(rawPassword: String, encoder: PasswordEncoder): Boolean =
+        encoder.matches(rawPassword, value)
 }

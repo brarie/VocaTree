@@ -1,11 +1,7 @@
 package com.monovoca.server.user.infrastructure.persistence
 
 import com.monovoca.server.user.domain.model.User
-import com.monovoca.server.user.domain.model.vo.Email
-import com.monovoca.server.user.domain.model.vo.EncryptedPassword
-import com.monovoca.server.user.domain.model.vo.Nickname
-import com.monovoca.server.user.domain.model.vo.Username
-import com.monovoca.server.user.domain.model.vo.UserRole
+import com.monovoca.server.user.domain.model.vo.*
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID

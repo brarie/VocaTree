@@ -25,6 +25,11 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-mail")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
     runtimeOnly("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
@@ -32,9 +37,11 @@ dependencies {
     testImplementation("io.kotest:kotest-runner-junit5:6.0.7")
     testImplementation("io.kotest:kotest-assertions-core:6.0.7")
     testImplementation("io.kotest:kotest-extensions-spring:6.0.7")
+    testImplementation("com.icegreen:greenmail-junit5:2.1.8")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     implementation("org.jetbrains.exposed:exposed-spring-boot-starter:0.57.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4")
 }
 
 kotlin {
