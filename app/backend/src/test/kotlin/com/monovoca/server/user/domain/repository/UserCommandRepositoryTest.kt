@@ -38,7 +38,7 @@ class UserCommandRepositoryTest(
         }
         it("존재하지 않는 ID로 유저를 수정하면 IllegalStateException 발생한다.") {
             val user = UserFixture.create(
-                id = 9999L,
+                id = "00000000-0000-0000-0000-000000000000",
                 username = "testuser1",
                 email = "monovoca@naver.com"
             )

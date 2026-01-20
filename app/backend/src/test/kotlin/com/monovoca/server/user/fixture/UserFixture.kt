@@ -9,7 +9,7 @@ import com.monovoca.server.user.domain.model.vo.Username
 object UserFixture {
 
     fun create(
-        id: Long? = null,
+        id: String? = null,
         username: String = "testuser",
         email: String = "test@example.com",
         nickname: String = "테스트유저",

@@ -1,9 +1,10 @@
 package com.monovoca.server.user.domain.model
 
+import com.monovoca.server.common.domain.vo.UserRole
 import com.monovoca.server.user.domain.model.vo.*
 
 data class User(
-    val id: Long? = null,
+    val id: String? = null,
     val username: Username,
     val email: Email,
     val nickname: Nickname,

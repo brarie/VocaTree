@@ -1,13 +1,15 @@
 package com.monovoca.server.user.infrastructure.persistence
 
+import com.monovoca.server.common.domain.vo.UserRole
 import com.monovoca.server.user.domain.model.User
 import com.monovoca.server.user.domain.model.vo.*
-import org.jetbrains.exposed.dao.LongEntity
-import org.jetbrains.exposed.dao.LongEntityClass
+import org.jetbrains.exposed.dao.UUIDEntity
+import org.jetbrains.exposed.dao.UUIDEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.dao.id.LongIdTable
+import org.jetbrains.exposed.dao.id.UUIDTable
+import java.util.*
 
-object UserTable : LongIdTable("user") {
+object UserTable : UUIDTable("user") {
     val username = varchar("username", 20).uniqueIndex()
     val email = varchar("email", 100).uniqueIndex()
     val passwordHash = varchar("password_hash", 255)
@@ -15,8 +17,8 @@ object UserTable : LongIdTable("user") {
     val role = enumerationByName("role", 20, UserRole::class).default(UserRole.USER)
 }
 
-class UserEntity(id: EntityID<Long>) : LongEntity(id) {
-    companion object : LongEntityClass<UserEntity>(UserTable)
+class UserEntity(id: EntityID<UUID>) : UUIDEntity(id) {
+    companion object : UUIDEntityClass<UserEntity>(UserTable)
 
     var username by UserTable.username
     var email by UserTable.email
@@ -25,7 +27,7 @@ class UserEntity(id: EntityID<Long>) : LongEntity(id) {
     var role by UserTable.role
 
     fun toDomain(): User = User(
-        id = this.id.value,
+        id = this.id.value.toString(),
         username = Username(this.username),
         email = Email(this.email),
         password = EncryptedPassword.fromHash(this.passwordHash),
