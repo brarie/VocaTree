@@ -1,6 +1,5 @@
 package com.monovoca.server.auth.service
 
-import com.monovoca.server.auth.controller.request.LoginRequest
 import com.monovoca.server.auth.domain.exception.AuthUserNotFoundException
 import com.monovoca.server.auth.domain.exception.InvalidPasswordException
 import com.monovoca.server.auth.domain.exception.InvalidRefreshTokenException
@@ -58,12 +57,7 @@ class AuthServiceTest(
             it("TokenResult를 반환한다.") {
                 createAndSaveUser("loginuser1", "loginuser1@example.com")
 
-                val request = LoginRequest(
-                    username = "loginuser1",
-                    rawPassword = rawPassword
-                )
-
-                val result = authService.login(request)
+                val result = authService.login("loginuser1", rawPassword)
 
                 result.accessToken.shouldNotBeEmpty()
                 result.refreshToken.shouldNotBeEmpty()
@@ -74,12 +68,7 @@ class AuthServiceTest(
             it("refresh token이 저장된다.") {
                 val user = createAndSaveUser("loginuser2", "loginuser2@example.com")
 
-                val request = LoginRequest(
-                    username = "loginuser2",
-                    rawPassword = rawPassword
-                )
-
-                val result = authService.login(request)
+                val result = authService.login("loginuser2", rawPassword)
 
                 val storedUserId = refreshTokenRepository.findUserIdByRefreshToken(result.refreshToken)
                 storedUserId shouldBe user.id
@@ -88,13 +77,8 @@ class AuthServiceTest(
 
         context("존재하지 않는 username으로 로그인 요청할 때") {
             it("AuthUserNotFoundException이 발생한다.") {
-                val request = LoginRequest(
-                    username = "nonexist",
-                    rawPassword = rawPassword
-                )
-
                 shouldThrow<AuthUserNotFoundException> {
-                    authService.login(request)
+                    authService.login("nonexist", rawPassword)
                 }
             }
         }
@@ -103,13 +87,8 @@ class AuthServiceTest(
             it("InvalidPasswordException이 발생한다.") {
                 createAndSaveUser("loginuser3", "loginuser3@example.com")
 
-                val request = LoginRequest(
-                    username = "loginuser3",
-                    rawPassword = "wrongpassword!"
-                )
-
                 shouldThrow<InvalidPasswordException> {
-                    authService.login(request)
+                    authService.login("loginuser3", "wrongpassword!")
                 }
             }
         }
@@ -119,9 +98,7 @@ class AuthServiceTest(
         it("로그아웃하면 refresh token이 삭제된다.") {
             val user = createAndSaveUser("logoutuser", "logoutuser1@example.com")
 
-            val loginResult = authService.login(
-                LoginRequest(username = "logoutuser", rawPassword = rawPassword)
-            )
+            val loginResult = authService.login("logoutuser", rawPassword)
 
             authService.logout(user.id!!)
 
@@ -135,9 +112,7 @@ class AuthServiceTest(
             it("새로운 TokenResult를 반환한다.") {
                 createAndSaveUser("refresh1", "refreshuser1@example.com")
 
-                val loginResult = authService.login(
-                    LoginRequest(username = "refresh1", rawPassword = rawPassword)
-                )
+                val loginResult = authService.login("refresh1", rawPassword)
 
                 val refreshResult = authService.refresh(loginResult.refreshToken)
 
@@ -148,9 +123,7 @@ class AuthServiceTest(
             it("기존 refresh token은 무효화된다 (token rotation).") {
                 createAndSaveUser("refresh2", "refreshuser2@example.com")
 
-                val loginResult = authService.login(
-                    LoginRequest(username = "refresh2", rawPassword = rawPassword)
-                )
+                val loginResult = authService.login("refresh2", rawPassword)
                 val oldRefreshToken = loginResult.refreshToken
 
                 authService.refresh(oldRefreshToken)
@@ -163,9 +136,7 @@ class AuthServiceTest(
             it("새로운 refresh token으로 다시 refresh할 수 있다.") {
                 createAndSaveUser("refresh3", "refreshuser3@example.com")
 
-                val loginResult = authService.login(
-                    LoginRequest(username = "refresh3", rawPassword = rawPassword)
-                )
+                val loginResult = authService.login("refresh3", rawPassword)
 
                 val firstRefresh = authService.refresh(loginResult.refreshToken)
                 val secondRefresh = authService.refresh(firstRefresh.refreshToken)

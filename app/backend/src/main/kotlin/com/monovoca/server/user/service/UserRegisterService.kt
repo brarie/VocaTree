@@ -1,8 +1,6 @@
 package com.monovoca.server.user.service
 
 import com.monovoca.server.common.service.port.UUIDHolder
-import com.monovoca.server.user.controller.request.SignUpRequest
-import com.monovoca.server.user.controller.response.SignUpResponse
 import com.monovoca.server.user.domain.exception.*
 import com.monovoca.server.user.domain.model.User
 import com.monovoca.server.user.domain.model.vo.Email
@@ -28,15 +26,15 @@ class UserRegisterService(
 ) {
 
     @Transactional
-    fun signUp(signUpRequest: SignUpRequest): SignUpResponse {
-        val email = Email(signUpRequest.email).also {
+    fun signUp(usernameStr: String, emailStr: String, nicknameStr: String, rawPassword: String): String {
+        val email = Email(emailStr).also {
             if (userQueryRepository.existsByEmail(it)) throw DuplicatedEmailException()
         }
-        val username = Username(signUpRequest.username).also {
+        val username = Username(usernameStr).also {
             if (userQueryRepository.existsByUsername(it)) throw DuplicatedUsernameException()
         }
-        val nickname = Nickname(signUpRequest.nickname)
-        val password = EncryptedPassword.encrypt(signUpRequest.rawPassword, passwordEncoder)
+        val nickname = Nickname(nicknameStr)
+        val password = EncryptedPassword.encrypt(rawPassword, passwordEncoder)
         val user = User.create(
             username = username,
             email = email,
@@ -56,7 +54,7 @@ class UserRegisterService(
 
         certificationEmailSender.sendCertification(email, code)
 
-        return SignUpResponse(tempKey)
+        return tempKey
     }
 
     @Transactional

@@ -1,6 +1,5 @@
 package com.monovoca.server.auth.service
 
-import com.monovoca.server.auth.controller.request.LoginRequest
 import com.monovoca.server.auth.domain.exception.AuthUserNotFoundException
 import com.monovoca.server.auth.domain.exception.InvalidPasswordException
 import com.monovoca.server.auth.domain.exception.InvalidRefreshTokenException
@@ -19,10 +18,10 @@ class AuthService(
     private val tokenIssuer: TokenIssuer,
 ) {
 
-    fun login(loginRequest: LoginRequest): TokenResult {
-        val authUser = authUserQueryRepository.findAuthUserByUsername(Username(loginRequest.username))
+    fun login(username: String, rawPassword: String): TokenResult {
+        val authUser = authUserQueryRepository.findAuthUserByUsername(Username(username))
             ?: throw AuthUserNotFoundException()
-        if (authUser.password == null || !authUser.password.matches(loginRequest.rawPassword, passwordEncoder))
+        if (authUser.password == null || !authUser.password.matches(rawPassword, passwordEncoder))
             throw InvalidPasswordException()
 
         val tokenResult = tokenIssuer.issueTokenResult(authUser)

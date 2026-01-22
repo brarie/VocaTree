@@ -21,7 +21,7 @@ class AuthController(
 
     @PostMapping("/login")
     fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<LoginResponse> {
-        val tokenResult = authService.login(loginRequest)
+        val tokenResult = authService.login(loginRequest.username, loginRequest.rawPassword)
         return tokenResultToResponseEntity(tokenResult)
     }
 

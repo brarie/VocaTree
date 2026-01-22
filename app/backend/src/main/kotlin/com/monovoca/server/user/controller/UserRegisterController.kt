@@ -16,8 +16,15 @@ class UserRegisterController(
 ) {
 
     @PostMapping("/sign-up")
-    fun signUp(@RequestBody @Valid request: SignUpRequest): ResponseEntity<SignUpResponse> =
-        ResponseEntity.ok(userRegisterService.signUp(request))
+    fun signUp(@RequestBody @Valid request: SignUpRequest): ResponseEntity<SignUpResponse> {
+        val tempKey = userRegisterService.signUp(
+            usernameStr = request.username,
+            emailStr = request.email,
+            nicknameStr = request.nickname,
+            rawPassword = request.rawPassword
+        )
+        return ResponseEntity.ok(SignUpResponse(tempKey))
+    }
 
     @PostMapping("/verify")
     fun certificate(@RequestBody request: CertificateRequest): ResponseEntity<Unit> {
