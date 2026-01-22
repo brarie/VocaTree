@@ -1,7 +1,7 @@
 package com.monovoca.server.user.infrastructure
 
 import com.monovoca.server.user.domain.model.vo.Email
-import com.monovoca.server.user.service.port.CertificationEmailSender
+import com.monovoca.server.user.domain.port.CertificationEmailSender
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper

@@ -1,6 +1,6 @@
 package com.monovoca.server.common.infrastructure
 
-import com.monovoca.server.common.service.port.UUIDHolder
+import com.monovoca.server.common.domain.port.UUIDHolder
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
 

@@ -1,6 +1,6 @@
 package com.monovoca.server.common.infrastructure
 
-import com.monovoca.server.common.service.port.DateHolder
+import com.monovoca.server.common.domain.port.DateHolder
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
 

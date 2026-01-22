@@ -1,8 +1,8 @@
 package com.monovoca.server.auth.domain.model
 
-import com.monovoca.server.common.domain.vo.EncryptedPassword
-import com.monovoca.server.common.domain.vo.UserRole
-import com.monovoca.server.common.domain.vo.Username
+import com.monovoca.server.common.domain.model.vo.EncryptedPassword
+import com.monovoca.server.common.domain.model.vo.UserRole
+import com.monovoca.server.common.domain.model.vo.Username
 
 /**
  * 인증 관련 사용자 정보 모델

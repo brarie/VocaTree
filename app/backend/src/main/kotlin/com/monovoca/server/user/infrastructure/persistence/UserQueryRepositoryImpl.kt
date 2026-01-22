@@ -1,7 +1,7 @@
 package com.monovoca.server.user.infrastructure.persistence
 
+import com.monovoca.server.common.domain.model.vo.Username
 import com.monovoca.server.user.domain.model.vo.Email
-import com.monovoca.server.common.domain.vo.Username
 import com.monovoca.server.user.domain.port.UserQueryRepository
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Repository

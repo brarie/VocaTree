@@ -1,6 +1,6 @@
 package com.monovoca.server.auth.infrastructure.persistence
 
-import com.monovoca.server.auth.service.port.RefreshTokenRepository
+import com.monovoca.server.auth.domain.port.RefreshTokenRepository
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Repository
 import java.util.concurrent.TimeUnit

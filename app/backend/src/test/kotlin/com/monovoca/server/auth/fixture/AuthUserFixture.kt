@@ -1,9 +1,9 @@
 package com.monovoca.server.auth.fixture
 
 import com.monovoca.server.auth.domain.model.AuthUser
-import com.monovoca.server.common.domain.vo.EncryptedPassword
-import com.monovoca.server.common.domain.vo.UserRole
-import com.monovoca.server.common.domain.vo.Username
+import com.monovoca.server.common.domain.model.vo.EncryptedPassword
+import com.monovoca.server.common.domain.model.vo.UserRole
+import com.monovoca.server.common.domain.model.vo.Username
 
 object AuthUserFixture {
 
