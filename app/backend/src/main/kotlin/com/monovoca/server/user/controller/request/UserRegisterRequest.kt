@@ -2,8 +2,8 @@ package com.monovoca.server.user.controller.request
 
 import com.monovoca.server.user.domain.model.vo.EmailPolicy
 import com.monovoca.server.user.domain.model.vo.NicknamePolicy
-import com.monovoca.server.user.domain.model.vo.RawPasswordPolicy
-import com.monovoca.server.user.domain.model.vo.UsernamePolicy
+import com.monovoca.server.common.domain.vo.RawPasswordPolicy
+import com.monovoca.server.common.domain.vo.UsernamePolicy
 import jakarta.validation.constraints.Pattern
 
 data class SignUpRequest(

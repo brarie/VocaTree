@@ -1,4 +1,4 @@
-package com.monovoca.server.user.domain.model.vo
+package com.monovoca.server.common.domain.vo
 
 import org.springframework.security.crypto.password.PasswordEncoder
 

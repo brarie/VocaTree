@@ -1,4 +1,4 @@
-package com.monovoca.server.user.domain.repository
+package com.monovoca.server.user.domain.port
 
 import com.monovoca.server.user.domain.model.vo.Nickname
 import com.monovoca.server.user.fixture.UserFixture

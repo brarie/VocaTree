@@ -6,11 +6,11 @@ import com.monovoca.server.user.controller.response.SignUpResponse
 import com.monovoca.server.user.domain.exception.*
 import com.monovoca.server.user.domain.model.User
 import com.monovoca.server.user.domain.model.vo.Email
-import com.monovoca.server.user.domain.model.vo.EncryptedPassword
+import com.monovoca.server.common.domain.vo.EncryptedPassword
 import com.monovoca.server.user.domain.model.vo.Nickname
-import com.monovoca.server.user.domain.model.vo.Username
-import com.monovoca.server.user.domain.repository.UserCommandRepository
-import com.monovoca.server.user.domain.repository.UserQueryRepository
+import com.monovoca.server.common.domain.vo.Username
+import com.monovoca.server.user.domain.port.UserCommandRepository
+import com.monovoca.server.user.domain.port.UserQueryRepository
 import com.monovoca.server.user.service.port.CertificationEmailSender
 import com.monovoca.server.user.service.port.PendingUserRepository
 import org.springframework.security.crypto.password.PasswordEncoder

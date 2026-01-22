@@ -1,6 +1,8 @@
 package com.monovoca.server.user.infrastructure.persistence
 
+import com.monovoca.server.common.domain.vo.EncryptedPassword
 import com.monovoca.server.common.domain.vo.UserRole
+import com.monovoca.server.common.domain.vo.Username
 import com.monovoca.server.user.domain.model.User
 import com.monovoca.server.user.domain.model.vo.*
 import org.jetbrains.exposed.dao.UUIDEntity

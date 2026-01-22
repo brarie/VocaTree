@@ -4,9 +4,9 @@ import com.monovoca.server.common.config.RedisTestConfig
 import com.monovoca.server.common.infrastructure.TestUUIDHolder
 import com.monovoca.server.user.controller.request.SignUpRequest
 import com.monovoca.server.user.domain.exception.*
-import com.monovoca.server.user.domain.model.vo.Username
-import com.monovoca.server.user.domain.repository.UserCommandRepository
-import com.monovoca.server.user.domain.repository.UserQueryRepository
+import com.monovoca.server.common.domain.vo.Username
+import com.monovoca.server.user.domain.port.UserCommandRepository
+import com.monovoca.server.user.domain.port.UserQueryRepository
 import com.monovoca.server.user.fixture.UserFixture
 import com.monovoca.server.user.service.port.PendingUserRepository
 import io.kotest.assertions.throwables.shouldThrow

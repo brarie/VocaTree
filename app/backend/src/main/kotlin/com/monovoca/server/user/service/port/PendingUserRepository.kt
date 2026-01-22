@@ -2,7 +2,7 @@ package com.monovoca.server.user.service.port
 
 import com.monovoca.server.user.domain.model.User
 import com.monovoca.server.user.domain.model.vo.Email
-import com.monovoca.server.user.domain.model.vo.Username
+import com.monovoca.server.common.domain.vo.Username
 
 interface PendingUserRepository {
 

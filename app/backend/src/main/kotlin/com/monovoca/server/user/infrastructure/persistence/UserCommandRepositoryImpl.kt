@@ -1,7 +1,7 @@
 package com.monovoca.server.user.infrastructure.persistence
 
 import com.monovoca.server.user.domain.model.User
-import com.monovoca.server.user.domain.repository.UserCommandRepository
+import com.monovoca.server.user.domain.port.UserCommandRepository
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Repository
 import java.util.*

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 @Component
 class CertificationEmailSenderImpl(
     private val mailSender: JavaMailSender,
-    @Value("\${app.certificate-redirect-url}") private val url: String,
+    @param:Value("\${app.certificate-redirect-url}") private val url: String,
 ) : CertificationEmailSender {
 
     @Async

@@ -1,6 +1,8 @@
 package com.monovoca.server.user.domain.model
 
+import com.monovoca.server.common.domain.vo.EncryptedPassword
 import com.monovoca.server.common.domain.vo.UserRole
+import com.monovoca.server.common.domain.vo.Username
 import com.monovoca.server.user.domain.model.vo.*
 
 data class User(

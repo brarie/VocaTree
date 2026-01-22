@@ -1,4 +1,4 @@
-package com.monovoca.server.user.domain.model.vo
+package com.monovoca.server.common.domain.vo
 
 object UsernamePolicy {
     const val regex = "^[A-Za-z0-9]{4,10}$"

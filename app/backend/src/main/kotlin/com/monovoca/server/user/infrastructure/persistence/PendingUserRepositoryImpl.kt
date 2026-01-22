@@ -3,7 +3,7 @@ package com.monovoca.server.user.infrastructure.persistence
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.monovoca.server.user.domain.model.User
 import com.monovoca.server.user.domain.model.vo.Email
-import com.monovoca.server.user.domain.model.vo.Username
+import com.monovoca.server.common.domain.vo.Username
 import com.monovoca.server.user.service.port.PendingUserRepository
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Repository

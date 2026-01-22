@@ -2,7 +2,7 @@ package com.monovoca.server.user.service.port
 
 import com.monovoca.server.common.config.RedisTestConfig
 import com.monovoca.server.user.domain.model.vo.Email
-import com.monovoca.server.user.domain.model.vo.Username
+import com.monovoca.server.common.domain.vo.Username
 import com.monovoca.server.user.fixture.UserFixture
 import io.kotest.core.extensions.ApplyExtension
 import io.kotest.core.spec.style.DescribeSpec

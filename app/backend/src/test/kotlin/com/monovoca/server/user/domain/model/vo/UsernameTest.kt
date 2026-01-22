@@ -1,5 +1,6 @@
 package com.monovoca.server.user.domain.model.vo
 
+import com.monovoca.server.common.domain.vo.Username
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
