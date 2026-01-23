@@ -1,6 +1,6 @@
-package com.monovoca.server.common.infrastructure
+package com.monovoca.server.common.infrastructure.holder
 
-import com.monovoca.server.common.domain.port.DateHolder
+import com.monovoca.server.common.domain.port.holder.DateHolder
 import org.springframework.stereotype.Component
 
 @Component

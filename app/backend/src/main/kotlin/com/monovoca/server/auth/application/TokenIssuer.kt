@@ -4,8 +4,8 @@ import com.monovoca.server.auth.application.dto.TokenResult
 import com.monovoca.server.auth.domain.model.AuthToken
 import com.monovoca.server.auth.domain.model.AuthUser
 import com.monovoca.server.auth.domain.port.AccessTokenProvider
-import com.monovoca.server.common.domain.port.DateHolder
-import com.monovoca.server.common.domain.port.UUIDHolder
+import com.monovoca.server.common.domain.port.holder.DateHolder
+import com.monovoca.server.common.domain.port.holder.UUIDHolder
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 

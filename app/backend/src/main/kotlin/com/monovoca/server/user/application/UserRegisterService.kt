@@ -1,6 +1,6 @@
 package com.monovoca.server.user.application
 
-import com.monovoca.server.common.domain.port.UUIDHolder
+import com.monovoca.server.common.domain.port.holder.UUIDHolder
 import com.monovoca.server.common.domain.model.vo.EncryptedPassword
 import com.monovoca.server.common.domain.model.vo.Username
 import com.monovoca.server.user.domain.exception.*
