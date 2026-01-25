@@ -21,8 +21,13 @@ class SupportCategoryEntity(id: EntityID<Long>) : LongEntity(id) {
 
     fun applyDomain(supportCategory: SupportCategory) {
         categoryName = supportCategory.categoryName
-        parentCategoryId = supportCategory.parentCategory?.id?.let {
-            EntityID(it, SupportCategoryTable)
+
+        val newParentCategoryId = supportCategory.parentCategory?.id
+        parentCategoryId = newParentCategoryId?.let {
+            EntityID(newParentCategoryId, SupportCategoryTable)
+        }
+        parentCategory = newParentCategoryId?.let {
+            SupportCategoryEntity[it]
         }
     }
 
