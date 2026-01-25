@@ -4,6 +4,7 @@ import com.monovoca.server.auth.infrastructure.security.JWTAuthFilter
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
@@ -14,6 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 class SecurityConfig(
     private val jwtAuthFilter: JWTAuthFilter
 ) {
@@ -30,6 +32,7 @@ class SecurityConfig(
                 it.requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
                 it.requestMatchers("/api/users/sign-up", "/api/users/verify", "/api/users/resend-verification")
                     .permitAll()
+                it.requestMatchers("/api/support-categories/**", "/api/support-posts/**").permitAll()
                 it.anyRequest().authenticated()
             }
             .headers { it.frameOptions { it.sameOrigin() } }

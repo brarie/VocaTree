@@ -41,6 +41,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     implementation("org.jetbrains.exposed:exposed-spring-boot-starter:0.57.0")
+    implementation("org.jetbrains.exposed:exposed-java-time:0.57.0")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4")
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
 

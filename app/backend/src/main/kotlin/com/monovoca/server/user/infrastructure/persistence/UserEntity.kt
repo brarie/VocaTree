@@ -39,10 +39,10 @@ class UserEntity(id: EntityID<UUID>) : UUIDEntity(id) {
     )
 
     fun applyDomain(user: User) {
-        this.username = user.username.value
-        this.email = user.email.value
-        this.passwordHash = user.password.value
-        this.nickname = user.nickname.value
-        this.role = user.role
+        username = user.username.value
+        email = user.email.value
+        passwordHash = user.password.value
+        nickname = user.nickname.value
+        role = user.role
     }
 }
