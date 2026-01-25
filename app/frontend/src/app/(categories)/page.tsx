@@ -24,7 +24,7 @@ export default function Home() {
 
         {/* Subtitle */}
         <p className="text-[min(20px,2.5vw)] text-gray-300 mb-6 font-medium">
-          단어 암기를 효율적으로
+          당신을 위한 영어 공부 플랫폼
         </p>
 
         {/* CTA Button */}

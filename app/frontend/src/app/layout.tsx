@@ -1,12 +1,13 @@
 import type { Metadata } from 'next';
-import { Noto_Sans_KR, Exo_2 } from 'next/font/google';
+import { Exo_2 } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
 import { ParticlesBackground } from '@/components/ParticlesBackground';
 
-const notoSansKR = Noto_Sans_KR({
-  variable: '--font-noto-sans-kr',
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '700'],
+const pretendard = localFont({
+  src: '../../fonts/pretendard/PretendardVariable.woff2',
+  variable: '--font-pretendard',
+  display: 'swap',
 });
 
 const exo2 = Exo_2({
@@ -29,7 +30,8 @@ export default function RootLayout({
   return (
     <html lang="ko" className="dark">
       <body
-        className={`${notoSansKR.variable} ${exo2.variable} antialiased bg-black`}
+        className={`${pretendard.variable} ${exo2.variable} font-sans antialiased bg-black`}
+        style={{ fontFamily: 'var(--font-pretendard), -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
       >
         {children}
         <ParticlesBackground />
