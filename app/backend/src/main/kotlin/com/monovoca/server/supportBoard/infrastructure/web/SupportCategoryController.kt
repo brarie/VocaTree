@@ -15,6 +15,13 @@ class SupportCategoryController(
     private val supportCategoryService: SupportCategoryService
 ) {
 
+    @GetMapping("/all")
+    fun getAllCategories(): ResponseEntity<List<SupportCategoryResponse>> {
+        val categories = supportCategoryService.findAllCategories()
+            .map { SupportCategoryResponse.from(it) }
+        return ResponseEntity.ok(categories)
+    }
+
     @GetMapping
     fun getMainCategories(): ResponseEntity<List<SupportCategoryResponse>> {
         val categories = supportCategoryService.findMainCategories()

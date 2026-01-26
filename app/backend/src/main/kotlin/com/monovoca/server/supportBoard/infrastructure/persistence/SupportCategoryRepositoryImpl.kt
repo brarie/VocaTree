@@ -23,6 +23,11 @@ class SupportCategoryRepositoryImpl : SupportCategoryRepository {
             ?.toDomain()
     }
 
+    override fun findAllCategories(): List<SupportCategory> = transaction {
+        SupportCategoryEntity.all()
+            .map { it.toDomain() }
+    }
+
     override fun findMainCategories(): List<SupportCategory> = transaction {
         SupportCategoryEntity.find { SupportCategoryTable.parentCategoryId.isNull() }
             .map { it.toDomain() }

@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional
 class SupportCategoryService(
     private val supportCategoryRepository: SupportCategoryRepository
 ) {
+    @Transactional(readOnly = true)
+    fun findAllCategories(): List<SupportCategory> = supportCategoryRepository.findAllCategories()
 
     @Transactional(readOnly = true)
     fun findMainCategories(): List<SupportCategory> = supportCategoryRepository.findMainCategories()
