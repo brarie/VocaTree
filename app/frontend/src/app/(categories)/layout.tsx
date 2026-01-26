@@ -1,6 +1,8 @@
+'use client';
+
 import { Header } from '@/components/Header';
 import { DashboardHeader } from '../../../components/DashboardHeader';
-import { AuthOnly } from '@/components/AuthOnly';
+import { AuthOnly } from '@/components/auth/AuthOnly';
 
 export default function CategoriesLayout({
   children,

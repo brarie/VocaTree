@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MonoVoca Frontend
 
-## Getting Started
+Next.js 16 기반 영어 학습 플랫폼 프론트엔드
 
-First, run the development server:
+## 환경 설정
 
+### 1. 환경변수 설정
+프로젝트 루트에 `.env.local` 파일 생성:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. 의존성 설치
+```bash
+pnpm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. 개발 서버 실행
+```bash
+pnpm dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+브라우저에서 [http://localhost:3000](http://localhost:3000) 접속
 
-## Learn More
+## 주요 개념
 
-To learn more about Next.js, take a look at the following resources:
+### Context API를 통한 전역 인증 상태 관리
+- **위치**: `contexts/AuthContext.tsx`
+- **사용**: `import { useAuth } from '@/contexts/AuthContext'`
+- 모든 컴포넌트가 동일한 인증 상태 공유
+- 로그아웃 시 전체 앱이 즉시 업데이트
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 자동 로그인
+- 앱 로드 시 refresh token(쿠키)이 있으면 자동으로 새 access token 발급
+- 사용자가 브라우저를 닫았다가 다시 열어도 로그인 유지
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### SSR & Hydration
+- Next.js는 서버에서 먼저 HTML 생성 후 클라이언트에서 hydration
+- `typeof window === 'undefined'`: 서버(Node.js) 환경 체크
+- `mounted` 상태: Hydration 에러 방지용 (서버/클라이언트 일치)
 
-## Deploy on Vercel
+### API Fetcher
+- **fetcherWithAuth**: 인증 필요 API (자동 Bearer token, 자동 refresh)
+- **fetcher**: 공개 API (로그인, 회원가입 등)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 프로젝트 구조
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+frontend/
+├── .env.local              # 환경변수 (git에 포함 안 됨)
+├── src/app/                # Next.js App Router
+├── api/                    # API 함수 (도메인별)
+├── components/             # 공통 컴포넌트
+├── contexts/               # React Context (AuthContext)
+├── hooks/                  # Custom Hooks
+├── lib/                    # 유틸리티 (fetcher, utils)
+└── types/                  # TypeScript 타입 정의
+```
+
+## 자세한 문서
+- **프론트엔드 전체 문서**: `CLAUDE.md`
+- **백엔드 문서**: `../backend/claude.md`
+
+## 기술 스택
+- Next.js 16 (App Router)
+- TypeScript 5
+- Tailwind CSS 4
+- shadcn/ui
+- Framer Motion
+- React Hook Form + Zod

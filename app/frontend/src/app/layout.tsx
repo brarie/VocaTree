@@ -3,6 +3,7 @@ import { Exo_2 } from 'next/font/google';
 import localFont from 'next/font/local';
 import './globals.css';
 import { ParticlesBackground } from '@/components/ParticlesBackground';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 const pretendard = localFont({
   src: '../../fonts/pretendard/PretendardVariable.woff2',
@@ -33,8 +34,10 @@ export default function RootLayout({
         className={`${pretendard.variable} ${exo2.variable} font-sans antialiased bg-black`}
         style={{ fontFamily: 'var(--font-pretendard), -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
       >
-        {children}
-        <ParticlesBackground />
+        <AuthProvider>
+          {children}
+          <ParticlesBackground />
+        </AuthProvider>
       </body>
     </html>
   );

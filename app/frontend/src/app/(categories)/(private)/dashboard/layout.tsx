@@ -1,4 +1,4 @@
-import { PrivateRoute } from '@/components/PrivateRoute';
+import { PrivateRoute } from '@/components/auth/PrivateRoute';
 
 export default function DashboardLayout({
   children,

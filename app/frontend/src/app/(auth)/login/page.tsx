@@ -1,6 +1,8 @@
 'use client';
 
+import { useState, Suspense } from 'react';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,9 +13,38 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+import { login } from '@/api/auth';
+import { useAuth } from '@/contexts/AuthContext';
 
-export default function Login() {
+function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get('redirect') || '/dashboard';
+  const { refetchUser } = useAuth();
+
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isLoading) return;
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      await login({ username, rawPassword: password });
+      refetchUser();
+      router.push(redirect);
+    } catch (err) {
+      setError('아이디 또는 비밀번호가 올바르지 않습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <main className="min-h-screen flex items-center justify-center p-4">
       <motion.div
@@ -34,87 +65,84 @@ export default function Login() {
               </Link>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Username Field */}
-            <div className="space-y-2">
-              <Label htmlFor="username" className="text-gray-200">
-                아이디
-              </Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="아이디를 입력하세요"
-                className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-white/30 focus:ring-white/20"
-              />
-            </div>
-
-            {/* Password Field */}
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-200">
-                비밀번호
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="비밀번호를 입력하세요"
-                className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-white/30 focus:ring-white/20"
-              />
-            </div>
-
-            {/* Remember Me Checkbox */}
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="remember"
-                className="border-white/20 data-[state=checked]:bg-white data-[state=checked]:text-black"
-              />
-              <Label
-                htmlFor="remember"
-                className="text-sm font-normal cursor-pointer text-gray-300"
-              >
-                로그인 상태 유지
-              </Label>
-            </div>
-
-            {/* Login Button */}
-            <Button
-              className="w-full bg-white text-black hover:bg-gray-200 font-semibold"
-              size="lg"
-            >
-              로그인
-            </Button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-white/10" />
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username" className="text-gray-200">
+                  아이디
+                </Label>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="아이디를 입력하세요"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-white/30 focus:ring-white/20"
+                />
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-black px-2 text-gray-500">또는</span>
+
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-gray-200">
+                  비밀번호
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="비밀번호를 입력하세요"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-white/30 focus:ring-white/20"
+                />
               </div>
-            </div>
 
-            {/* SNS Login Buttons: 나중에 각 dev 사이트 들어가서 사진 받아오기 */}
-            <div className="space-y-2">
-              <Button
-                variant="outline"
-                className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white"
-              >
-                네이버로 로그인
-              </Button>
+              {error && (
+                <p className="text-sm text-red-400">{error}</p>
+              )}
 
               <Button
-                variant="outline"
-                className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white"
+                type="submit"
+                className="w-full bg-white text-black hover:bg-gray-200 font-semibold"
+                size="lg"
+                disabled={isLoading}
               >
-                구글로 로그인
+                {isLoading ? '로그인 중...' : '로그인'}
               </Button>
 
-              <Button
-                variant="outline"
-                className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white"
-              >
-                카카오로 로그인
-              </Button>
-            </div>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-white/10" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-black px-2 text-gray-500">또는</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white"
+                >
+                  네이버로 로그인
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white"
+                >
+                  구글로 로그인
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white"
+                >
+                  카카오로 로그인
+                </Button>
+              </div>
+            </form>
           </CardContent>
 
           <CardFooter className="flex flex-col space-y-4 pb-8">
@@ -137,5 +165,17 @@ export default function Login() {
         </Card>
       </motion.div>
     </main>
+  );
+}
+
+export default function Login() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-white">Loading...</div>
+      </main>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

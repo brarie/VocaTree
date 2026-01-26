@@ -20,7 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 
 const menuItems = [
   { label: '홈', href: '/' },
@@ -32,8 +32,13 @@ const menuItems = [
 
 export function Header() {
   const pathname = usePathname();
-  const { isAuthenticated, isLoading, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <header className="border-b border-white/20 px-4 h-16 bg-black">
@@ -76,7 +81,7 @@ export function Header() {
         {/* Right: Auth Buttons or User Menu */}
         <div className="flex items-center justify-end gap-3 col-start-3">
           {/* Notification Bell - Always visible when authenticated */}
-          {isAuthenticated && (
+          {mounted && isAuthenticated && (
             <>
               <Button
                 variant="ghost"
@@ -103,10 +108,13 @@ export function Header() {
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">
-                        사용자 ID
+                        {user?.nickname}
                       </p>
                       <p className="text-xs leading-none text-muted-foreground">
-                        user@example.com
+                        @{user?.username}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {user?.email}
                       </p>
                     </div>
                   </DropdownMenuLabel>
@@ -131,7 +139,7 @@ export function Header() {
           )}
 
           {/* Auth buttons - only desktop, only when not loading */}
-          {!isLoading && !isAuthenticated && (
+          {mounted && !isLoading && !isAuthenticated && (
             <>
               <Button
                 variant="outline"
@@ -179,7 +187,30 @@ export function Header() {
                     </Link>
                   );
                 })}
-                {!isLoading && !isAuthenticated && (
+
+                {mounted && isAuthenticated && (
+                  <>
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setIsSheetOpen(false)}
+                      className="text-base font-medium transition-colors py-2 text-muted-foreground hover:text-foreground"
+                    >
+                      대시보드
+                    </Link>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setIsSheetOpen(false);
+                        logout();
+                      }}
+                      className="text-xs font-bold border-white bg-transparent hover:bg-white/10 text-white"
+                    >
+                      로그아웃
+                    </Button>
+                  </>
+                )}
+
+                {mounted && !isLoading && !isAuthenticated && (
                   <div className="flex flex-col gap-4">
                     <Button
                       variant="outline"

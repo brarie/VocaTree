@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -10,18 +13,84 @@ import {
   CardFooter,
   CardHeader,
 } from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { signUp, resendVerification } from '@/api/user';
+import { SignUpRequestSchema } from '@/types/api/user';
+
+const signUpFormSchema = SignUpRequestSchema.extend({
+  passwordConfirm: z.string(),
+}).refine((data) => data.rawPassword === data.passwordConfirm, {
+  message: '비밀번호가 일치하지 않습니다.',
+  path: ['passwordConfirm'],
+});
+
+type SignUpFormValues = z.infer<typeof signUpFormSchema>;
 
 export default function SignUp() {
-  const [emailSent, setEmailSent] = useState(false);
+  const [step, setStep] = useState<'form' | 'email-sent'>('form');
+  const [tempKey, setTempKey] = useState('');
   const [email, setEmail] = useState('');
 
-  const handleSendVerification = () => {
-    if (email) {
-      // TODO: Implement actual email verification API
-      setEmailSent(true);
-      console.log('Verification code sent to:', email);
+  const [error, setError] = useState('');
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
+
+  const form = useForm<SignUpFormValues>({
+    resolver: zodResolver(signUpFormSchema),
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      username: '',
+      email: '',
+      nickname: '',
+      rawPassword: '',
+      passwordConfirm: '',
+    },
+  });
+
+  const onSubmit = async (data: SignUpFormValues) => {
+    setError('');
+
+    try {
+      const result = await signUp({
+        username: data.username,
+        email: data.email,
+        nickname: data.nickname,
+        rawPassword: data.rawPassword,
+      });
+
+      setTempKey(result.tempKey);
+      setEmail(data.email);
+      setStep('email-sent');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '회원가입에 실패했습니다.');
+    }
+  };
+
+  const handleResend = async () => {
+    if (resendLoading || !tempKey) return;
+
+    setResendLoading(true);
+    setResendSuccess(false);
+    setError('');
+
+    try {
+      await resendVerification({ tempKey });
+      setResendSuccess(true);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : '인증 메일 재전송에 실패했습니다.',
+      );
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -45,112 +114,187 @@ export default function SignUp() {
               </Link>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Username Field */}
-            <div className="space-y-2">
-              <Label htmlFor="username" className="text-gray-200">
-                아이디
-              </Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="사용할 아이디를 입력하세요"
-                className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-white/30 focus:ring-white/20"
-              />
-            </div>
 
-            {/* Email Field with Verification Button */}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-200">
-                이메일
-              </Label>
-              <div className="flex gap-2">
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="이메일을 입력하세요"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-white/30 focus:ring-white/20"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleSendVerification}
-                  disabled={emailSent}
-                  className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white whitespace-nowrap disabled:opacity-50"
-                >
-                  {emailSent ? '발송됨' : '인증 발송'}
-                </Button>
-              </div>
-            </div>
+          {step === 'form' && (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                <CardContent className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="username"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-200">아이디</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="영문, 숫자 4~10자"
+                            className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-white/30 focus:ring-white/20"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage className="text-red-400" />
+                      </FormItem>
+                    )}
+                  />
 
-            {/* Verification Code Field (appears after email is sent) */}
-            {emailSent && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                transition={{ duration: 0.3 }}
-                className="space-y-2"
-              >
-                <Label htmlFor="verificationCode" className="text-gray-200">
-                  인증 코드
-                </Label>
-                <Input
-                  id="verificationCode"
-                  type="text"
-                  placeholder="인증 코드를 입력하세요"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-white/30 focus:ring-white/20"
-                />
-              </motion.div>
-            )}
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-200">이메일</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="example@email.com"
+                            className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-white/30 focus:ring-white/20"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage className="text-red-400" />
+                      </FormItem>
+                    )}
+                  />
 
-            {/* Password Field */}
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-200">
-                비밀번호
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="비밀번호를 입력하세요"
-                className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-white/30 focus:ring-white/20"
-              />
-            </div>
+                  <FormField
+                    control={form.control}
+                    name="nickname"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-200">닉네임</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="영문, 숫자, 한글 2~8자"
+                            className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-white/30 focus:ring-white/20"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage className="text-red-400" />
+                      </FormItem>
+                    )}
+                  />
 
-            {/* Password Confirm Field */}
-            <div className="space-y-2">
-              <Label htmlFor="passwordConfirm" className="text-gray-200">
-                비밀번호 확인
-              </Label>
-              <Input
-                id="passwordConfirm"
-                type="password"
-                placeholder="비밀번호를 다시 입력하세요"
-                className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-white/30 focus:ring-white/20"
-              />
-            </div>
+                  <FormField
+                    control={form.control}
+                    name="rawPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-200">
+                          비밀번호
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="영문, 숫자, 특수문자 8~20자"
+                            className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-white/30 focus:ring-white/20"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage className="text-red-400" />
+                      </FormItem>
+                    )}
+                  />
 
-            {/* Sign Up Button */}
-            <Button
-              className="w-full bg-white text-black hover:bg-gray-200 font-semibold"
-              size="lg"
-            >
-              회원가입
-            </Button>
-          </CardContent>
+                  <FormField
+                    control={form.control}
+                    name="passwordConfirm"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-200">
+                          비밀번호 확인
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="비밀번호를 다시 입력하세요"
+                            className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-white/30 focus:ring-white/20"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage className="text-red-400" />
+                      </FormItem>
+                    )}
+                  />
 
-          <CardFooter className="flex flex-col space-y-4 pb-8">
-            <div className="flex items-center justify-center text-sm">
-              <span className="text-gray-400">이미 계정이 있으신가요?</span>
-              <Link
-                href="/login"
-                className="text-white hover:text-gray-300 font-medium transition-colors ml-2"
-              >
-                로그인
-              </Link>
-            </div>
-          </CardFooter>
+                  {error && <p className="text-sm text-red-400">{error}</p>}
+
+                  <Button
+                    type="submit"
+                    className="w-full bg-white text-black hover:bg-gray-200 font-semibold"
+                    size="lg"
+                    disabled={form.formState.isSubmitting}
+                  >
+                    {form.formState.isSubmitting ? '처리 중...' : '회원가입'}
+                  </Button>
+                </CardContent>
+
+                <CardFooter className="flex flex-col space-y-4 pt-4">
+                  <div className="flex items-center justify-center text-sm">
+                    <span className="text-gray-400">
+                      이미 계정이 있으신가요?
+                    </span>
+                    <Link
+                      href="/login"
+                      className="text-white hover:text-gray-300 font-medium transition-colors ml-2"
+                    >
+                      로그인
+                    </Link>
+                  </div>
+                </CardFooter>
+              </form>
+            </Form>
+          )}
+
+          {step === 'email-sent' && (
+            <>
+              <CardContent className="space-y-4 text-center py-8 -mt-16">
+                <div className="space-y-4">
+                  <div className="text-6xl">📧</div>
+                  <h2 className="text-2xl font-bold text-white">
+                    이메일을 확인해주세요
+                  </h2>
+                  <p className="text-gray-300">
+                    <span className="font-semibold text-white">{email}</span>로
+                    <br />
+                    인증 링크를 보냈습니다.
+                  </p>
+                  <p className="text-sm text-gray-400">
+                    이메일의 링크를 클릭하여 회원가입을 완료해주세요.
+                    <br />
+                    인증이 완료되었다면 이 페이지를 닫으셔도 됩니다.
+                  </p>
+
+                  {resendSuccess && (
+                    <p className="text-sm text-green-400">
+                      인증 메일이 재전송되었습니다.
+                    </p>
+                  )}
+
+                  {error && <p className="text-sm text-red-400">{error}</p>}
+
+                  <div className="pt-4 space-y-2 -mb-8">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleResend}
+                      disabled={resendLoading}
+                      className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white"
+                    >
+                      {resendLoading ? '전송 중...' : '인증 메일 다시 보내기'}
+                    </Button>
+
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white"
+                    >
+                      <Link href="/login">로그인 페이지로 이동</Link>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </>
+          )}
         </Card>
       </motion.div>
     </main>
