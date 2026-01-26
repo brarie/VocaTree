@@ -25,7 +25,7 @@ export function PrivateRoute({ children, roles }: PrivateRouteProps) {
     }
 
     if (roles && roles.length > 0 && !roles.includes(user.role as UserRole)) {
-      router.push('/');
+      router.push('/forbidden');
     }
   }, [user, isLoading, roles, router, pathname]);
 

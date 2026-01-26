@@ -24,8 +24,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const menuItems = [
   { label: '홈', href: '/' },
-  { label: '공지사항', href: '/notice' },
-  { label: '도움말', href: '/help' },
+  { label: '도움마당', href: '/support' },
   { label: '커뮤니티', href: '/community' },
   { label: '라이브러리', href: '/library' },
 ];

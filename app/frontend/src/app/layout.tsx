@@ -4,6 +4,8 @@ import localFont from 'next/font/local';
 import './globals.css';
 import { ParticlesBackground } from '@/components/ParticlesBackground';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { QueryProvider } from '@/components/QueryProvider';
+import { Toaster } from 'sonner';
 
 const pretendard = localFont({
   src: '../../fonts/pretendard/PretendardVariable.woff2',
@@ -34,10 +36,13 @@ export default function RootLayout({
         className={`${pretendard.variable} ${exo2.variable} font-sans antialiased bg-black`}
         style={{ fontFamily: 'var(--font-pretendard), -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
       >
-        <AuthProvider>
-          {children}
-          <ParticlesBackground />
-        </AuthProvider>
+        <QueryProvider>
+          <AuthProvider>
+            {children}
+            <ParticlesBackground />
+            <Toaster position="top-center" theme="dark" />
+          </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );
