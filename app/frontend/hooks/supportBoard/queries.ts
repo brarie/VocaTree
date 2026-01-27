@@ -17,6 +17,7 @@ import {
   CreateSupportPostRequest,
   UpdateSupportPostRequest,
 } from '@/types/api/supportBoard';
+import { ApiError } from '@/types/api/error';
 import { toast } from 'sonner';
 
 export const supportBoardKeys = {
@@ -59,8 +60,8 @@ export function useCreateMainCategory() {
       });
       toast.success('대분류 카테고리가 생성되었습니다.');
     },
-    onError: (error: any) => {
-      toast.error(error.message || '카테고리 생성에 실패했습니다.');
+    onError: (error: ApiError) => {
+      toast.error(error.message);
     },
   });
 }
@@ -82,8 +83,8 @@ export function useCreateSubCategory() {
       });
       toast.success('서브 카테고리가 생성되었습니다.');
     },
-    onError: (error: any) => {
-      toast.error(error.message || '서브 카테고리 생성에 실패했습니다.');
+    onError: (error: ApiError) => {
+      toast.error(error.message);
     },
   });
 }
@@ -105,8 +106,8 @@ export function useUpdateCategory() {
       });
       toast.success('카테고리가 수정되었습니다.');
     },
-    onError: (error: any) => {
-      toast.error(error.message || '카테고리 수정에 실패했습니다.');
+    onError: (error: ApiError) => {
+      toast.error(error.message);
     },
   });
 }
@@ -122,8 +123,8 @@ export function useDeleteCategory() {
       });
       toast.success('카테고리가 삭제되었습니다.');
     },
-    onError: (error: any) => {
-      toast.error(error.message || '카테고리 삭제에 실패했습니다.');
+    onError: (error: ApiError) => {
+      toast.error(error.message);
     },
   });
 }
@@ -137,8 +138,8 @@ export function useCreatePost() {
       queryClient.invalidateQueries({ queryKey: supportBoardKeys.all });
       toast.success('게시글이 작성되었습니다.');
     },
-    onError: (error: any) => {
-      toast.error(error.message || '게시글 작성에 실패했습니다.');
+    onError: (error: ApiError) => {
+      toast.error(error.message);
     },
   });
 }
@@ -158,8 +159,8 @@ export function useUpdatePost() {
       queryClient.invalidateQueries({ queryKey: supportBoardKeys.all });
       toast.success('게시글이 수정되었습니다.');
     },
-    onError: (error: any) => {
-      toast.error(error.message || '게시글 수정에 실패했습니다.');
+    onError: (error: ApiError) => {
+      toast.error(error.message);
     },
   });
 }
@@ -173,8 +174,8 @@ export function useDeletePost() {
       queryClient.invalidateQueries({ queryKey: supportBoardKeys.all });
       toast.success('게시글이 삭제되었습니다.');
     },
-    onError: (error: any) => {
-      toast.error(error.message || '게시글 삭제에 실패했습니다.');
+    onError: (error: ApiError) => {
+      toast.error(error.message);
     },
   });
 }

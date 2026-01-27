@@ -1,5 +1,6 @@
 import { LoginRequest, LoginResponse } from '@/types/api/auth';
 import { tokenStorage, fetcher, fetcherWithAuth } from '@/lib/fetcher';
+import { handleApiResponse } from '@/lib/error';
 
 export async function login(data: LoginRequest): Promise<LoginResponse> {
   const response = await fetcher('/api/auth/login', {
@@ -7,10 +8,7 @@ export async function login(data: LoginRequest): Promise<LoginResponse> {
     body: data,
   });
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Login failed' }));
-    throw new Error(error.message || 'Login failed');
-  }
+  await handleApiResponse(response, 'Login failed');
 
   const result: LoginResponse = await response.json();
   tokenStorage.setAccessToken(result.accessToken, result.accessExpSec);
