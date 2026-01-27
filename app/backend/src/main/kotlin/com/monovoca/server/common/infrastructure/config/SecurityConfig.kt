@@ -1,6 +1,8 @@
 package com.monovoca.server.common.infrastructure.config
 
 import com.monovoca.server.auth.infrastructure.security.JWTAuthFilter
+import com.monovoca.server.common.infrastructure.security.CustomAccessDeniedHandler
+import com.monovoca.server.common.infrastructure.security.CustomAuthenticationEntryPoint
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -20,7 +22,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 @EnableWebSecurity
 @EnableMethodSecurity
 class SecurityConfig(
-    private val jwtAuthFilter: JWTAuthFilter
+    private val jwtAuthFilter: JWTAuthFilter,
+    private val customAuthenticationEntryPoint: CustomAuthenticationEntryPoint,
+    private val customAccessDeniedHandler: CustomAccessDeniedHandler
 ) {
 
     @Bean
@@ -30,6 +34,10 @@ class SecurityConfig(
             .httpBasic { it.disable() }
             .csrf { it.disable() }
             .cors { cors -> cors.configurationSource(corsConfigurationSource()) }
+            .exceptionHandling {
+                    it.authenticationEntryPoint(customAuthenticationEntryPoint)
+                    it.accessDeniedHandler(customAccessDeniedHandler)
+            }
             .authorizeHttpRequests {
                 it.requestMatchers(PathRequest.toH2Console()).permitAll()
                 it.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
