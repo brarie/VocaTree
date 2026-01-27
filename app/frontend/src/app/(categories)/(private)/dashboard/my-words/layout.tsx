@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { SideTabs, SideTabItem } from '@/components/SideTabs';
 import { BookOpen, Folder, Search } from 'lucide-react';
+import { PageHeader } from '@/components/PageHeader';
 
 const tabs: SideTabItem[] = [
   { id: '/dashboard/my-words', label: '단어장', icon: BookOpen },
@@ -38,20 +39,10 @@ export default function MyWordsLayout({
 
   return (
     <div>
-      {/* Page Header */}
-      <div className="mb-3">
-        <h1 className="text-2xl font-bold text-white mb-1">{header.title}</h1>
-        <p className="text-gray-400 text-sm">{header.description}</p>
-      </div>
+      <PageHeader title={header.title} description={header.description} />
 
-      {/* Horizontal Separator */}
-      <div className="border-t border-white/10 mb-3" />
-
-      {/* Sidebar + Content */}
       <div className="flex gap-3">
         <SideTabs items={tabs} activeTab={pathname} />
-
-        {/* Main Content */}
         <div className="flex-1 min-w-0">{children}</div>
       </div>
     </div>

@@ -157,78 +157,80 @@ export function Header() {
           )}
 
           {/* Mobile Navigation */}
-          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-            <SheetTrigger className="flex xl:hidden" asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">메뉴 열기</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[300px]">
-              <SheetHeader>
-                <SheetTitle>메뉴</SheetTitle>
-              </SheetHeader>
-              <div className="flex flex-col gap-4 p-4 pt-0">
-                {menuItems.map((item) => {
-                  const isActive = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setIsSheetOpen(false)}
-                      className={`text-base font-medium transition-colors py-2 ${
-                        isActive
-                          ? 'text-foreground font-semibold'
-                          : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      {item.label}
-                    </Link>
-                  );
-                })}
+          {mounted && (
+            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+              <SheetTrigger className="flex xl:hidden" asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">메뉴 열기</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px]">
+                <SheetHeader>
+                  <SheetTitle>메뉴</SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col gap-4 p-4 pt-0">
+                  {menuItems.map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setIsSheetOpen(false)}
+                        className={`text-base font-medium transition-colors py-2 ${
+                          isActive
+                            ? 'text-foreground font-semibold'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        {item.label}
+                      </Link>
+                    );
+                  })}
 
-                {mounted && isAuthenticated && (
-                  <>
-                    <Link
-                      href="/dashboard"
-                      onClick={() => setIsSheetOpen(false)}
-                      className="text-base font-medium transition-colors py-2 text-muted-foreground hover:text-foreground"
-                    >
-                      대시보드
-                    </Link>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setIsSheetOpen(false);
-                        logout();
-                      }}
-                      className="text-xs font-bold border-white bg-transparent hover:bg-white/10 text-white"
-                    >
-                      로그아웃
-                    </Button>
-                  </>
-                )}
+                  {isAuthenticated && (
+                    <>
+                      <Link
+                        href="/dashboard"
+                        onClick={() => setIsSheetOpen(false)}
+                        className="text-base font-medium transition-colors py-2 text-muted-foreground hover:text-foreground"
+                      >
+                        대시보드
+                      </Link>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setIsSheetOpen(false);
+                          logout();
+                        }}
+                        className="text-xs font-bold border-white bg-transparent hover:bg-white/10 text-white"
+                      >
+                        로그아웃
+                      </Button>
+                    </>
+                  )}
 
-                {mounted && !isLoading && !isAuthenticated && (
-                  <div className="flex flex-col gap-4">
-                    <Button
-                      variant="outline"
-                      asChild
-                      className="text-xs font-bold border-white bg-transparent hover:bg-white/10 text-white"
-                    >
-                      <Link href="/login">로그인</Link>
-                    </Button>
-                    <Button
-                      asChild
-                      className="text-xs font-bold bg-white text-black hover:bg-white/90"
-                    >
-                      <Link href="/sign-up">회원가입</Link>
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </SheetContent>
-          </Sheet>
+                  {!isLoading && !isAuthenticated && (
+                    <div className="flex flex-col gap-4">
+                      <Button
+                        variant="outline"
+                        asChild
+                        className="text-xs font-bold border-white bg-transparent hover:bg-white/10 text-white"
+                      >
+                        <Link href="/login">로그인</Link>
+                      </Button>
+                      <Button
+                        asChild
+                        className="text-xs font-bold bg-white text-black hover:bg-white/90"
+                      >
+                        <Link href="/sign-up">회원가입</Link>
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
+          )}
         </div>
       </div>
     </header>
