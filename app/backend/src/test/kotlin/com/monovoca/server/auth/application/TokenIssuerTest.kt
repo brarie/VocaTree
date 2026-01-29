@@ -2,7 +2,7 @@ package com.monovoca.server.auth.application
 
 import com.monovoca.server.auth.domain.port.AccessTokenProvider
 import com.monovoca.server.auth.fixture.AuthUserFixture
-import com.monovoca.server.common.domain.model.vo.UserRole
+import com.monovoca.server.common.domain.model.vo.enumerated.UserRole
 import com.monovoca.server.common.infrastructure.holder.TestDateHolder
 import com.monovoca.server.common.infrastructure.holder.TestUUIDHolder
 import io.kotest.core.extensions.ApplyExtension

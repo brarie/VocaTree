@@ -1,6 +1,6 @@
 package com.monovoca.server.auth.domain.model
 
-import com.monovoca.server.common.domain.model.vo.UserRole
+import com.monovoca.server.common.domain.model.vo.enumerated.UserRole
 
 /**
  * JWT 랑 1:1 매핑되는 인증 토큰 모델

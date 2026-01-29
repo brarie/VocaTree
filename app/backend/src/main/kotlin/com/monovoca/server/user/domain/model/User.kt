@@ -1,7 +1,7 @@
 package com.monovoca.server.user.domain.model
 
 import com.monovoca.server.common.domain.model.vo.EncryptedPassword
-import com.monovoca.server.common.domain.model.vo.UserRole
+import com.monovoca.server.common.domain.model.vo.enumerated.UserRole
 import com.monovoca.server.common.domain.model.vo.Username
 import com.monovoca.server.user.domain.model.vo.Email
 import com.monovoca.server.user.domain.model.vo.Nickname

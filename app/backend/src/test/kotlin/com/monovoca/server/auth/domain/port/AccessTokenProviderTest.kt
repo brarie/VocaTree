@@ -3,7 +3,7 @@ package com.monovoca.server.auth.domain.port
 import com.monovoca.server.auth.domain.exception.InvalidAccessTokenException
 import com.monovoca.server.auth.domain.exception.TokenExpiredException
 import com.monovoca.server.auth.domain.model.AuthToken
-import com.monovoca.server.common.domain.model.vo.UserRole
+import com.monovoca.server.common.domain.model.vo.enumerated.UserRole
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.extensions.ApplyExtension
 import io.kotest.core.spec.style.DescribeSpec

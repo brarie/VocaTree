@@ -4,7 +4,7 @@ import com.monovoca.server.auth.domain.exception.InvalidAccessTokenException
 import com.monovoca.server.auth.domain.exception.TokenExpiredException
 import com.monovoca.server.auth.domain.model.AuthToken
 import com.monovoca.server.auth.domain.port.AccessTokenProvider
-import com.monovoca.server.common.domain.model.vo.UserRole
+import com.monovoca.server.common.domain.model.vo.enumerated.UserRole
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts

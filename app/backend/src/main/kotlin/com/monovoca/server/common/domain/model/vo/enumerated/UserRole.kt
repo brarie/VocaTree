@@ -1,4 +1,4 @@
-package com.monovoca.server.common.domain.model.vo
+package com.monovoca.server.common.domain.model.vo.enumerated
 
 enum class UserRole(
     val authority: String
