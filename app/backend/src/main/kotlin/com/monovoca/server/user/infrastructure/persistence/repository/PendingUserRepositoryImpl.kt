@@ -1,4 +1,4 @@
-package com.monovoca.server.user.infrastructure.persistence
+package com.monovoca.server.user.infrastructure.persistence.repository
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.monovoca.server.common.domain.model.vo.Username

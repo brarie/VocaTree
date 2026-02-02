@@ -1,8 +1,8 @@
-package com.monovoca.server.user.infrastructure.persistence
+package com.monovoca.server.user.infrastructure.persistence.entity
 
 import com.monovoca.server.common.domain.model.vo.EncryptedPassword
-import com.monovoca.server.common.domain.model.vo.enumerated.UserRole
 import com.monovoca.server.common.domain.model.vo.Username
+import com.monovoca.server.common.domain.model.vo.enumerated.UserRole
 import com.monovoca.server.user.domain.model.User
 import com.monovoca.server.user.domain.model.vo.Email
 import com.monovoca.server.user.domain.model.vo.Nickname
@@ -33,7 +33,7 @@ class UserEntity(id: EntityID<UUID>) : UUIDEntity(id) {
         id = this.id.value.toString(),
         username = Username(this.username),
         email = Email(this.email),
-        password = EncryptedPassword.fromHash(this.passwordHash),
+        password = EncryptedPassword.Companion.fromHash(this.passwordHash),
         nickname = Nickname(this.nickname),
         role = this.role,
     )

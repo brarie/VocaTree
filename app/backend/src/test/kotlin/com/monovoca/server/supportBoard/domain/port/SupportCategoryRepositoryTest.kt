@@ -1,10 +1,8 @@
 package com.monovoca.server.supportBoard.domain.port
 
-import com.monovoca.server.supportBoard.domain.exception.CannotDeleteCategoryWithPostsException
-import com.monovoca.server.supportBoard.domain.exception.CannotDeleteCategoryWithSubCategoriesException
 import com.monovoca.server.supportBoard.fixture.SupportCategoryFixture
 import com.monovoca.server.supportBoard.fixture.SupportPostFixture
-import com.monovoca.server.user.domain.port.UserCommandRepository
+import com.monovoca.server.user.domain.port.UserRepository
 import com.monovoca.server.user.fixture.UserFixture
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.extensions.ApplyExtension
@@ -24,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional
 class SupportCategoryRepositoryTest(
     private val supportCategoryRepository: SupportCategoryRepository,
     private val supportPostRepository: SupportPostRepository,
-    private val userCommandRepository: UserCommandRepository,
+    private val userRepository: UserRepository,
 ) : DescribeSpec({
 
     describe("save") {
@@ -192,7 +190,7 @@ class SupportCategoryRepositoryTest(
 
     describe("hasRelatedSupportPosts") {
         it("연관된 게시글이 있으면 true를 반환한다.") {
-            val user = userCommandRepository.save(
+            val user = userRepository.save(
                 UserFixture.create(username = "testuser1", email = "test1@example.com")
             )
             val main = supportCategoryRepository.save(
@@ -250,7 +248,7 @@ class SupportCategoryRepositoryTest(
         }
 
         it("관련된 게시글이 있으면 Exception이 발생한다.") {
-            val user = userCommandRepository.save(
+            val user = userRepository.save(
                 UserFixture.create(username = "testuser2", email = "test2@example.com")
             )
             val main = supportCategoryRepository.save(

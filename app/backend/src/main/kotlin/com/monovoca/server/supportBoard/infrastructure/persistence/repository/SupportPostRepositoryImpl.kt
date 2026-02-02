@@ -1,8 +1,12 @@
-package com.monovoca.server.supportBoard.infrastructure.persistence
+package com.monovoca.server.supportBoard.infrastructure.persistence.repository
 
 import com.monovoca.server.supportBoard.domain.model.SupportPost
 import com.monovoca.server.supportBoard.domain.model.query.SupportPostView
 import com.monovoca.server.supportBoard.domain.port.SupportPostRepository
+import com.monovoca.server.supportBoard.infrastructure.persistence.entity.SupportCategoryTable
+import com.monovoca.server.supportBoard.infrastructure.persistence.entity.SupportPostEntity
+import com.monovoca.server.supportBoard.infrastructure.persistence.entity.SupportPostTable
+import com.monovoca.server.supportBoard.infrastructure.persistence.entity.toSupportPostView
 import org.jetbrains.exposed.dao.with
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.or

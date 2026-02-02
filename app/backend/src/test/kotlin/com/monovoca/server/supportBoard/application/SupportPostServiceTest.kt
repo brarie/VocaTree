@@ -7,7 +7,7 @@ import com.monovoca.server.supportBoard.domain.port.SupportCategoryRepository
 import com.monovoca.server.supportBoard.domain.port.SupportPostRepository
 import com.monovoca.server.supportBoard.fixture.SupportCategoryFixture
 import com.monovoca.server.supportBoard.fixture.SupportPostFixture
-import com.monovoca.server.user.domain.port.UserCommandRepository
+import com.monovoca.server.user.domain.port.UserRepository
 import com.monovoca.server.user.fixture.UserFixture
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.extensions.ApplyExtension
@@ -27,7 +27,7 @@ class SupportPostServiceTest(
     private val supportPostService: SupportPostService,
     private val supportCategoryRepository: SupportCategoryRepository,
     private val supportPostRepository: SupportPostRepository,
-    private val userCommandRepository: UserCommandRepository,
+    private val userRepository: UserRepository,
     private val testLocalDateTimeHolder: TestLocalDateTimeHolder
 ) : DescribeSpec({
 
@@ -38,7 +38,7 @@ class SupportPostServiceTest(
     describe("paginateViewsByCategoryTree") {
         context("게시글이 존재할 때") {
             it("페이징된 게시글 뷰를 반환한다") {
-                val user = userCommandRepository.save(
+                val user = userRepository.save(
                     UserFixture.create(username = "page1", email = "page1@test.com")
                 )
                 val main = supportCategoryRepository.save(
@@ -78,7 +78,7 @@ class SupportPostServiceTest(
     describe("create") {
         context("정상적인 게시글 생성 요청일 때") {
             it("게시글이 생성되고 도메인 객체를 반환한다") {
-                val user = userCommandRepository.save(
+                val user = userRepository.save(
                     UserFixture.create(username = "create1", email = "create1@test.com")
                 )
                 val main = supportCategoryRepository.save(
@@ -140,7 +140,7 @@ class SupportPostServiceTest(
     describe("update") {
         context("정상적인 수정 요청일 때") {
             it("게시글이 수정되고 도메인 객체를 반환한다") {
-                val user = userCommandRepository.save(
+                val user = userRepository.save(
                     UserFixture.create(username = "update1", email = "update1@test.com")
                 )
                 val main = supportCategoryRepository.save(
@@ -173,7 +173,7 @@ class SupportPostServiceTest(
 
         context("다른 카테고리로 이동할 때") {
             it("게시글의 카테고리가 변경된다") {
-                val user = userCommandRepository.save(
+                val user = userRepository.save(
                     UserFixture.create(username = "update2", email = "update2@test.com")
                 )
                 val main = supportCategoryRepository.save(
@@ -227,7 +227,7 @@ class SupportPostServiceTest(
 
         context("존재하지 않는 카테고리로 이동하려 할 때") {
             it("SupportCategoryNotFoundException이 발생한다") {
-                val user = userCommandRepository.save(
+                val user = userRepository.save(
                     UserFixture.create(username = "update3", email = "update3@test.com")
                 )
                 val main = supportCategoryRepository.save(
@@ -253,7 +253,7 @@ class SupportPostServiceTest(
 
         context("대분류 카테고리로 이동하려 할 때") {
             it("IllegalArgumentException이 발생한다") {
-                val user = userCommandRepository.save(
+                val user = userRepository.save(
                     UserFixture.create(username = "update4", email = "update4@test.com")
                 )
                 val main1 = supportCategoryRepository.save(
@@ -284,7 +284,7 @@ class SupportPostServiceTest(
     describe("delete") {
         context("정상적인 삭제 요청일 때") {
             it("게시글이 삭제된다") {
-                val user = userCommandRepository.save(
+                val user = userRepository.save(
                     UserFixture.create(username = "delete1", email = "delete1@test.com")
                 )
                 val main = supportCategoryRepository.save(

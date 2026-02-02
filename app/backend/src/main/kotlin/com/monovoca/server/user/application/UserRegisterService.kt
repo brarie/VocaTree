@@ -1,24 +1,22 @@
 package com.monovoca.server.user.application
 
-import com.monovoca.server.common.domain.port.holder.UUIDHolder
 import com.monovoca.server.common.domain.model.vo.EncryptedPassword
 import com.monovoca.server.common.domain.model.vo.Username
+import com.monovoca.server.common.domain.port.holder.UUIDHolder
 import com.monovoca.server.user.domain.exception.*
 import com.monovoca.server.user.domain.model.User
 import com.monovoca.server.user.domain.model.vo.Email
 import com.monovoca.server.user.domain.model.vo.Nickname
 import com.monovoca.server.user.domain.port.CertificationEmailSender
 import com.monovoca.server.user.domain.port.PendingUserRepository
-import com.monovoca.server.user.domain.port.UserCommandRepository
-import com.monovoca.server.user.domain.port.UserQueryRepository
+import com.monovoca.server.user.domain.port.UserRepository
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class UserRegisterService(
-    private val userCommandRepository: UserCommandRepository,
-    private val userQueryRepository: UserQueryRepository,
+    private val userRepository: UserRepository,
     private val pendingUserRepository: PendingUserRepository,
     private val passwordEncoder: PasswordEncoder,
     private val certificationEmailSender: CertificationEmailSender,
@@ -28,10 +26,10 @@ class UserRegisterService(
     @Transactional
     fun signUp(usernameStr: String, emailStr: String, nicknameStr: String, rawPassword: String): String {
         val email = Email(emailStr).also {
-            if (userQueryRepository.existsByEmail(it)) throw DuplicatedEmailException()
+            if (userRepository.existsByEmail(it)) throw DuplicatedEmailException()
         }
         val username = Username(usernameStr).also {
-            if (userQueryRepository.existsByUsername(it)) throw DuplicatedUsernameException()
+            if (userRepository.existsByUsername(it)) throw DuplicatedUsernameException()
         }
         val nickname = Nickname(nicknameStr)
         val password = EncryptedPassword.encrypt(rawPassword, passwordEncoder)
@@ -62,7 +60,7 @@ class UserRegisterService(
         val user = pendingUserRepository.findByCode(code)
             ?: throw InvalidCertificationCodeException()
 
-        userCommandRepository.save(user)
+        userRepository.save(user)
         pendingUserRepository.deleteAllByCode(code)
     }
 

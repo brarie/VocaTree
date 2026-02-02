@@ -10,7 +10,7 @@ import com.monovoca.server.common.infrastructure.config.RedisTestConfig
 import com.monovoca.server.user.domain.model.User
 import com.monovoca.server.user.domain.model.vo.Email
 import com.monovoca.server.user.domain.model.vo.Nickname
-import com.monovoca.server.user.domain.port.UserCommandRepository
+import com.monovoca.server.user.domain.port.UserRepository
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.extensions.ApplyExtension
 import io.kotest.core.spec.style.DescribeSpec
@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class AuthServiceTest(
     private val authService: AuthService,
-    private val userCommandRepository: UserCommandRepository,
+    private val userRepository: UserRepository,
     private val refreshTokenRepository: RefreshTokenRepository,
     private val passwordEncoder: PasswordEncoder,
     private val redisTemplate: StringRedisTemplate
@@ -49,7 +49,7 @@ class AuthServiceTest(
             nickname = Nickname("테스트유저"),
             password = EncryptedPassword.encrypt(rawPassword, passwordEncoder)
         )
-        return userCommandRepository.save(user)
+        return userRepository.save(user)
     }
 
     describe("login") {

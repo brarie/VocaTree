@@ -1,7 +1,11 @@
-package com.monovoca.server.supportBoard.infrastructure.persistence
+package com.monovoca.server.supportBoard.infrastructure.persistence.repository
 
 import com.monovoca.server.supportBoard.domain.model.SupportCategory
 import com.monovoca.server.supportBoard.domain.port.SupportCategoryRepository
+import com.monovoca.server.supportBoard.infrastructure.persistence.entity.SupportCategoryEntity
+import com.monovoca.server.supportBoard.infrastructure.persistence.entity.SupportCategoryTable
+import com.monovoca.server.supportBoard.infrastructure.persistence.entity.SupportPostEntity
+import com.monovoca.server.supportBoard.infrastructure.persistence.entity.SupportPostTable
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Repository
 

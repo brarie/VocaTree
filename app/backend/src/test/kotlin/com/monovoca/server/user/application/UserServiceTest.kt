@@ -1,8 +1,7 @@
 package com.monovoca.server.user.application
 
 import com.monovoca.server.user.domain.exception.UserNotFoundException
-import com.monovoca.server.user.domain.port.UserCommandRepository
-import com.monovoca.server.user.domain.port.UserQueryRepository
+import com.monovoca.server.user.domain.port.UserRepository
 import com.monovoca.server.user.fixture.UserFixture
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.extensions.ApplyExtension
@@ -18,8 +17,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class UserServiceTest(
     private val userService: UserService,
-    private val userQueryRepository: UserQueryRepository,
-    private val userCommandRepository: UserCommandRepository
+    private val userRepository: UserRepository,
 ) : DescribeSpec({
 
     describe("findById") {
@@ -30,7 +28,7 @@ class UserServiceTest(
                     email = "testuser@example.com",
                     nickname = "테스트유저"
                 )
-                val savedUser = userCommandRepository.save(user)
+                val savedUser = userRepository.save(user)
 
                 val foundUser = userService.findById(savedUser.id!!)
 

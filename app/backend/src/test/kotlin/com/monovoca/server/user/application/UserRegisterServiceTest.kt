@@ -1,12 +1,11 @@
 package com.monovoca.server.user.application
 
 import com.monovoca.server.common.domain.model.vo.Username
-import com.monovoca.server.common.infrastructure.holder.TestUUIDHolder
 import com.monovoca.server.common.infrastructure.config.RedisTestConfig
+import com.monovoca.server.common.infrastructure.holder.TestUUIDHolder
 import com.monovoca.server.user.domain.exception.*
 import com.monovoca.server.user.domain.port.PendingUserRepository
-import com.monovoca.server.user.domain.port.UserCommandRepository
-import com.monovoca.server.user.domain.port.UserQueryRepository
+import com.monovoca.server.user.domain.port.UserRepository
 import com.monovoca.server.user.fixture.UserFixture
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.extensions.ApplyExtension
@@ -25,8 +24,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class UserRegisterServiceTest(
     private val userRegisterService: UserRegisterService,
-    private val userQueryRepository: UserQueryRepository,
-    private val userCommandRepository: UserCommandRepository,
+    private val userRepository: UserRepository,
     private val pendingUserRepository: PendingUserRepository,
     private val redisTemplate: StringRedisTemplate,
     private val testUUIDHolder: TestUUIDHolder
@@ -64,7 +62,7 @@ class UserRegisterServiceTest(
                     username = "existing1",
                     email = "existing@example.com"
                 )
-                userCommandRepository.save(existingUser)
+                userRepository.save(existingUser)
 
                 shouldThrow<DuplicatedEmailException> {
                     userRegisterService.signUp(
@@ -83,7 +81,7 @@ class UserRegisterServiceTest(
                     username = "existing2",
                     email = "existing2@example.com"
                 )
-                userCommandRepository.save(existingUser)
+                userRepository.save(existingUser)
 
                 shouldThrow<DuplicatedUsernameException> {
                     userRegisterService.signUp(
@@ -155,7 +153,7 @@ class UserRegisterServiceTest(
 
                 userRegisterService.certificate("code-cert")
 
-                userQueryRepository.existsByUsername(Username("certuser")) shouldBe true
+                userRepository.existsByUsername(Username("certuser")) shouldBe true
                 pendingUserRepository.findByTempKey(tempKey) shouldBe null
             }
         }
@@ -202,7 +200,7 @@ class UserRegisterServiceTest(
                 userRegisterService.resendCertification(tempKey)
 
                 userRegisterService.certificate("new-code")
-                userQueryRepository.existsByUsername(Username("rsuser1")) shouldBe true
+                userRepository.existsByUsername(Username("rsuser1")) shouldBe true
             }
 
             it("이전 인증 코드는 무효화된다") {

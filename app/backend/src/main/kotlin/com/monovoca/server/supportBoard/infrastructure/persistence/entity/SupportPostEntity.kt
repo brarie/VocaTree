@@ -1,10 +1,10 @@
-package com.monovoca.server.supportBoard.infrastructure.persistence
+package com.monovoca.server.supportBoard.infrastructure.persistence.entity
 
 import com.monovoca.server.common.domain.model.query.SimpleUserView
 import com.monovoca.server.supportBoard.domain.model.SupportPost
 import com.monovoca.server.supportBoard.domain.model.query.SupportPostView
-import com.monovoca.server.user.infrastructure.persistence.UserEntity
-import com.monovoca.server.user.infrastructure.persistence.UserTable
+import com.monovoca.server.user.infrastructure.persistence.entity.UserEntity
+import com.monovoca.server.user.infrastructure.persistence.entity.UserTable
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
@@ -28,7 +28,7 @@ class SupportPostEntity(id: EntityID<Long>) : LongEntity(id) {
     var content by SupportPostTable.content
     var createdAt by SupportPostTable.createdAt
 
-    var author by UserEntity referencedOn SupportPostTable.authorId
+    var author by UserEntity.Companion referencedOn SupportPostTable.authorId
     var authorId by SupportPostTable.authorId
 
     var supportCategory by SupportCategoryEntity referencedOn SupportPostTable.supportCategoryId
@@ -49,7 +49,7 @@ class SupportPostEntity(id: EntityID<Long>) : LongEntity(id) {
         createdAt = supportPost.createdAt
 
         val newAuthorId = UUID.fromString(supportPost.authorId)
-        author = UserEntity[newAuthorId]
+        author = UserEntity.Companion[newAuthorId]
         authorId = EntityID(newAuthorId, UserTable)
 
         val newSupportCategoryId = supportPost.supportCategory.id!!

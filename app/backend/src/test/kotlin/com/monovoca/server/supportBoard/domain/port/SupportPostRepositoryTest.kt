@@ -2,7 +2,7 @@ package com.monovoca.server.supportBoard.domain.port
 
 import com.monovoca.server.supportBoard.fixture.SupportCategoryFixture
 import com.monovoca.server.supportBoard.fixture.SupportPostFixture
-import com.monovoca.server.user.domain.port.UserCommandRepository
+import com.monovoca.server.user.domain.port.UserRepository
 import com.monovoca.server.user.fixture.UserFixture
 import io.kotest.core.extensions.ApplyExtension
 import io.kotest.core.spec.style.DescribeSpec
@@ -22,12 +22,12 @@ import java.time.LocalDateTime
 class SupportPostRepositoryTest(
     private val supportPostRepository: SupportPostRepository,
     private val supportCategoryRepository: SupportCategoryRepository,
-    private val userCommandRepository: UserCommandRepository,
+    private val userRepository: UserRepository,
 ) : DescribeSpec({
 
     describe("save") {
         it("새로운 게시글을 저장하면 ID가 할당된다.") {
-            val author = userCommandRepository.save(
+            val author = userRepository.save(
                 UserFixture.create(username = "saveuser1", email = "save1@test.com")
             )
             val main = supportCategoryRepository.save(
@@ -53,7 +53,7 @@ class SupportPostRepositoryTest(
         }
 
         it("기존 게시글을 수정하면 변경된 내용이 반영된다.") {
-            val author = userCommandRepository.save(
+            val author = userRepository.save(
                 UserFixture.create(username = "saveuser2", email = "save2@test.com")
             )
             val main = supportCategoryRepository.save(
@@ -85,7 +85,7 @@ class SupportPostRepositoryTest(
 
     describe("findById") {
         it("ID로 게시글을 조회한다.") {
-            val author = userCommandRepository.save(
+            val author = userRepository.save(
                 UserFixture.create(username = "finduser1", email = "find1@test.com")
             )
             val main = supportCategoryRepository.save(
@@ -121,7 +121,7 @@ class SupportPostRepositoryTest(
 
     describe("paginateViewsByCategoryTree") {
         it("게시글이 여러 개 있으면 페이지네이션된 결과를 반환한다.") {
-            val author = userCommandRepository.save(
+            val author = userRepository.save(
                 UserFixture.create(username = "pageuser1", email = "page1@test.com", nickname = "테스트작성자")
             )
             val main = supportCategoryRepository.save(
@@ -163,7 +163,7 @@ class SupportPostRepositoryTest(
         }
 
         it("두 번째 페이지를 조회할 수 있다.") {
-            val author = userCommandRepository.save(
+            val author = userRepository.save(
                 UserFixture.create(username = "pageuser2", email = "page2@test.com")
             )
             val main = supportCategoryRepository.save(
@@ -211,7 +211,7 @@ class SupportPostRepositoryTest(
         }
 
         it("다른 카테고리의 게시글은 조회되지 않는다.") {
-            val author = userCommandRepository.save(
+            val author = userRepository.save(
                 UserFixture.create(username = "pageuser3", email = "page3@test.com")
             )
             val main = supportCategoryRepository.save(
@@ -244,7 +244,7 @@ class SupportPostRepositoryTest(
         }
 
         it("대분류의 ID로 조회하면 하위 중분류의 게시글도 함께 조회된다.") {
-            val author = userCommandRepository.save(
+            val author = userRepository.save(
                 UserFixture.create(username = "pageuser4", email = "page4@test.com")
             )
             val main = supportCategoryRepository.save(
@@ -277,7 +277,7 @@ class SupportPostRepositoryTest(
 
     describe("delete") {
         it("게시글을 삭제한다.") {
-            val author = userCommandRepository.save(
+            val author = userRepository.save(
                 UserFixture.create(username = "deleteuser", email = "delete1@test.com")
             )
             val main = supportCategoryRepository.save(
@@ -308,7 +308,7 @@ class SupportPostRepositoryTest(
         it("10명의 유저, 1개의 대분류, 10개의 중분류, 10개의 게시글로 페이지네이션 쿼리를 측정한다.") {
             // 1. 유저 10명 생성
             val authors = (1..10).map { i ->
-                userCommandRepository.save(
+                userRepository.save(
                     UserFixture.create(username = "query$i", email = "query$i@test.com", nickname = "작성자$i")
                 )
             }

@@ -7,7 +7,7 @@ import com.monovoca.server.supportBoard.domain.port.SupportCategoryRepository
 import com.monovoca.server.supportBoard.domain.port.SupportPostRepository
 import com.monovoca.server.supportBoard.fixture.SupportCategoryFixture
 import com.monovoca.server.supportBoard.fixture.SupportPostFixture
-import com.monovoca.server.user.domain.port.UserCommandRepository
+import com.monovoca.server.user.domain.port.UserRepository
 import com.monovoca.server.user.fixture.UserFixture
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.extensions.ApplyExtension
@@ -27,7 +27,7 @@ class SupportCategoryServiceTest(
     private val supportCategoryService: SupportCategoryService,
     private val supportCategoryRepository: SupportCategoryRepository,
     private val supportPostRepository: SupportPostRepository,
-    private val userCommandRepository: UserCommandRepository
+    private val userRepository: UserRepository
 ) : DescribeSpec({
 
     describe("findMainCategories") {
@@ -187,7 +187,7 @@ class SupportCategoryServiceTest(
 
         context("관련 게시글이 있는 카테고리를 삭제하려 할 때") {
             it("CannotDeleteCategoryWithPostsException이 발생한다") {
-                val user = userCommandRepository.save(
+                val user = userRepository.save(
                     UserFixture.create(username = "testuser", email = "test@example.com")
                 )
                 val main = supportCategoryRepository.save(

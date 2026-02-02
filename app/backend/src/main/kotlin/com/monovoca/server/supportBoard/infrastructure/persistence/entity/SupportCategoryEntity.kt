@@ -1,4 +1,4 @@
-package com.monovoca.server.supportBoard.infrastructure.persistence
+package com.monovoca.server.supportBoard.infrastructure.persistence.entity
 
 import com.monovoca.server.supportBoard.domain.model.SupportCategory
 import org.jetbrains.exposed.dao.LongEntity

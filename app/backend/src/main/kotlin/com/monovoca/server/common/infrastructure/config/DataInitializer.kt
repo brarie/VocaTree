@@ -1,14 +1,14 @@
 package com.monovoca.server.common.infrastructure.config
 
 import com.monovoca.server.common.domain.model.vo.EncryptedPassword
-import com.monovoca.server.common.domain.model.vo.enumerated.UserRole
 import com.monovoca.server.common.domain.model.vo.Username
+import com.monovoca.server.common.domain.model.vo.enumerated.UserRole
 import com.monovoca.server.supportBoard.application.SupportCategoryService
 import com.monovoca.server.supportBoard.application.SupportPostService
 import com.monovoca.server.user.domain.model.User
 import com.monovoca.server.user.domain.model.vo.Email
 import com.monovoca.server.user.domain.model.vo.Nickname
-import com.monovoca.server.user.domain.port.UserCommandRepository
+import com.monovoca.server.user.domain.port.UserRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.boot.ApplicationArguments
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component
     matchIfMissing = false
 )
 class DataInitializer(
-    private val userCommandRepository: UserCommandRepository,
+    private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
     private val supportCategoryService: SupportCategoryService,
     private val supportPostService: SupportPostService,
@@ -52,8 +52,8 @@ class DataInitializer(
                 password = EncryptedPassword.encrypt("12121212", passwordEncoder),
                 role = UserRole.USER
             )
-            adminAccount = userCommandRepository.save(adminAccount)
-            userAccount = userCommandRepository.save(userAccount)
+            adminAccount = userRepository.save(adminAccount)
+            userAccount = userRepository.save(userAccount)
 
 
             //////////////////// 카테고리 초기화 //////////////////////////

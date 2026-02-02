@@ -1,16 +1,16 @@
-package com.monovoca.server.auth.infrastructure.persistence
+package com.monovoca.server.auth.infrastructure.persistence.repository
 
 import com.monovoca.server.auth.domain.model.AuthUser
-import com.monovoca.server.auth.domain.port.AuthUserQueryRepository
+import com.monovoca.server.auth.domain.port.AuthUserRepository
 import com.monovoca.server.common.domain.model.vo.EncryptedPassword
 import com.monovoca.server.common.domain.model.vo.Username
-import com.monovoca.server.user.infrastructure.persistence.UserTable
+import com.monovoca.server.user.infrastructure.persistence.entity.UserTable
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-class AuthUserQueryRepositoryImpl : AuthUserQueryRepository {
+class AuthUserRepositoryImpl : AuthUserRepository {
 
     override fun findAuthUserById(id: String): AuthUser? = transaction {
         UserTable.select(UserTable.id, UserTable.role, UserTable.username, UserTable.passwordHash)
