@@ -11,11 +11,13 @@ object PublicWordFixture {
     fun createWord(
         id: Long? = null,
         spelling: String = "test",
+        slug: String? = null,
         senses: List<PublicSense> = emptyList()
     ): PublicWord {
         return PublicWord(
             id = id,
             spelling = Spelling(spelling),
+            slug = slug,
             senses = senses
         )
     }

@@ -3,12 +3,15 @@ package com.monovoca.server.dictionary.application
 import com.monovoca.server.common.domain.model.vo.Spelling
 import com.monovoca.server.dictionary.domain.exception.PublicWordAlreadyExistsException
 import com.monovoca.server.dictionary.domain.exception.PublicWordNotFoundException
+import com.monovoca.server.dictionary.domain.model.query.PublicWordSearchView
 import com.monovoca.server.dictionary.domain.model.word.PublicWord
 import com.monovoca.server.dictionary.domain.model.word.command.CreateExampleCommand
 import com.monovoca.server.dictionary.domain.model.word.command.CreateSenseCommand
 import com.monovoca.server.dictionary.domain.model.word.command.UpdateExampleCommand
 import com.monovoca.server.dictionary.domain.model.word.command.UpdateSenseCommand
 import com.monovoca.server.dictionary.domain.port.DictionaryWordRepository
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -16,6 +19,13 @@ import org.springframework.transaction.annotation.Transactional
 class DictionaryWordService(
     private val dictionaryWordRepository: DictionaryWordRepository
 ) {
+    @Transactional(readOnly = true)
+    fun paginateViewsBySpelling(query: String, pageable: Pageable): Page<PublicWordSearchView> =
+        dictionaryWordRepository.paginateViewsBySpelling(query, pageable)
+
+    @Transactional(readOnly = true)
+    fun findBySlug(slug: String): PublicWord =
+        dictionaryWordRepository.findBySlug(slug) ?: throw PublicWordNotFoundException()
 
     @Transactional
     fun createWord(spelling: String): PublicWord {
@@ -25,27 +35,46 @@ class DictionaryWordService(
             throw PublicWordAlreadyExistsException()
 
         val word = PublicWord(spelling = spellingVo)
+        val savedWord = dictionaryWordRepository.save(word)
 
-        return dictionaryWordRepository.save(word)
+        val baseSlug = PublicWord.normalizeToSlug(spelling)
+        val slug = if (dictionaryWordRepository.existsBySlug(baseSlug)) {
+            PublicWord.generateSlugWithId(spelling, savedWord.id!!)
+        } else {
+            baseSlug
+        }
+        val wordWithSlug = savedWord.withSlug(slug)
+
+        return dictionaryWordRepository.save(wordWithSlug)
     }
 
     @Transactional
     fun updateWord(wordId: Long, spelling: String): PublicWord {
         val spellingVo = Spelling(spelling)
-        val word = dictionaryWordRepository.findPublicWordById(wordId)
+        val word = dictionaryWordRepository.findById(wordId)
             ?: throw PublicWordNotFoundException()
 
         if (word.spelling != spellingVo && dictionaryWordRepository.existsBySpelling(spellingVo))
             throw PublicWordAlreadyExistsException()
 
-        val updatedWord = word.updateSpelling(spellingVo)
+        val updatedWord = if (word.spelling != spellingVo) {
+            val baseSlug = PublicWord.normalizeToSlug(spelling)
+            val newSlug = if (dictionaryWordRepository.existsBySlug(baseSlug)) {
+                PublicWord.generateSlugWithId(spelling, wordId)
+            } else {
+                baseSlug
+            }
+            word.updateSpelling(spellingVo).withSlug(newSlug)
+        } else {
+            word.updateSpelling(spellingVo)
+        }
 
         return dictionaryWordRepository.save(updatedWord)
     }
 
     @Transactional
     fun deleteWord(wordId: Long) {
-        val word = dictionaryWordRepository.findPublicWordById(wordId)
+        val word = dictionaryWordRepository.findById(wordId)
             ?: throw PublicWordNotFoundException()
 
         dictionaryWordRepository.delete(word)
@@ -53,7 +82,7 @@ class DictionaryWordService(
 
     @Transactional
     fun createSense(wordId: Long, command: CreateSenseCommand): PublicWord {
-        val word = dictionaryWordRepository.findPublicWordById(wordId)
+        val word = dictionaryWordRepository.findById(wordId)
             ?: throw PublicWordNotFoundException()
 
         val updatedWord = word.addSense(command)
@@ -63,7 +92,7 @@ class DictionaryWordService(
 
     @Transactional
     fun updateSense(wordId: Long, senseId: Long, command: UpdateSenseCommand): PublicWord {
-        val word = dictionaryWordRepository.findPublicWordById(wordId)
+        val word = dictionaryWordRepository.findById(wordId)
             ?: throw PublicWordNotFoundException()
 
         val updatedWord = word.updateSense(senseId, command)
@@ -73,7 +102,7 @@ class DictionaryWordService(
 
     @Transactional
     fun deleteSense(wordId: Long, senseId: Long): PublicWord {
-        val word = dictionaryWordRepository.findPublicWordById(wordId)
+        val word = dictionaryWordRepository.findById(wordId)
             ?: throw PublicWordNotFoundException()
 
         val updatedWord = word.deleteSense(senseId)
@@ -83,7 +112,7 @@ class DictionaryWordService(
 
     @Transactional
     fun reorderSenses(wordId: Long, orders: List<Pair<Long, Int>>): PublicWord {
-        val word = dictionaryWordRepository.findPublicWordById(wordId)
+        val word = dictionaryWordRepository.findById(wordId)
             ?: throw PublicWordNotFoundException()
 
         val updatedWord = word.reorderSenses(orders)
@@ -93,7 +122,7 @@ class DictionaryWordService(
 
     @Transactional
     fun createExample(wordId: Long, senseId: Long, command: CreateExampleCommand): PublicWord {
-        val word = dictionaryWordRepository.findPublicWordById(wordId)
+        val word = dictionaryWordRepository.findById(wordId)
             ?: throw PublicWordNotFoundException()
 
         val updatedWord = word.addExample(senseId, command)
@@ -108,7 +137,7 @@ class DictionaryWordService(
         exampleId: Long,
         command: UpdateExampleCommand
     ): PublicWord {
-        val word = dictionaryWordRepository.findPublicWordById(wordId)
+        val word = dictionaryWordRepository.findById(wordId)
             ?: throw PublicWordNotFoundException()
 
         val updatedWord = word.updateExample(senseId, exampleId, command)
@@ -118,7 +147,7 @@ class DictionaryWordService(
 
     @Transactional
     fun deleteExample(wordId: Long, senseId: Long, exampleId: Long): PublicWord {
-        val word = dictionaryWordRepository.findPublicWordById(wordId)
+        val word = dictionaryWordRepository.findById(wordId)
             ?: throw PublicWordNotFoundException()
 
         val updatedWord = word.deleteExample(senseId, exampleId)
@@ -128,7 +157,7 @@ class DictionaryWordService(
 
     @Transactional
     fun reorderExamples(wordId: Long, senseId: Long, orders: List<Pair<Long, Int>>): PublicWord {
-        val word = dictionaryWordRepository.findPublicWordById(wordId)
+        val word = dictionaryWordRepository.findById(wordId)
             ?: throw PublicWordNotFoundException()
 
         val updatedWord = word.reorderExamples(senseId, orders)

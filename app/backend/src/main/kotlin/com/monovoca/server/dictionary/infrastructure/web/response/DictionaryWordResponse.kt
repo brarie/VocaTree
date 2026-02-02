@@ -8,6 +8,7 @@ import com.monovoca.server.dictionary.domain.model.word.PublicWord
 data class PublicWordResponse(
     val id: Long,
     val spelling: String,
+    val slug: String,
     val senses: List<Sense>,
 ) {
     data class Sense(
@@ -67,6 +68,7 @@ data class PublicWordResponse(
             return PublicWordResponse(
                 id = word.id!!,
                 spelling = word.spelling.value,
+                slug = word.slug!!,
                 senses = word.senses.map { Sense.from(it) },
             )
         }

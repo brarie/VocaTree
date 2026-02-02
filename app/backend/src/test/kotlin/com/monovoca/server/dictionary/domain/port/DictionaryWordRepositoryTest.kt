@@ -10,6 +10,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.data.domain.PageRequest
 import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
@@ -124,7 +125,7 @@ class DictionaryWordRepositoryTest(
     describe("existsBySpelling") {
         it("동일한 spelling이 존재하면 true를 반환한다.") {
             dictionaryWordRepository.save(
-                PublicWordFixture.createWord(spelling = "apple")
+                PublicWordFixture.createWord(spelling = "apple", slug = "apple")
             )
 
             val exists = dictionaryWordRepository.existsBySpelling(Spelling("apple"))
@@ -139,20 +140,39 @@ class DictionaryWordRepositoryTest(
         }
     }
 
-    describe("findPublicWordById") {
-        it("ID로 단어를 조회한다.") {
-            val saved = dictionaryWordRepository.save(
-                PublicWordFixture.createWord(spelling = "apple")
+    describe("existsBySlug") {
+        it("동일한 slug가 존재하면 true를 반환한다.") {
+            dictionaryWordRepository.save(
+                PublicWordFixture.createWord(spelling = "well-known", slug = "well-known")
             )
 
-            val found = dictionaryWordRepository.findPublicWordById(saved.id!!)
+            val exists = dictionaryWordRepository.existsBySlug("well-known")
+
+            exists shouldBe true
+        }
+
+        it("존재하지 않는 slug이면 false를 반환한다.") {
+            val exists = dictionaryWordRepository.existsBySlug("notexist")
+
+            exists shouldBe false
+        }
+    }
+
+    describe("findById") {
+        it("ID로 단어를 조회한다.") {
+            val saved = dictionaryWordRepository.save(
+                PublicWordFixture.createWord(spelling = "apple", slug = "apple")
+            )
+
+            val found = dictionaryWordRepository.findById(saved.id!!)
 
             found shouldNotBe null
             found!!.spelling.value shouldBe "apple"
+            found.slug shouldBe "apple"
         }
 
         it("존재하지 않는 ID로 조회하면 null을 반환한다.") {
-            val found = dictionaryWordRepository.findPublicWordById(999999L)
+            val found = dictionaryWordRepository.findById(999999L)
 
             found shouldBe null
         }
@@ -161,10 +181,10 @@ class DictionaryWordRepositoryTest(
             val example = PublicWordFixture.createExample(sentence = "Test")
             val sense = PublicWordFixture.createSense(definition = "뜻", examples = listOf(example))
             val saved = dictionaryWordRepository.save(
-                PublicWordFixture.createWord(spelling = "word", senses = listOf(sense))
+                PublicWordFixture.createWord(spelling = "word", slug = "word", senses = listOf(sense))
             )
 
-            val found = dictionaryWordRepository.findPublicWordById(saved.id!!)
+            val found = dictionaryWordRepository.findById(saved.id!!)
 
             found shouldNotBe null
             found!!.senses shouldHaveSize 1
@@ -172,15 +192,129 @@ class DictionaryWordRepositoryTest(
         }
     }
 
+    describe("findBySlug") {
+        it("slug로 단어를 조회한다.") {
+            val saved = dictionaryWordRepository.save(
+                PublicWordFixture.createWord(spelling = "don't", slug = "don-t")
+            )
+
+            val found = dictionaryWordRepository.findBySlug("don-t")
+
+            found shouldNotBe null
+            found!!.id shouldBe saved.id
+            found.spelling.value shouldBe "don't"
+        }
+
+        it("존재하지 않는 slug로 조회하면 null을 반환한다.") {
+            val found = dictionaryWordRepository.findBySlug("notexist")
+
+            found shouldBe null
+        }
+
+        it("sense와 example을 함께 조회한다.") {
+            val example = PublicWordFixture.createExample(sentence = "Don't do that")
+            val sense = PublicWordFixture.createSense(definition = "~하지 마라", examples = listOf(example))
+            val saved = dictionaryWordRepository.save(
+                PublicWordFixture.createWord(spelling = "don't", slug = "don-t", senses = listOf(sense))
+            )
+
+            val found = dictionaryWordRepository.findBySlug("don-t")
+
+            found shouldNotBe null
+            found!!.senses shouldHaveSize 1
+            found.senses[0].examples shouldHaveSize 1
+        }
+    }
+
+    describe("paginateViewsBySpelling") {
+        it("prefix 검색으로 단어를 조회한다.") {
+            val sense1 = PublicWordFixture.createSense(definition = "뜻1", displayOrder = 0)
+            val sense2 = PublicWordFixture.createSense(definition = "뜻2", displayOrder = 1)
+            val sense3 = PublicWordFixture.createSense(definition = "뜻3", displayOrder = 2)
+            dictionaryWordRepository.save(
+                PublicWordFixture.createWord(
+                    spelling = "apple",
+                    slug = "apple",
+                    senses = listOf(sense1, sense2, sense3)
+                )
+            )
+            dictionaryWordRepository.save(
+                PublicWordFixture.createWord(spelling = "application", slug = "application")
+            )
+            dictionaryWordRepository.save(
+                PublicWordFixture.createWord(spelling = "apply", slug = "apply")
+            )
+
+            val page = dictionaryWordRepository.paginateViewsBySpelling("app", PageRequest.of(0, 10))
+
+            page.totalElements shouldBe 3
+            page.content shouldHaveSize 3
+            page.content[0].spelling shouldBe "apple"
+            page.content[0].slug shouldBe "apple"
+            page.content[0].topDefinitions shouldHaveSize 3
+            page.content[1].spelling shouldBe "apply"
+            page.content[1].topDefinitions shouldHaveSize 0
+            page.content[2].spelling shouldBe "application"
+        }
+
+        it("길이순으로 정렬된다.") {
+            dictionaryWordRepository.save(
+                PublicWordFixture.createWord(spelling = "test", slug = "test")
+            )
+            dictionaryWordRepository.save(
+                PublicWordFixture.createWord(spelling = "testing", slug = "testing")
+            )
+            dictionaryWordRepository.save(
+                PublicWordFixture.createWord(spelling = "tester", slug = "tester")
+            )
+
+            val page = dictionaryWordRepository.paginateViewsBySpelling("test", PageRequest.of(0, 10))
+
+            page.content[0].spelling shouldBe "test"
+            page.content[1].spelling shouldBe "tester"
+            page.content[2].spelling shouldBe "testing"
+        }
+
+        it("topDefinitions는 최대 3개까지만 포함한다.") {
+            val senses = (1..5).map { PublicWordFixture.createSense(definition = "뜻$it", displayOrder = it - 1) }
+            dictionaryWordRepository.save(
+                PublicWordFixture.createWord(spelling = "minute", slug = "minute", senses = senses)
+            )
+
+            val page = dictionaryWordRepository.paginateViewsBySpelling("minute", PageRequest.of(0, 10))
+
+            page.content[0].topDefinitions shouldHaveSize 3
+            page.content[0].topDefinitions[0] shouldBe "뜻1"
+            page.content[0].topDefinitions[1] shouldBe "뜻2"
+            page.content[0].topDefinitions[2] shouldBe "뜻3"
+        }
+
+        it("페이징이 적용된다.") {
+            val letters = "abcdefghijklmnopqrstuvwxy"
+            letters.forEach { ch ->
+                dictionaryWordRepository.save(
+                    PublicWordFixture.createWord(spelling = "word$ch", slug = "word-$ch")
+                )
+            }
+
+            val page1 = dictionaryWordRepository.paginateViewsBySpelling("word", PageRequest.of(0, 10))
+            val page2 = dictionaryWordRepository.paginateViewsBySpelling("word", PageRequest.of(1, 10))
+
+            page1.totalElements shouldBe 25
+            page1.content shouldHaveSize 10
+            page2.content shouldHaveSize 10
+        }
+    }
+
     describe("delete") {
         it("단어를 삭제한다.") {
             val word = dictionaryWordRepository.save(
-                PublicWordFixture.createWord(spelling = "delete")
+                PublicWordFixture.createWord(spelling = "delete", slug = "delete")
             )
 
             dictionaryWordRepository.delete(word)
 
-            val found = dictionaryWordRepository.findPublicWordById(word.id!!)
+            val found = dictionaryWordRepository.findById(word.id!!)
             found shouldBe null
         }
 
@@ -188,12 +322,12 @@ class DictionaryWordRepositoryTest(
             val example = PublicWordFixture.createExample()
             val sense = PublicWordFixture.createSense(examples = listOf(example))
             val word = dictionaryWordRepository.save(
-                PublicWordFixture.createWord(spelling = "delete", senses = listOf(sense))
+                PublicWordFixture.createWord(spelling = "delete", slug = "delete", senses = listOf(sense))
             )
 
             dictionaryWordRepository.delete(word)
 
-            val found = dictionaryWordRepository.findPublicWordById(word.id!!)
+            val found = dictionaryWordRepository.findById(word.id!!)
             found shouldBe null
         }
     }
@@ -222,7 +356,7 @@ class DictionaryWordRepositoryTest(
 
             println("=== findPublicWordById 쿼리 측정 시작 ===")
 
-            val found = dictionaryWordRepository.findPublicWordById(word.id!!)
+            val found = dictionaryWordRepository.findById(word.id!!)
 
             found shouldNotBe null
             found!!.spelling.value shouldBe "query"

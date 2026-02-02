@@ -11,14 +11,33 @@ import com.monovoca.server.dictionary.domain.model.word.command.UpdateSenseComma
 data class PublicWord(
     val id: Long? = null,
     val spelling: Spelling,
+    val slug: String? = null,
     val senses: List<PublicSense> = emptyList(),
 ) {
     init {
         require(senses.isSortedBy { it.displayOrder }) { "Senses must be sorted by displayOrder" }
     }
 
+    companion object {
+        fun normalizeToSlug(spelling: String): String {
+            return spelling
+                .lowercase()
+                .replace(Regex("[^a-z0-9]+"), "-")
+                .trim('-')
+        }
+
+        fun generateSlugWithId(spelling: String, id: Long): String {
+            val base = normalizeToSlug(spelling)
+            return "$base-$id"
+        }
+    }
+
     fun updateSpelling(newSpelling: Spelling): PublicWord {
         return this.copy(spelling = newSpelling)
+    }
+
+    fun withSlug(slug: String): PublicWord {
+        return this.copy(slug = slug)
     }
 
     fun addSense(command: CreateSenseCommand): PublicWord {

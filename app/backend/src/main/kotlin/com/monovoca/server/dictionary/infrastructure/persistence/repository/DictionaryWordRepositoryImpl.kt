@@ -1,6 +1,7 @@
 package com.monovoca.server.dictionary.infrastructure.persistence.repository
 
 import com.monovoca.server.common.domain.model.vo.Spelling
+import com.monovoca.server.dictionary.domain.model.query.PublicWordSearchView
 import com.monovoca.server.dictionary.domain.model.word.PublicSense
 import com.monovoca.server.dictionary.domain.model.word.PublicWord
 import com.monovoca.server.dictionary.domain.port.DictionaryWordRepository
@@ -8,8 +9,18 @@ import com.monovoca.server.dictionary.infrastructure.persistence.entity.PublicEx
 import com.monovoca.server.dictionary.infrastructure.persistence.entity.PublicSenseEntity
 import com.monovoca.server.dictionary.infrastructure.persistence.entity.PublicWordEntity
 import com.monovoca.server.dictionary.infrastructure.persistence.entity.PublicWordTable
+import com.monovoca.server.dictionary.infrastructure.persistence.entity.toPublicWordSearchView
 import org.jetbrains.exposed.dao.load
+import org.jetbrains.exposed.dao.with
+import org.jetbrains.exposed.sql.CustomFunction
+import org.jetbrains.exposed.sql.IntegerColumnType
+import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -82,7 +93,13 @@ class DictionaryWordRepositoryImpl : DictionaryWordRepository {
             .empty().not()
     }
 
-    override fun findPublicWordById(wordId: Long): PublicWord? = transaction {
+    override fun existsBySlug(slug: String): Boolean = transaction {
+        PublicWordTable.select(PublicWordTable.id)
+            .where { PublicWordTable.slug eq slug }
+            .empty().not()
+    }
+
+    override fun findById(wordId: Long): PublicWord? = transaction {
         PublicWordEntity.findById(wordId)
             ?.load(PublicWordEntity::senses, PublicSenseEntity::examples)
             ?.toDomain()
@@ -90,6 +107,35 @@ class DictionaryWordRepositoryImpl : DictionaryWordRepository {
 
     override fun delete(word: PublicWord) = transaction {
         PublicWordEntity.findById(word.id!!)!!.delete()
+    }
+
+    override fun findBySlug(slug: String): PublicWord? = transaction {
+        PublicWordEntity.find { PublicWordTable.slug eq slug }
+            .firstOrNull()
+            ?.load(PublicWordEntity::senses, PublicSenseEntity::examples)
+            ?.toDomain()
+    }
+
+    override fun paginateViewsBySpelling(query: String, pageable: Pageable): Page<PublicWordSearchView> = transaction {
+        val lengthFunc = CustomFunction("LENGTH", IntegerColumnType(), PublicWordTable.spelling)
+
+        val total = PublicWordTable
+            .selectAll()
+            .where { PublicWordTable.spelling like "$query%" }
+            .count()
+
+        val content = PublicWordEntity
+            .find { PublicWordTable.spelling like "$query%" }
+            .orderBy(
+                lengthFunc to SortOrder.ASC,
+                PublicWordTable.spelling to SortOrder.ASC
+            )
+            .limit(pageable.pageSize)
+            .offset(pageable.offset)
+            .with(PublicWordEntity::senses)
+            .map { it.toPublicWordSearchView() }
+
+        PageImpl(content, pageable, total)
     }
 }
 

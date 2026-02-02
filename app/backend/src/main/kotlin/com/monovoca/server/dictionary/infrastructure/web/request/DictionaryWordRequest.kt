@@ -25,8 +25,8 @@ data class CreateSenseRequest(
     val britishPhonetic: String?,
     val americanPhonetic: String?,
     val partOfSpeech: PartOfSpeech?,
-    val synonyms: List<String>,
-    val antonyms: List<String>
+    val synonyms: List<String>?,
+    val antonyms: List<String>?,
 ) {
     fun toCommand(): CreateSenseCommand = CreateSenseCommand(
         definition = definition,
@@ -34,8 +34,8 @@ data class CreateSenseRequest(
         britishPhonetic = britishPhonetic,
         americanPhonetic = americanPhonetic,
         partOfSpeech = partOfSpeech,
-        synonyms = synonyms.map { Spelling(it) },
-        antonyms = antonyms.map { Spelling(it) }
+        synonyms = synonyms?.map { Spelling(it) } ?: emptyList(),
+        antonyms = antonyms?.map { Spelling(it) } ?: emptyList(),
     )
 }
 
@@ -45,8 +45,8 @@ data class UpdateSenseRequest(
     val britishPhonetic: String?,
     val americanPhonetic: String?,
     val partOfSpeech: PartOfSpeech?,
-    val synonyms: List<String>,
-    val antonyms: List<String>
+    val synonyms: List<String>?,
+    val antonyms: List<String>?,
 ) {
     fun toCommand(): UpdateSenseCommand = UpdateSenseCommand(
         definition = definition,
@@ -54,8 +54,8 @@ data class UpdateSenseRequest(
         britishPhonetic = britishPhonetic,
         americanPhonetic = americanPhonetic,
         partOfSpeech = partOfSpeech,
-        synonyms = synonyms.map { Spelling(it) },
-        antonyms = antonyms.map { Spelling(it) }
+        synonyms = synonyms?.map { Spelling(it) } ?: emptyList(),
+        antonyms = antonyms?.map { Spelling(it) } ?: emptyList(),
     )
 }
 

@@ -17,7 +17,9 @@ import io.kotest.extensions.spring.SpringExtension
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldContain
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.data.domain.PageRequest
 import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
@@ -35,6 +37,33 @@ class DictionaryWordServiceTest(
 
                 word.id shouldNotBe null
                 word.spelling.value shouldBe "apple"
+                word.slug shouldNotBe null
+            }
+
+            it("중복되지 않는 slug는 ID 없이 생성된다") {
+                val word = dictionaryWordService.createWord("well-known")
+
+                word.slug shouldBe "well-known"
+            }
+
+            it("중복되는 slug는 ID를 포함해서 생성된다") {
+                val first = dictionaryWordService.createWord("well-known")
+                val second = dictionaryWordService.createWord("well known")
+
+                first.slug shouldBe "well-known"
+                second.slug shouldBe "well-known-${second.id}"
+            }
+
+            it("특수문자는 하이픈으로 변환된다") {
+                val word = dictionaryWordService.createWord("don't")
+
+                word.slug shouldBe "don-t"
+            }
+
+            it("공백이 포함된 숙어도 정상적으로 slug가 생성된다") {
+                val word = dictionaryWordService.createWord("so as to")
+
+                word.slug shouldBe "so-as-to"
             }
         }
 
@@ -58,6 +87,23 @@ class DictionaryWordServiceTest(
 
                 updated.spelling.value shouldBe "tested"
             }
+
+            it("spelling 변경 시 slug도 새로 생성된다") {
+                val word = dictionaryWordService.createWord("well-known")
+
+                val updated = dictionaryWordService.updateWord(word.id!!, "well known")
+
+                updated.spelling.value shouldBe "well known"
+                updated.slug shouldBe "well-known-${word.id}"
+            }
+
+            it("slug가 중복되지 않으면 ID 없이 생성된다") {
+                val word = dictionaryWordService.createWord("test")
+
+                val updated = dictionaryWordService.updateWord(word.id!!, "unique-word")
+
+                updated.slug shouldBe "unique-word"
+            }
         }
 
         context("존재하지 않는 단어를 수정하려 할 때") {
@@ -80,12 +126,14 @@ class DictionaryWordServiceTest(
         }
 
         context("같은 spelling으로 수정할 때") {
-            it("예외가 발생하지 않는다") {
+            it("예외가 발생하지 않고 slug는 변경되지 않는다") {
                 val word = dictionaryWordService.createWord("test")
+                val originalSlug = word.slug
 
                 val updated = dictionaryWordService.updateWord(word.id!!, "test")
 
                 updated.spelling.value shouldBe "test"
+                updated.slug shouldBe originalSlug
             }
         }
     }
@@ -97,7 +145,7 @@ class DictionaryWordServiceTest(
 
                 dictionaryWordService.deleteWord(word.id!!)
 
-                dictionaryWordRepository.findPublicWordById(word.id) shouldBe null
+                dictionaryWordRepository.findById(word.id) shouldBe null
             }
         }
 
@@ -321,6 +369,70 @@ class DictionaryWordServiceTest(
                 val result = dictionaryWordService.deleteExample(word.id, senseId, exampleId)
 
                 result.senses[0].examples shouldHaveSize 0
+            }
+        }
+    }
+
+    describe("paginateViewsBySpelling") {
+        context("정상적인 검색 요청일 때") {
+            it("검색 결과를 페이징하여 반환한다") {
+                dictionaryWordService.createWord("apple")
+                dictionaryWordService.createWord("application")
+                dictionaryWordService.createWord("apply")
+
+                val page = dictionaryWordService.paginateViewsBySpelling("app", PageRequest.of(0, 10))
+
+                page.totalElements shouldBe 3
+                page.content shouldHaveSize 3
+            }
+
+            it("검색 결과에 slug가 포함된다") {
+                dictionaryWordService.createWord("test")
+
+                val page = dictionaryWordService.paginateViewsBySpelling("test", PageRequest.of(0, 10))
+
+                page.content[0].slug shouldNotBe null
+                page.content[0].slug shouldContain "test"
+            }
+
+            it("검색 결과에 topDefinitions가 포함된다") {
+                val word = dictionaryWordService.createWord("minute")
+                dictionaryWordService.createSense(word.id!!, CreateSenseCommand(definition = "분 (시간)"))
+                dictionaryWordService.createSense(word.id, CreateSenseCommand(definition = "아주 작은"))
+
+                val page = dictionaryWordService.paginateViewsBySpelling("minute", PageRequest.of(0, 10))
+
+                page.content[0].topDefinitions shouldHaveSize 2
+            }
+        }
+
+        context("검색 결과가 없을 때") {
+            it("빈 페이지를 반환한다") {
+                val page = dictionaryWordService.paginateViewsBySpelling("notexist", PageRequest.of(0, 10))
+
+                page.totalElements shouldBe 0
+                page.content shouldHaveSize 0
+            }
+        }
+    }
+
+    describe("findBySlug") {
+        context("정상적인 조회 요청일 때") {
+            it("slug로 단어를 조회한다") {
+                val word = dictionaryWordService.createWord("don't")
+
+                val found = dictionaryWordService.findBySlug("don-t")
+
+                found.id shouldBe word.id
+                found.spelling.value shouldBe "don't"
+            }
+        }
+
+        context("존재하지 않는 slug로 조회할 때") {
+            it("PublicWordNotFoundException이 발생한다") {
+                shouldThrow<PublicWordNotFoundException> {
+                    dictionaryWordService.findBySlug("notexist")
+                }
             }
         }
     }

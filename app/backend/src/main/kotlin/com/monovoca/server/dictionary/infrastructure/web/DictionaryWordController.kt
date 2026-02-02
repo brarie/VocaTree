@@ -1,27 +1,45 @@
 package com.monovoca.server.dictionary.infrastructure.web
 
 import com.monovoca.server.dictionary.application.DictionaryWordService
+import com.monovoca.server.dictionary.domain.model.query.PublicWordSearchView
 import com.monovoca.server.dictionary.infrastructure.web.request.*
 import com.monovoca.server.dictionary.infrastructure.web.response.PublicWordResponse
 import jakarta.validation.Valid
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/api/dictionary/words")
+@RequestMapping("/api/dictionary")
 class DictionaryWordController(
     private val dictionaryWordService: DictionaryWordService
 ) {
 
-    @PostMapping
+    @GetMapping("/search")
+    fun searchWords(
+        query: String,
+        pageable: Pageable
+    ): ResponseEntity<Page<PublicWordSearchView>> {
+        val views = dictionaryWordService.paginateViewsBySpelling(query, pageable)
+        return ResponseEntity.ok(views)
+    }
+
+    @GetMapping("/words/slug/{slug}")
+    fun getWordBySlug(@PathVariable slug: String): ResponseEntity<PublicWordResponse> {
+        val word = dictionaryWordService.findBySlug(slug)
+        return ResponseEntity.ok(PublicWordResponse.from(word))
+    }
+
+    @PostMapping("/words")
     @PreAuthorize("hasRole('ADMIN')")
     fun createWord(@RequestBody @Valid request: CreatePublicWordRequest): ResponseEntity<PublicWordResponse> {
         val word = dictionaryWordService.createWord(request.spelling)
         return ResponseEntity.ok(PublicWordResponse.from(word))
     }
 
-    @PatchMapping("/{wordId}")
+    @PatchMapping("/words/{wordId}")
     @PreAuthorize("hasRole('ADMIN')")
     fun updateWord(
         @PathVariable wordId: Long,
@@ -31,14 +49,14 @@ class DictionaryWordController(
         return ResponseEntity.ok(PublicWordResponse.from(word))
     }
 
-    @DeleteMapping("/{wordId}")
+    @DeleteMapping("/words/{wordId}")
     @PreAuthorize("hasRole('ADMIN')")
     fun deleteWord(@PathVariable wordId: Long): ResponseEntity<Unit> {
         dictionaryWordService.deleteWord(wordId)
         return ResponseEntity.ok().build()
     }
 
-    @PostMapping("/{wordId}/senses")
+    @PostMapping("/words/{wordId}/senses")
     @PreAuthorize("hasRole('ADMIN')")
     fun createSense(
         @PathVariable wordId: Long,
@@ -48,7 +66,7 @@ class DictionaryWordController(
         return ResponseEntity.ok(PublicWordResponse.from(word))
     }
 
-    @PutMapping("/{wordId}/senses/{senseId}")
+    @PutMapping("/words/{wordId}/senses/{senseId}")
     @PreAuthorize("hasRole('ADMIN')")
     fun updateSense(
         @PathVariable wordId: Long,
@@ -59,7 +77,7 @@ class DictionaryWordController(
         return ResponseEntity.ok(PublicWordResponse.from(word))
     }
 
-    @DeleteMapping("/{wordId}/senses/{senseId}")
+    @DeleteMapping("/words/{wordId}/senses/{senseId}")
     @PreAuthorize("hasRole('ADMIN')")
     fun deleteSense(
         @PathVariable wordId: Long,
@@ -69,7 +87,7 @@ class DictionaryWordController(
         return ResponseEntity.ok().build()
     }
 
-    @PostMapping("/{wordId}/senses/reorder")
+    @PostMapping("/words/{wordId}/senses/reorder")
     @PreAuthorize("hasRole('ADMIN')")
     fun reorderSenses(
         @PathVariable wordId: Long,
@@ -79,7 +97,7 @@ class DictionaryWordController(
         return ResponseEntity.ok(PublicWordResponse.from(word))
     }
 
-    @PostMapping("/{wordId}/senses/{senseId}/examples")
+    @PostMapping("/words/{wordId}/senses/{senseId}/examples")
     @PreAuthorize("hasRole('ADMIN')")
     fun createExample(
         @PathVariable wordId: Long,
@@ -90,7 +108,7 @@ class DictionaryWordController(
         return ResponseEntity.ok(PublicWordResponse.from(word))
     }
 
-    @PutMapping("/{wordId}/senses/{senseId}/examples/{exampleId}")
+    @PutMapping("/words/{wordId}/senses/{senseId}/examples/{exampleId}")
     @PreAuthorize("hasRole('ADMIN')")
     fun updateExample(
         @PathVariable wordId: Long,
@@ -102,7 +120,7 @@ class DictionaryWordController(
         return ResponseEntity.ok(PublicWordResponse.from(word))
     }
 
-    @DeleteMapping("/{wordId}/senses/{senseId}/examples/{exampleId}")
+    @DeleteMapping("/words/{wordId}/senses/{senseId}/examples/{exampleId}")
     @PreAuthorize("hasRole('ADMIN')")
     fun deleteExample(
         @PathVariable wordId: Long,
@@ -113,7 +131,7 @@ class DictionaryWordController(
         return ResponseEntity.ok().build()
     }
 
-    @PostMapping("/{wordId}/senses/{senseId}/examples/reorder")
+    @PostMapping("/words/{wordId}/senses/{senseId}/examples/reorder")
     @PreAuthorize("hasRole('ADMIN')")
     fun reorderExamples(
         @PathVariable wordId: Long,
