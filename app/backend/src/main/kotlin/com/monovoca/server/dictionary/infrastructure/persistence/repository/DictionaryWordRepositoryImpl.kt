@@ -1,7 +1,8 @@
 package com.monovoca.server.dictionary.infrastructure.persistence.repository
 
 import com.monovoca.server.common.domain.model.vo.Spelling
-import com.monovoca.server.dictionary.domain.model.query.PublicWordSearchView
+import com.monovoca.server.dictionary.domain.model.query.DictionaryCountView
+import com.monovoca.server.dictionary.domain.model.query.PublicWordSimpleView
 import com.monovoca.server.dictionary.domain.model.word.PublicSense
 import com.monovoca.server.dictionary.domain.model.word.PublicWord
 import com.monovoca.server.dictionary.domain.port.DictionaryWordRepository
@@ -15,7 +16,6 @@ import org.jetbrains.exposed.dao.with
 import org.jetbrains.exposed.sql.CustomFunction
 import org.jetbrains.exposed.sql.IntegerColumnType
 import org.jetbrains.exposed.sql.SortOrder
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.data.domain.Page
@@ -116,7 +116,7 @@ class DictionaryWordRepositoryImpl : DictionaryWordRepository {
             ?.toDomain()
     }
 
-    override fun paginateViewsBySpelling(query: String, pageable: Pageable): Page<PublicWordSearchView> = transaction {
+    override fun paginateViewsBySpelling(query: String, pageable: Pageable): Page<PublicWordSimpleView> = transaction {
         val lengthFunc = CustomFunction("LENGTH", IntegerColumnType(), PublicWordTable.spelling)
 
         val total = PublicWordTable
@@ -136,6 +136,18 @@ class DictionaryWordRepositoryImpl : DictionaryWordRepository {
             .map { it.toPublicWordSearchView() }
 
         PageImpl(content, pageable, total)
+    }
+
+    override fun getDictionaryCounts(): DictionaryCountView = transaction {
+        val wordCount = PublicWordEntity.all().count()
+        val senseCount = PublicSenseEntity.all().count()
+        val exampleCount = PublicExampleEntity.all().count()
+
+        DictionaryCountView(
+            totalWords = wordCount,
+            totalSenses = senseCount,
+            totalExamples = exampleCount
+        )
     }
 }
 

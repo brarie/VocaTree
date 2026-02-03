@@ -1,8 +1,13 @@
 package com.monovoca.server.common.infrastructure.config
 
 import com.monovoca.server.common.domain.model.vo.EncryptedPassword
+import com.monovoca.server.common.domain.model.vo.Spelling
 import com.monovoca.server.common.domain.model.vo.Username
+import com.monovoca.server.common.domain.model.vo.enumerated.PartOfSpeech
 import com.monovoca.server.common.domain.model.vo.enumerated.UserRole
+import com.monovoca.server.dictionary.application.DictionaryWordService
+import com.monovoca.server.dictionary.domain.model.word.command.CreateExampleCommand
+import com.monovoca.server.dictionary.domain.model.word.command.CreateSenseCommand
 import com.monovoca.server.supportBoard.application.SupportCategoryService
 import com.monovoca.server.supportBoard.application.SupportPostService
 import com.monovoca.server.user.domain.model.User
@@ -29,6 +34,7 @@ class DataInitializer(
     private val passwordEncoder: PasswordEncoder,
     private val supportCategoryService: SupportCategoryService,
     private val supportPostService: SupportPostService,
+    private val dictionaryWordService: DictionaryWordService
 ) : ApplicationRunner {
 
     private val klogger = KotlinLogging.logger {}
@@ -98,6 +104,38 @@ class DataInitializer(
             )
 
         }
+
+        /* 공용 사전 초기화 */
+        val word1 = dictionaryWordService.createWord("exist")
+        val word2 = dictionaryWordService.createWord("existence")
+        val word3 = dictionaryWordService.createWord("apple")
+        val word4 = dictionaryWordService.createWord("mango")
+
+        val sense1 = dictionaryWordService.createSense(1, CreateSenseCommand(definition = "존재하다", partOfSpeech = PartOfSpeech.VERB))
+        val sense2 = dictionaryWordService.createSense(1, CreateSenseCommand(
+            definition = "생존하다",
+            partOfSpeech = PartOfSpeech.VERB,
+            engDefinition = "to live or continue to be alive",
+            britishPhonetic = "ɪɡˈzɪst", americanPhonetic = "ɪɡˈzɪst",
+            synonyms = listOf(Spelling("live"), Spelling("survive")), antonyms = listOf(Spelling("perish"), Spelling("die"))))
+        val ex1 = dictionaryWordService.createExample(1, 1, CreateExampleCommand(sentence = "God exists.", translation = "신은 존재한다.", isOfficial = true, sourceInfo = "Bible"))
+        val ex2 = dictionaryWordService.createExample(1, 1, CreateExampleCommand(sentence = "I want to exist in this world.", translation = "나는 이 세상에 존재하고 싶다.", isOfficial = false, sourceInfo = "Literature"))
+        val ex3 = dictionaryWordService.createExample(1, 2, CreateExampleCommand(sentence = "Dinosaurs existed millions of years ago.", translation = "공룡은 수백만 년 전에 존재했다.", isOfficial = false, sourceInfo = "Science Book"))
+
+        val sense3 = dictionaryWordService.createSense(2, CreateSenseCommand(definition = "존재", partOfSpeech = PartOfSpeech.NOUN))
+        val sense4 = dictionaryWordService.createSense(2, CreateSenseCommand(
+            definition = "실재",
+            partOfSpeech = PartOfSpeech.NOUN,
+            engDefinition = "the state or fact of being real",
+            britishPhonetic = "ɪɡˈzɪstəns", americanPhonetic = "ɪɡˈzɪstəns",
+            synonyms = listOf(Spelling("reality"), Spelling("being")), antonyms = listOf(Spelling("nonexistence"), Spelling("void"))))
+
+        val ex4 = dictionaryWordService.createExample(2, 3, CreateExampleCommand(sentence = "The existence of life on other planets is still unknown.", translation = "다른 행성에 생명체의 존재는 아직 알려지지 않았다.", isOfficial = false, sourceInfo = "Science Journal"))
+        val ex5 = dictionaryWordService.createExample(2, 4, CreateExampleCommand(sentence = "Her existence was a mystery to everyone.", translation = "그녀의 존재는 모두에게 미스터리였다.", isOfficial = false, sourceInfo = "Novel"))
+        val sense5 = dictionaryWordService.createSense(3, CreateSenseCommand(definition = "사과", partOfSpeech = PartOfSpeech.NOUN))
+        val ex6 = dictionaryWordService.createExample(3, 5, CreateExampleCommand(sentence = "An apple a day keeps the doctor away.", translation = "하루에 사과 하나면 의사를 멀리한다.", isOfficial = true, sourceInfo = "Proverb"))
+        val sense6 = dictionaryWordService.createSense(4, CreateSenseCommand(definition = "망고", partOfSpeech = PartOfSpeech.NOUN))
+        val ex7 = dictionaryWordService.createExample(4, 6, CreateExampleCommand(sentence = "Mangoes are my favorite fruit.", translation = "망고는 내가 가장 좋아하는 과일이다.", isOfficial = false, sourceInfo = "Personal Statement"))
 
         klogger.info { "===== 초기 데이터 삽입 완료 =====" }
     }

@@ -2,7 +2,7 @@ package com.monovoca.server.dictionary.infrastructure.persistence.entity
 
 
 import com.monovoca.server.common.domain.model.vo.Spelling
-import com.monovoca.server.dictionary.domain.model.query.PublicWordSearchView
+import com.monovoca.server.dictionary.domain.model.query.PublicWordSimpleView
 import com.monovoca.server.dictionary.domain.model.word.PublicWord
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
@@ -35,7 +35,7 @@ class PublicWordEntity(id: EntityID<Long>) : LongEntity(id) {
     }
 }
 
-fun PublicWordEntity.toPublicWordSearchView() = PublicWordSearchView(
+fun PublicWordEntity.toPublicWordSearchView() = PublicWordSimpleView(
     id = this.id.value,
     spelling = this.spelling,
     slug = this.slug!!,

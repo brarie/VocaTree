@@ -6,6 +6,7 @@ import com.monovoca.server.common.infrastructure.security.CustomAuthenticationEn
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
@@ -44,7 +45,7 @@ class SecurityConfig(
                 it.requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
                 it.requestMatchers("/api/users/sign-up", "/api/users/verify", "/api/users/resend-verification").permitAll()
                 it.requestMatchers("/api/support-categories/**", "/api/support-posts/**").permitAll()
-                it.requestMatchers("/api/dictionary/search", "/api/dictionary/words/slug/{slug}", "/api/dictionary/search/autocomplete").permitAll()
+                it.requestMatchers(HttpMethod.GET, "/api/dictionary/search", "/api/dictionary/words/slug/{slug}", "/api/dictionary/search/autocomplete", "/api/dictionary/words", "/api/dictionary/count").permitAll()
                 it.anyRequest().authenticated()
             }
             .headers { it.frameOptions { it.sameOrigin() } }

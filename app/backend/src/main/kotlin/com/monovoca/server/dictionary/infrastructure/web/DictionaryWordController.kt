@@ -2,7 +2,8 @@ package com.monovoca.server.dictionary.infrastructure.web
 
 import com.monovoca.server.common.infrastructure.UserPrincipal
 import com.monovoca.server.dictionary.application.DictionaryWordService
-import com.monovoca.server.dictionary.domain.model.query.PublicWordSearchView
+import com.monovoca.server.dictionary.domain.model.query.DictionaryCountView
+import com.monovoca.server.dictionary.domain.model.query.PublicWordSimpleView
 import com.monovoca.server.dictionary.infrastructure.web.request.*
 import com.monovoca.server.dictionary.infrastructure.web.response.PublicWordResponse
 import jakarta.validation.Valid
@@ -19,11 +20,23 @@ class DictionaryWordController(
     private val dictionaryWordService: DictionaryWordService
 ) {
 
+    @GetMapping("/count")
+    fun getDictionaryCounts(): ResponseEntity<DictionaryCountView> {
+        val counts = dictionaryWordService.getDictionaryCounts()
+        return ResponseEntity.ok(counts)
+    }
+
+    @GetMapping("/words")
+    fun paginateAllWords(pageable: Pageable): ResponseEntity<Page<PublicWordSimpleView>> {
+        val views = dictionaryWordService.paginateAllWords(pageable)
+        return ResponseEntity.ok(views)
+    }
+
     @GetMapping("/search/autocomplete")
     fun autocomplete(
         @RequestParam query: String,
         @RequestParam(defaultValue = "10") limit: Int
-    ): ResponseEntity<List<PublicWordSearchView>> {
+    ): ResponseEntity<List<PublicWordSimpleView>> {
         val views = dictionaryWordService.autocomplete(query, limit)
         return ResponseEntity.ok(views)
     }
@@ -33,7 +46,7 @@ class DictionaryWordController(
         @RequestParam query: String,
         pageable: Pageable,
         @AuthenticationPrincipal userPrincipal: UserPrincipal?
-    ): ResponseEntity<Page<PublicWordSearchView>> {
+    ): ResponseEntity<Page<PublicWordSimpleView>> {
         val userId = userPrincipal?.id
         val views = dictionaryWordService.paginateViewsBySpelling(query, pageable, userId)
         return ResponseEntity.ok(views)

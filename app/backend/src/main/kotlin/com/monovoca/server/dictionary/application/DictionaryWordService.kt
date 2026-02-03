@@ -3,7 +3,8 @@ package com.monovoca.server.dictionary.application
 import com.monovoca.server.common.domain.model.vo.Spelling
 import com.monovoca.server.dictionary.domain.exception.PublicWordAlreadyExistsException
 import com.monovoca.server.dictionary.domain.exception.PublicWordNotFoundException
-import com.monovoca.server.dictionary.domain.model.query.PublicWordSearchView
+import com.monovoca.server.dictionary.domain.model.query.DictionaryCountView
+import com.monovoca.server.dictionary.domain.model.query.PublicWordSimpleView
 import com.monovoca.server.dictionary.domain.model.word.PublicWord
 import com.monovoca.server.dictionary.domain.model.word.command.CreateExampleCommand
 import com.monovoca.server.dictionary.domain.model.word.command.CreateSenseCommand
@@ -21,15 +22,24 @@ class DictionaryWordService(
     private val dictionaryWordRepository: DictionaryWordRepository,
     private val userSearchHistoryService: UserSearchHistoryService
 ) {
+
     @Transactional(readOnly = true)
-    fun autocomplete(query: String, limit: Int): List<PublicWordSearchView> {
+    fun getDictionaryCounts(): DictionaryCountView =
+        dictionaryWordRepository.getDictionaryCounts()
+
+    @Transactional(readOnly = true)
+    fun paginateAllWords(pageable: Pageable) =
+        dictionaryWordRepository.paginateViewsBySpelling("", pageable)
+
+    @Transactional(readOnly = true)
+    fun autocomplete(query: String, limit: Int): List<PublicWordSimpleView> {
         val pageable = PageRequest.of(0, limit)
         /* 그냥 만들기 귀찮아서 pagination 재활용 성능 이슈 생기면 그때 수정 */
         return dictionaryWordRepository.paginateViewsBySpelling(query, pageable).content
     }
 
-    @Transactional(readOnly = true)
-    fun paginateViewsBySpelling(query: String, pageable: Pageable, userId: String?): Page<PublicWordSearchView> {
+    @Transactional
+    fun paginateViewsBySpelling(query: String, pageable: Pageable, userId: String?): Page<PublicWordSimpleView> {
         userId?.let {
             userSearchHistoryService.recordSearch(it, query)
         }

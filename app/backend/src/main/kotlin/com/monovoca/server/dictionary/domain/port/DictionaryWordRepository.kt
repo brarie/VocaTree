@@ -1,7 +1,8 @@
 package com.monovoca.server.dictionary.domain.port
 
 import com.monovoca.server.common.domain.model.vo.Spelling
-import com.monovoca.server.dictionary.domain.model.query.PublicWordSearchView
+import com.monovoca.server.dictionary.domain.model.query.DictionaryCountView
+import com.monovoca.server.dictionary.domain.model.query.PublicWordSimpleView
 import com.monovoca.server.dictionary.domain.model.word.PublicWord
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -12,6 +13,7 @@ interface DictionaryWordRepository {
     fun existsBySlug(slug: String): Boolean
     fun findById(wordId: Long): PublicWord?
     fun findBySlug(slug: String): PublicWord?
-    fun paginateViewsBySpelling(query: String, pageable: Pageable): Page<PublicWordSearchView>
+    fun paginateViewsBySpelling(query: String, pageable: Pageable): Page<PublicWordSimpleView>
     fun delete(word: PublicWord)
+    fun getDictionaryCounts(): DictionaryCountView
 }
