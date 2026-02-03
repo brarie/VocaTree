@@ -27,6 +27,7 @@ const menuItems = [
   { label: '도움마당', href: '/support' },
   { label: '커뮤니티', href: '/community' },
   { label: '라이브러리', href: '/library' },
+  { label: '공용사전', href: '/dictionary' },
 ];
 
 export function Header() {
@@ -190,13 +191,6 @@ export function Header() {
 
                   {isAuthenticated && (
                     <>
-                      <Link
-                        href="/dashboard"
-                        onClick={() => setIsSheetOpen(false)}
-                        className="text-base font-medium transition-colors py-2 text-muted-foreground hover:text-foreground"
-                      >
-                        대시보드
-                      </Link>
                       <Button
                         variant="outline"
                         onClick={() => {

@@ -13,7 +13,6 @@ export default function AdminSupportPage() {
           title="도움마당 관리"
           description="카테고리와 게시글을 관리합니다."
         />
-
         <CategoryManagement />
         <PostManagement />
       </div>

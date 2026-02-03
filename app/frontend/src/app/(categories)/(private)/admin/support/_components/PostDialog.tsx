@@ -6,6 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   CreateSupportPostRequestSchema,
   UpdateSupportPostRequestSchema,
+  CreateSupportPostRequest,
+  UpdateSupportPostRequest,
   SupportCategoryResponse,
   SupportPostView,
 } from '@/types/api/supportBoard';
@@ -14,19 +16,44 @@ import {
   useUpdatePost,
   useDeletePost,
 } from '@/hooks/supportBoard/queries';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 
-function getCategoryDisplayName(cat: SupportCategoryResponse, allCategories: SupportCategoryResponse[]) {
+function getCategoryDisplayName(
+  cat: SupportCategoryResponse,
+  allCategories: SupportCategoryResponse[],
+) {
   if (cat.parentCategoryId === null) {
     return cat.categoryName;
   }
   const parent = allCategories.find((c) => c.id === cat.parentCategoryId);
-  return parent ? `${parent.categoryName} > ${cat.categoryName}` : cat.categoryName;
+  return parent
+    ? `${parent.categoryName} > ${cat.categoryName}`
+    : cat.categoryName;
 }
 
 interface CreatePostDialogProps {
@@ -35,10 +62,16 @@ interface CreatePostDialogProps {
   categories: SupportCategoryResponse[];
 }
 
-export function CreatePostDialog({ open, onOpenChange, categories }: CreatePostDialogProps) {
+export function CreatePostDialog({
+  open,
+  onOpenChange,
+  categories,
+}: CreatePostDialogProps) {
   const createMutation = useCreatePost();
 
-  const subCategories = categories.filter((cat) => cat.parentCategoryId !== null);
+  const subCategories = categories.filter(
+    (cat) => cat.parentCategoryId !== null,
+  );
 
   const form = useForm({
     resolver: zodResolver(CreateSupportPostRequestSchema),
@@ -49,7 +82,7 @@ export function CreatePostDialog({ open, onOpenChange, categories }: CreatePostD
     },
   });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: CreateSupportPostRequest) => {
     await createMutation.mutateAsync(data);
     form.reset();
     onOpenChange(false);
@@ -141,7 +174,11 @@ export function CreatePostDialog({ open, onOpenChange, categories }: CreatePostD
               >
                 취소
               </Button>
-              <Button type="submit" disabled={createMutation.isPending} className="bg-white text-black hover:bg-gray-200">
+              <Button
+                type="submit"
+                disabled={createMutation.isPending}
+                className="bg-white text-black hover:bg-gray-200"
+              >
                 작성
               </Button>
             </DialogFooter>
@@ -159,10 +196,17 @@ interface UpdatePostDialogProps {
   categories: SupportCategoryResponse[];
 }
 
-export function UpdatePostDialog({ open, onOpenChange, post, categories }: UpdatePostDialogProps) {
+export function UpdatePostDialog({
+  open,
+  onOpenChange,
+  post,
+  categories,
+}: UpdatePostDialogProps) {
   const updateMutation = useUpdatePost();
 
-  const subCategories = categories.filter((cat) => cat.parentCategoryId !== null);
+  const subCategories = categories.filter(
+    (cat) => cat.parentCategoryId !== null,
+  );
 
   const form = useForm({
     resolver: zodResolver(UpdateSupportPostRequestSchema),
@@ -181,7 +225,7 @@ export function UpdatePostDialog({ open, onOpenChange, post, categories }: Updat
     });
   }, [post, form]);
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: UpdateSupportPostRequest) => {
     await updateMutation.mutateAsync({ postId: post.id, data });
     form.reset();
     onOpenChange(false);
@@ -271,7 +315,11 @@ export function UpdatePostDialog({ open, onOpenChange, post, categories }: Updat
               >
                 취소
               </Button>
-              <Button type="submit" disabled={updateMutation.isPending} className="bg-white text-black hover:bg-gray-200">
+              <Button
+                type="submit"
+                disabled={updateMutation.isPending}
+                className="bg-white text-black hover:bg-gray-200"
+              >
                 수정
               </Button>
             </DialogFooter>
@@ -288,7 +336,11 @@ interface DeletePostDialogProps {
   post: SupportPostView;
 }
 
-export function DeletePostDialog({ open, onOpenChange, post }: DeletePostDialogProps) {
+export function DeletePostDialog({
+  open,
+  onOpenChange,
+  post,
+}: DeletePostDialogProps) {
   const deleteMutation = useDeletePost();
 
   const handleDelete = async () => {

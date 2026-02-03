@@ -7,6 +7,9 @@ import {
   CreateMainCategoryRequestSchema,
   CreateSubCategoryRequestSchema,
   UpdateCategoryRequestSchema,
+  CreateMainCategoryRequest,
+  CreateSubCategoryRequest,
+  UpdateCategoryRequest,
   SupportCategoryResponse,
 } from '@/types/api/supportBoard';
 import {
@@ -35,7 +38,7 @@ export function CreateMainCategoryDialog({ open, onOpenChange }: CreateMainCateg
     },
   });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: CreateMainCategoryRequest) => {
     await createMutation.mutateAsync(data);
     form.reset();
     onOpenChange(false);
@@ -111,7 +114,7 @@ export function CreateSubCategoryDialog({
     },
   });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: CreateSubCategoryRequest) => {
     await createMutation.mutateAsync({ parentCategoryId, data });
     form.reset();
     onOpenChange(false);
@@ -189,7 +192,7 @@ export function UpdateCategoryDialog({ open, onOpenChange, category }: UpdateCat
     });
   }, [category, form]);
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: UpdateCategoryRequest) => {
     await updateMutation.mutateAsync({ categoryId: category.id, data });
     form.reset();
     onOpenChange(false);

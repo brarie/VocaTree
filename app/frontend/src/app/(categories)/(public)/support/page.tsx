@@ -103,20 +103,21 @@ function SupportPageContent() {
           <PageHeader
             title="도움마당"
             description="궁금한 게 있거나 도움이 필요할 땐 여기서 확인해보세요."
-          />
-        </div>
-        <AuthOnly roles={['ADMIN']}>
-          <Button
-            asChild
-            variant="outline"
-            className="bg-white/5 border-white/10 text-white hover:bg-white/10 mt-3"
           >
-            <Link href="/admin/support">
-              <Settings className="w-4 h-4 mr-2" />
-              관리
-            </Link>
-          </Button>
-        </AuthOnly>
+            <AuthOnly roles={['ADMIN']}>
+              <Button
+                asChild
+                variant="outline"
+                className="items-center bg-white/5 border-white/10 text-white hover:bg-white/10 mt-3"
+              >
+                <Link href="/admin/support">
+                  <Settings className="w-4 h-4 mr-2" />
+                  관리
+                </Link>
+              </Button>
+            </AuthOnly>
+          </PageHeader>
+        </div>
       </div>
 
       <div className="flex flex-col md:flex-row gap-6">
