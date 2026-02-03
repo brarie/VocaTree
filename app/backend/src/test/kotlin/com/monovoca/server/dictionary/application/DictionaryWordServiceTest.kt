@@ -380,7 +380,7 @@ class DictionaryWordServiceTest(
                 dictionaryWordService.createWord("application")
                 dictionaryWordService.createWord("apply")
 
-                val page = dictionaryWordService.paginateViewsBySpelling("app", PageRequest.of(0, 10))
+                val page = dictionaryWordService.paginateViewsBySpelling("app", PageRequest.of(0, 10), null)
 
                 page.totalElements shouldBe 3
                 page.content shouldHaveSize 3
@@ -389,7 +389,7 @@ class DictionaryWordServiceTest(
             it("검색 결과에 slug가 포함된다") {
                 dictionaryWordService.createWord("test")
 
-                val page = dictionaryWordService.paginateViewsBySpelling("test", PageRequest.of(0, 10))
+                val page = dictionaryWordService.paginateViewsBySpelling("test", PageRequest.of(0, 10), null)
 
                 page.content[0].slug shouldNotBe null
                 page.content[0].slug shouldContain "test"
@@ -400,7 +400,7 @@ class DictionaryWordServiceTest(
                 dictionaryWordService.createSense(word.id!!, CreateSenseCommand(definition = "분 (시간)"))
                 dictionaryWordService.createSense(word.id, CreateSenseCommand(definition = "아주 작은"))
 
-                val page = dictionaryWordService.paginateViewsBySpelling("minute", PageRequest.of(0, 10))
+                val page = dictionaryWordService.paginateViewsBySpelling("minute", PageRequest.of(0, 10), null)
 
                 page.content[0].topDefinitions shouldHaveSize 2
             }
@@ -408,7 +408,7 @@ class DictionaryWordServiceTest(
 
         context("검색 결과가 없을 때") {
             it("빈 페이지를 반환한다") {
-                val page = dictionaryWordService.paginateViewsBySpelling("notexist", PageRequest.of(0, 10))
+                val page = dictionaryWordService.paginateViewsBySpelling("notexist", PageRequest.of(0, 10), null)
 
                 page.totalElements shouldBe 0
                 page.content shouldHaveSize 0

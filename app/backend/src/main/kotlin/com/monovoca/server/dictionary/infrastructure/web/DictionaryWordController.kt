@@ -1,5 +1,6 @@
 package com.monovoca.server.dictionary.infrastructure.web
 
+import com.monovoca.server.common.infrastructure.UserPrincipal
 import com.monovoca.server.dictionary.application.DictionaryWordService
 import com.monovoca.server.dictionary.domain.model.query.PublicWordSearchView
 import com.monovoca.server.dictionary.infrastructure.web.request.*
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -17,12 +19,23 @@ class DictionaryWordController(
     private val dictionaryWordService: DictionaryWordService
 ) {
 
+    @GetMapping("/search/autocomplete")
+    fun autocomplete(
+        @RequestParam query: String,
+        @RequestParam(defaultValue = "10") limit: Int
+    ): ResponseEntity<List<PublicWordSearchView>> {
+        val views = dictionaryWordService.autocomplete(query, limit)
+        return ResponseEntity.ok(views)
+    }
+
     @GetMapping("/search")
     fun searchWords(
-        query: String,
-        pageable: Pageable
+        @RequestParam query: String,
+        pageable: Pageable,
+        @AuthenticationPrincipal userPrincipal: UserPrincipal?
     ): ResponseEntity<Page<PublicWordSearchView>> {
-        val views = dictionaryWordService.paginateViewsBySpelling(query, pageable)
+        val userId = userPrincipal?.id
+        val views = dictionaryWordService.paginateViewsBySpelling(query, pageable, userId)
         return ResponseEntity.ok(views)
     }
 

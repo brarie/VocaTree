@@ -42,9 +42,9 @@ class SecurityConfig(
                 it.requestMatchers(PathRequest.toH2Console()).permitAll()
                 it.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 it.requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
-                it.requestMatchers("/api/users/sign-up", "/api/users/verify", "/api/users/resend-verification")
-                    .permitAll()
+                it.requestMatchers("/api/users/sign-up", "/api/users/verify", "/api/users/resend-verification").permitAll()
                 it.requestMatchers("/api/support-categories/**", "/api/support-posts/**").permitAll()
+                it.requestMatchers("/api/dictionary/search", "/api/dictionary/words/slug/{slug}", "/api/dictionary/search/autocomplete").permitAll()
                 it.anyRequest().authenticated()
             }
             .headers { it.frameOptions { it.sameOrigin() } }

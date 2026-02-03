@@ -11,17 +11,30 @@ import com.monovoca.server.dictionary.domain.model.word.command.UpdateExampleCom
 import com.monovoca.server.dictionary.domain.model.word.command.UpdateSenseCommand
 import com.monovoca.server.dictionary.domain.port.DictionaryWordRepository
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DictionaryWordService(
-    private val dictionaryWordRepository: DictionaryWordRepository
+    private val dictionaryWordRepository: DictionaryWordRepository,
+    private val userSearchHistoryService: UserSearchHistoryService
 ) {
     @Transactional(readOnly = true)
-    fun paginateViewsBySpelling(query: String, pageable: Pageable): Page<PublicWordSearchView> =
-        dictionaryWordRepository.paginateViewsBySpelling(query, pageable)
+    fun autocomplete(query: String, limit: Int): List<PublicWordSearchView> {
+        val pageable = PageRequest.of(0, limit)
+        /* 그냥 만들기 귀찮아서 pagination 재활용 성능 이슈 생기면 그때 수정 */
+        return dictionaryWordRepository.paginateViewsBySpelling(query, pageable).content
+    }
+
+    @Transactional(readOnly = true)
+    fun paginateViewsBySpelling(query: String, pageable: Pageable, userId: String?): Page<PublicWordSearchView> {
+        userId?.let {
+            userSearchHistoryService.recordSearch(it, query)
+        }
+        return dictionaryWordRepository.paginateViewsBySpelling(query, pageable)
+    }
 
     @Transactional(readOnly = true)
     fun findBySlug(slug: String): PublicWord =
