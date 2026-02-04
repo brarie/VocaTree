@@ -1,6 +1,6 @@
 package com.monovoca.server.dictionary.application
 
-import com.monovoca.server.common.domain.model.vo.Spelling
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.Spelling
 import com.monovoca.server.dictionary.domain.exception.PublicWordAlreadyExistsException
 import com.monovoca.server.dictionary.domain.exception.PublicWordNotFoundException
 import com.monovoca.server.dictionary.domain.model.query.DictionaryCountView

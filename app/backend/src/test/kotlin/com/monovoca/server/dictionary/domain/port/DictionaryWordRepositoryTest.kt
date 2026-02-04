@@ -1,7 +1,7 @@
 package com.monovoca.server.dictionary.domain.port
 
-import com.monovoca.server.common.domain.model.vo.Spelling
-import com.monovoca.server.common.domain.model.vo.enumerated.PartOfSpeech
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.Spelling
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.PartOfSpeech
 import com.monovoca.server.dictionary.fixture.PublicWordFixture
 import io.kotest.core.extensions.ApplyExtension
 import io.kotest.core.spec.style.DescribeSpec
@@ -46,9 +46,9 @@ class DictionaryWordRepositoryTest(
 
             saved.id shouldNotBe null
             saved.senses shouldHaveSize 1
-            saved.senses[0].definition shouldBe "사과"
+            saved.senses[0].sense.definition shouldBe "사과"
             saved.senses[0].examples shouldHaveSize 1
-            saved.senses[0].examples[0].sentence shouldBe "I like apples"
+            saved.senses[0].examples[0].example.sentence shouldBe "I like apples"
         }
 
         it("기존 단어를 수정하면 변경된 내용이 반영된다.") {
@@ -76,7 +76,7 @@ class DictionaryWordRepositoryTest(
             val updated = dictionaryWordRepository.save(word)
 
             updated.senses shouldHaveSize 1
-            updated.senses[0].definition shouldBe "분 (시간)"
+            updated.senses[0].sense.definition shouldBe "분 (시간)"
         }
 
         it("sense를 수정하면 변경된 내용이 반영된다.") {
@@ -85,11 +85,13 @@ class DictionaryWordRepositoryTest(
                 PublicWordFixture.createWord(spelling = "test", senses = listOf(sense))
             )
 
-            val updatedSense = word.senses[0].copy(definition = "수정된 뜻")
+            val updatedSense = word.senses[0].copy(
+                sense = word.senses[0].sense.copy(definition = "수정된 뜻")
+            )
             word = word.copy(senses = listOf(updatedSense))
             val saved = dictionaryWordRepository.save(word)
 
-            saved.senses[0].definition shouldBe "수정된 뜻"
+            saved.senses[0].sense.definition shouldBe "수정된 뜻"
         }
 
         it("sense를 삭제하면 제거된다.") {
@@ -103,7 +105,7 @@ class DictionaryWordRepositoryTest(
             val saved = dictionaryWordRepository.save(word)
 
             saved.senses shouldHaveSize 1
-            saved.senses[0].definition shouldBe "두 번째"
+            saved.senses[0].sense.definition shouldBe "두 번째"
         }
 
         it("example을 추가하면 저장된다.") {
@@ -118,7 +120,7 @@ class DictionaryWordRepositoryTest(
             val saved = dictionaryWordRepository.save(word)
 
             saved.senses[0].examples shouldHaveSize 1
-            saved.senses[0].examples[0].sentence shouldBe "Test sentence"
+            saved.senses[0].examples[0].example.sentence shouldBe "Test sentence"
         }
     }
 

@@ -1,12 +1,12 @@
 package com.monovoca.server.dictionary.domain.model.word
 
+import com.monovoca.server.common.domain.model.vocabulary.vo.ExampleVo
 import com.monovoca.server.dictionary.domain.model.word.command.CreateExampleCommand
 import com.monovoca.server.dictionary.domain.model.word.command.UpdateExampleCommand
 
 data class PublicExample(
     val id: Long? = null,
-    val sentence: String,
-    val translation: String? = null,
+    val example: ExampleVo,
     val isOfficial: Boolean = false,
     val sourceInfo: String? = null,
     val displayOrder: Int = 0,
@@ -14,8 +14,10 @@ data class PublicExample(
     companion object {
         fun create(command: CreateExampleCommand, displayOrder: Int): PublicExample {
             return PublicExample(
-                sentence = command.sentence,
-                translation = command.translation,
+                example = ExampleVo(
+                    sentence = command.sentence,
+                    translation = command.translation
+                ),
                 isOfficial = command.isOfficial,
                 sourceInfo = command.sourceInfo,
                 displayOrder = displayOrder
@@ -25,8 +27,10 @@ data class PublicExample(
 
     fun update(command: UpdateExampleCommand): PublicExample {
         return this.copy(
-            sentence = command.sentence,
-            translation = command.translation,
+            example = ExampleVo(
+                sentence = command.sentence,
+                translation = command.translation
+            ),
             isOfficial = command.isOfficial,
             sourceInfo = command.sourceInfo
         )

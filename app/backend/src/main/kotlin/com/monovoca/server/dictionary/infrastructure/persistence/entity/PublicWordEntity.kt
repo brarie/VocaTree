@@ -1,7 +1,7 @@
 package com.monovoca.server.dictionary.infrastructure.persistence.entity
 
 
-import com.monovoca.server.common.domain.model.vo.Spelling
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.Spelling
 import com.monovoca.server.dictionary.domain.model.query.PublicWordSimpleView
 import com.monovoca.server.dictionary.domain.model.word.PublicWord
 import org.jetbrains.exposed.dao.LongEntity

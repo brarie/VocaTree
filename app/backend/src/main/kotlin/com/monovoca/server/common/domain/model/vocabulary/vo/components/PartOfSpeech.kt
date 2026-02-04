@@ -1,4 +1,4 @@
-package com.monovoca.server.common.domain.model.vo.enumerated
+package com.monovoca.server.common.domain.model.vocabulary.vo.components
 
 enum class PartOfSpeech(val koreanName: String) {
     NOUN("명사"),

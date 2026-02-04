@@ -1,6 +1,6 @@
 package com.monovoca.server.dictionary.infrastructure.persistence.repository
 
-import com.monovoca.server.common.domain.model.vo.Spelling
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.Spelling
 import com.monovoca.server.dictionary.domain.model.query.DictionaryCountView
 import com.monovoca.server.dictionary.domain.model.query.PublicWordSimpleView
 import com.monovoca.server.dictionary.domain.model.word.PublicSense

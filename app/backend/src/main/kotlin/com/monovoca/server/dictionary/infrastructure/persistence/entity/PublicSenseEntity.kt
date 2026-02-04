@@ -1,7 +1,8 @@
 package com.monovoca.server.dictionary.infrastructure.persistence.entity
 
-import com.monovoca.server.common.domain.model.vo.Spelling
-import com.monovoca.server.common.domain.model.vo.enumerated.PartOfSpeech
+import com.monovoca.server.common.domain.model.vocabulary.vo.SenseVo
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.Spelling
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.PartOfSpeech
 import com.monovoca.server.dictionary.domain.model.word.PublicSense
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.dao.LongEntity
@@ -41,31 +42,33 @@ class PublicSenseEntity(id: EntityID<Long>) : LongEntity(id) {
 
     fun toDomain(): PublicSense = PublicSense(
         id = this.id.value,
-        definition = this.definition,
-        engDefinition = this.engDefinition,
-        britishPhonetic = this.britishPhonetic,
-        americanPhonetic = this.americanPhonetic,
-        synonyms = synonymsList?.map { Spelling(it) } ?: emptyList(),
-        antonyms = antonymsList?.map { Spelling(it) } ?: emptyList(),
-        partOfSpeech = this.partOfSpeech,
+        sense = SenseVo(
+            definition = this.definition,
+            engDefinition = this.engDefinition,
+            britishPhonetic = this.britishPhonetic,
+            americanPhonetic = this.americanPhonetic,
+            partOfSpeech = this.partOfSpeech,
+            synonyms = synonymsList?.map { Spelling(it) } ?: emptyList(),
+            antonyms = antonymsList?.map { Spelling(it) } ?: emptyList()
+        ),
         displayOrder = this.displayOrder,
         examples = this.examples.sortedBy { it.displayOrder }.map { it.toDomain() }
     )
 
     fun applyDomain(publicSense: PublicSense, wordId: Long) {
         this.wordId = EntityID(wordId, PublicWordTable)
-        this.definition = publicSense.definition
-        this.engDefinition = publicSense.engDefinition
-        this.britishPhonetic = publicSense.britishPhonetic
-        this.americanPhonetic = publicSense.americanPhonetic
-        this.partOfSpeech = publicSense.partOfSpeech
+        this.definition = publicSense.sense.definition ?: ""
+        this.engDefinition = publicSense.sense.engDefinition
+        this.britishPhonetic = publicSense.sense.britishPhonetic
+        this.americanPhonetic = publicSense.sense.americanPhonetic
+        this.partOfSpeech = publicSense.sense.partOfSpeech
         this.displayOrder = publicSense.displayOrder
 
-        this.synonymsList = publicSense.synonyms
+        this.synonymsList = publicSense.sense.synonyms
             .map { it.value }
             .takeIf { it.isNotEmpty() }
 
-        this.antonymsList = publicSense.antonyms
+        this.antonymsList = publicSense.sense.antonyms
             .map { it.value }
             .takeIf { it.isNotEmpty() }
     }

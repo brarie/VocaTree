@@ -1,6 +1,6 @@
 package com.monovoca.server.dictionary.domain.model.word
 
-import com.monovoca.server.common.domain.model.vo.Spelling
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.Spelling
 import com.monovoca.server.common.util.isSortedBy
 import com.monovoca.server.dictionary.domain.exception.PublicSenseNotFoundException
 import com.monovoca.server.dictionary.domain.model.word.command.CreateExampleCommand

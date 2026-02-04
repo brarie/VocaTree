@@ -1,6 +1,6 @@
 package com.monovoca.server.dictionary.domain.model.word
 
-import com.monovoca.server.common.domain.model.vo.Spelling
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.Spelling
 import com.monovoca.server.dictionary.domain.exception.PublicSenseNotFoundException
 import com.monovoca.server.dictionary.domain.model.word.command.CreateSenseCommand
 import com.monovoca.server.dictionary.domain.model.word.command.UpdateSenseCommand
@@ -34,7 +34,7 @@ class PublicWordTest : DescribeSpec({
             val updated = word.addSense(command)
 
             updated.senses shouldHaveSize 1
-            updated.senses[0].definition shouldBe "새로운 뜻"
+            updated.senses[0].sense.definition shouldBe "새로운 뜻"
             updated.senses[0].displayOrder shouldBe 0
         }
 
@@ -67,8 +67,8 @@ class PublicWordTest : DescribeSpec({
 
             val updated = word.updateSense(1L, command)
 
-            updated.senses[0].definition shouldBe "수정된 뜻"
-            updated.senses[0].engDefinition shouldBe "updated meaning"
+            updated.senses[0].sense.definition shouldBe "수정된 뜻"
+            updated.senses[0].sense.engDefinition shouldBe "updated meaning"
             updated.senses[0].displayOrder shouldBe 0
         }
 

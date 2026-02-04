@@ -1,8 +1,8 @@
 package com.monovoca.server.dictionary.infrastructure.web.request
 
-import com.monovoca.server.common.domain.model.vo.Spelling
-import com.monovoca.server.common.domain.model.vo.SpellingPolicy
-import com.monovoca.server.common.domain.model.vo.enumerated.PartOfSpeech
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.Spelling
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.SpellingPolicy
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.PartOfSpeech
 import com.monovoca.server.dictionary.domain.model.word.command.CreateExampleCommand
 import com.monovoca.server.dictionary.domain.model.word.command.CreateSenseCommand
 import com.monovoca.server.dictionary.domain.model.word.command.UpdateExampleCommand

@@ -1,7 +1,7 @@
 package com.monovoca.server.dictionary.domain.model.word
 
-import com.monovoca.server.common.domain.model.vo.Spelling
-import com.monovoca.server.common.domain.model.vo.enumerated.PartOfSpeech
+import com.monovoca.server.common.domain.model.vocabulary.vo.SenseVo
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.Spelling
 import com.monovoca.server.common.util.isSortedBy
 import com.monovoca.server.dictionary.domain.exception.PublicExampleNotFoundException
 import com.monovoca.server.dictionary.domain.model.word.command.CreateExampleCommand
@@ -11,13 +11,7 @@ import com.monovoca.server.dictionary.domain.model.word.command.UpdateSenseComma
 
 data class PublicSense(
     val id: Long? = null,
-    val definition: String,
-    val engDefinition: String? = null,
-    val britishPhonetic: String? = null,
-    val americanPhonetic: String? = null,
-    val synonyms: List<Spelling> = emptyList(),
-    val antonyms: List<Spelling> = emptyList(),
-    val partOfSpeech: PartOfSpeech? = null,
+    val sense: SenseVo,
     val displayOrder: Int = 0,
     val examples: List<PublicExample> = emptyList(),
 ) {
@@ -28,13 +22,15 @@ data class PublicSense(
     companion object {
         fun create(command: CreateSenseCommand, displayOrder: Int): PublicSense {
             return PublicSense(
-                definition = command.definition,
-                engDefinition = command.engDefinition,
-                britishPhonetic = command.britishPhonetic,
-                americanPhonetic = command.americanPhonetic,
-                partOfSpeech = command.partOfSpeech,
-                synonyms = command.synonyms,
-                antonyms = command.antonyms,
+                sense = SenseVo(
+                    definition = command.definition,
+                    engDefinition = command.engDefinition,
+                    britishPhonetic = command.britishPhonetic,
+                    americanPhonetic = command.americanPhonetic,
+                    partOfSpeech = command.partOfSpeech,
+                    synonyms = command.synonyms,
+                    antonyms = command.antonyms
+                ),
                 displayOrder = displayOrder
             )
         }
@@ -42,13 +38,15 @@ data class PublicSense(
 
     fun update(command: UpdateSenseCommand): PublicSense {
         return this.copy(
-            definition = command.definition,
-            engDefinition = command.engDefinition,
-            britishPhonetic = command.britishPhonetic,
-            americanPhonetic = command.americanPhonetic,
-            partOfSpeech = command.partOfSpeech,
-            synonyms = command.synonyms,
-            antonyms = command.antonyms
+            sense = SenseVo(
+                definition = command.definition,
+                engDefinition = command.engDefinition,
+                britishPhonetic = command.britishPhonetic,
+                americanPhonetic = command.americanPhonetic,
+                partOfSpeech = command.partOfSpeech,
+                synonyms = command.synonyms,
+                antonyms = command.antonyms
+            )
         )
     }
 

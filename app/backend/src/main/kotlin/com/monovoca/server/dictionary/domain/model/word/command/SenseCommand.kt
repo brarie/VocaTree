@@ -1,7 +1,7 @@
 package com.monovoca.server.dictionary.domain.model.word.command
 
-import com.monovoca.server.common.domain.model.vo.Spelling
-import com.monovoca.server.common.domain.model.vo.enumerated.PartOfSpeech
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.Spelling
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.PartOfSpeech
 
 data class CreateSenseCommand(
     val definition: String,

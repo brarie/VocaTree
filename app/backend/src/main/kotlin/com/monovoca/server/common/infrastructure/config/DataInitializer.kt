@@ -1,9 +1,9 @@
 package com.monovoca.server.common.infrastructure.config
 
 import com.monovoca.server.common.domain.model.vo.EncryptedPassword
-import com.monovoca.server.common.domain.model.vo.Spelling
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.Spelling
 import com.monovoca.server.common.domain.model.vo.Username
-import com.monovoca.server.common.domain.model.vo.enumerated.PartOfSpeech
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.PartOfSpeech
 import com.monovoca.server.common.domain.model.vo.enumerated.UserRole
 import com.monovoca.server.dictionary.application.DictionaryWordService
 import com.monovoca.server.dictionary.domain.model.word.command.CreateExampleCommand

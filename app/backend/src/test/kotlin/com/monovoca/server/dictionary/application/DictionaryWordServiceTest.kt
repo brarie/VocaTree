@@ -1,7 +1,7 @@
 package com.monovoca.server.dictionary.application
 
-import com.monovoca.server.common.domain.model.vo.Spelling
-import com.monovoca.server.common.domain.model.vo.enumerated.PartOfSpeech
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.Spelling
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.PartOfSpeech
 import com.monovoca.server.dictionary.domain.exception.PublicSenseNotFoundException
 import com.monovoca.server.dictionary.domain.exception.PublicWordAlreadyExistsException
 import com.monovoca.server.dictionary.domain.exception.PublicWordNotFoundException
@@ -171,7 +171,7 @@ class DictionaryWordServiceTest(
                 val updated = dictionaryWordService.createSense(word.id!!, command)
 
                 updated.senses shouldHaveSize 1
-                updated.senses[0].definition shouldBe "분 (시간)"
+                updated.senses[0].sense.definition shouldBe "분 (시간)"
             }
         }
 
@@ -205,9 +205,9 @@ class DictionaryWordServiceTest(
                 )
                 val updated = dictionaryWordService.updateSense(word.id, senseId, updateCommand)
 
-                updated.senses[0].definition shouldBe "수정된 뜻"
-                updated.senses[0].partOfSpeech shouldBe PartOfSpeech.VERB
-                updated.senses[0].synonyms shouldBe listOf(Spelling("synonym"))
+                updated.senses[0].sense.definition shouldBe "수정된 뜻"
+                updated.senses[0].sense.partOfSpeech shouldBe PartOfSpeech.VERB
+                updated.senses[0].sense.synonyms shouldBe listOf(Spelling("synonym"))
             }
         }
 
@@ -312,7 +312,7 @@ class DictionaryWordServiceTest(
                 val updated = dictionaryWordService.createExample(word.id, senseId, exampleCommand)
 
                 updated.senses[0].examples shouldHaveSize 1
-                updated.senses[0].examples[0].sentence shouldBe "Test sentence"
+                updated.senses[0].examples[0].example.sentence shouldBe "Test sentence"
             }
         }
 
@@ -348,7 +348,7 @@ class DictionaryWordServiceTest(
                 )
                 val result = dictionaryWordService.updateExample(word.id, senseId, exampleId, updateCommand)
 
-                result.senses[0].examples[0].sentence shouldBe "Updated"
+                result.senses[0].examples[0].example.sentence shouldBe "Updated"
                 result.senses[0].examples[0].isOfficial shouldBe true
             }
         }

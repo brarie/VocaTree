@@ -1,7 +1,7 @@
 package com.monovoca.server.dictionary.domain.model.word
 
-import com.monovoca.server.common.domain.model.vo.Spelling
-import com.monovoca.server.common.domain.model.vo.enumerated.PartOfSpeech
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.Spelling
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.PartOfSpeech
 import com.monovoca.server.dictionary.domain.exception.PublicExampleNotFoundException
 import com.monovoca.server.dictionary.domain.model.word.command.CreateExampleCommand
 import com.monovoca.server.dictionary.domain.model.word.command.CreateSenseCommand
@@ -29,11 +29,11 @@ class PublicSenseTest : DescribeSpec({
 
             val sense = PublicSense.create(command, displayOrder = 0)
 
-            sense.definition shouldBe "테스트 뜻"
-            sense.engDefinition shouldBe "test meaning"
-            sense.partOfSpeech shouldBe PartOfSpeech.NOUN
-            sense.synonyms shouldHaveSize 1
-            sense.antonyms shouldHaveSize 1
+            sense.sense.definition shouldBe "테스트 뜻"
+            sense.sense.engDefinition shouldBe "test meaning"
+            sense.sense.partOfSpeech shouldBe PartOfSpeech.NOUN
+            sense.sense.synonyms shouldHaveSize 1
+            sense.sense.antonyms shouldHaveSize 1
             sense.displayOrder shouldBe 0
         }
     }
@@ -53,9 +53,9 @@ class PublicSenseTest : DescribeSpec({
 
             val updated = sense.update(command)
 
-            updated.definition shouldBe "수정된 뜻"
-            updated.engDefinition shouldBe "updated meaning"
-            updated.partOfSpeech shouldBe PartOfSpeech.VERB
+            updated.sense.definition shouldBe "수정된 뜻"
+            updated.sense.engDefinition shouldBe "updated meaning"
+            updated.sense.partOfSpeech shouldBe PartOfSpeech.VERB
             updated.displayOrder shouldBe sense.displayOrder
         }
     }
@@ -71,7 +71,7 @@ class PublicSenseTest : DescribeSpec({
             val updated = sense.addExample(command)
 
             updated.examples shouldHaveSize 1
-            updated.examples[0].sentence shouldBe "Test sentence"
+            updated.examples[0].example.sentence shouldBe "Test sentence"
             updated.examples[0].displayOrder shouldBe 0
         }
 
@@ -101,8 +101,8 @@ class PublicSenseTest : DescribeSpec({
 
             val updated = sense.updateExample(1L, command)
 
-            updated.examples[0].sentence shouldBe "Updated"
-            updated.examples[0].translation shouldBe "수정됨"
+            updated.examples[0].example.sentence shouldBe "Updated"
+            updated.examples[0].example.translation shouldBe "수정됨"
             updated.examples[0].isOfficial shouldBe true
             updated.examples[0].displayOrder shouldBe 0
         }

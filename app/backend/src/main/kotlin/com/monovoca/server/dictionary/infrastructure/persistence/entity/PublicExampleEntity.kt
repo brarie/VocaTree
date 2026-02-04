@@ -1,5 +1,6 @@
 package com.monovoca.server.dictionary.infrastructure.persistence.entity
 
+import com.monovoca.server.common.domain.model.vocabulary.vo.ExampleVo
 import com.monovoca.server.dictionary.domain.model.word.PublicExample
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
@@ -29,8 +30,10 @@ class PublicExampleEntity(id: EntityID<Long>) : LongEntity(id) {
 
     fun toDomain(): PublicExample = PublicExample(
         id = this.id.value,
-        sentence = this.sentence,
-        translation = this.translation,
+        example = ExampleVo(
+            sentence = this.sentence,
+            translation = this.translation
+        ),
         isOfficial = this.isOfficial,
         sourceInfo = this.sourceInfo,
         displayOrder = this.displayOrder
@@ -38,8 +41,8 @@ class PublicExampleEntity(id: EntityID<Long>) : LongEntity(id) {
 
     fun applyDomain(publicExample: PublicExample, senseId: Long) {
         this.senseId = EntityID(senseId, PublicSenseTable)
-        this.sentence = publicExample.sentence
-        this.translation = publicExample.translation
+        this.sentence = publicExample.example.sentence ?: ""
+        this.translation = publicExample.example.translation
         this.isOfficial = publicExample.isOfficial
         this.sourceInfo = publicExample.sourceInfo
         this.displayOrder = publicExample.displayOrder

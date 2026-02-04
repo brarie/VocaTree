@@ -1,6 +1,7 @@
 package com.monovoca.server.dictionary.infrastructure.web.response
 
-import com.monovoca.server.common.domain.model.vo.enumerated.PartOfSpeech
+import com.monovoca.server.common.infrastructure.web.response.SenseResponse
+import com.monovoca.server.common.infrastructure.web.response.ExampleResponse
 import com.monovoca.server.dictionary.domain.model.word.PublicExample
 import com.monovoca.server.dictionary.domain.model.word.PublicSense
 import com.monovoca.server.dictionary.domain.model.word.PublicWord
@@ -13,29 +14,17 @@ data class PublicWordResponse(
 ) {
     data class Sense(
         val id: Long,
-        val definition: String,
-        val engDefinition: String?,
-        val britishPhonetic: String?,
-        val americanPhonetic: String?,
-        val synonyms: List<String>,
-        val antonyms: List<String>,
-        val partOfSpeech: PartOfSpeech?,
+        val sense: SenseResponse,
         val displayOrder: Int,
         val examples: List<Example>,
     ) {
         companion object {
-            fun from(sense: PublicSense): Sense {
+            fun from(publicSense: PublicSense): Sense {
                 return Sense(
-                    id = sense.id!!,
-                    definition = sense.definition,
-                    engDefinition = sense.engDefinition,
-                    britishPhonetic = sense.britishPhonetic,
-                    americanPhonetic = sense.americanPhonetic,
-                    synonyms = sense.synonyms.map { it.value },
-                    antonyms = sense.antonyms.map { it.value },
-                    partOfSpeech = sense.partOfSpeech,
-                    displayOrder = sense.displayOrder,
-                    examples = sense.examples.map { Example.from(it) },
+                    id = publicSense.id!!,
+                    sense = SenseResponse.from(publicSense.sense),
+                    displayOrder = publicSense.displayOrder,
+                    examples = publicSense.examples.map { Example.from(it) },
                 )
             }
         }
@@ -43,21 +32,19 @@ data class PublicWordResponse(
 
     data class Example(
         val id: Long,
-        val sentence: String,
-        val translation: String?,
+        val example: ExampleResponse,
         val isOfficial: Boolean,
         val sourceInfo: String?,
         val displayOrder: Int,
     ) {
         companion object {
-            fun from(example: PublicExample): Example {
+            fun from(publicExample: PublicExample): Example {
                 return Example(
-                    id = example.id!!,
-                    sentence = example.sentence,
-                    translation = example.translation,
-                    isOfficial = example.isOfficial,
-                    sourceInfo = example.sourceInfo,
-                    displayOrder = example.displayOrder,
+                    id = publicExample.id!!,
+                    example = ExampleResponse.from(publicExample.example),
+                    isOfficial = publicExample.isOfficial,
+                    sourceInfo = publicExample.sourceInfo,
+                    displayOrder = publicExample.displayOrder,
                 )
             }
         }

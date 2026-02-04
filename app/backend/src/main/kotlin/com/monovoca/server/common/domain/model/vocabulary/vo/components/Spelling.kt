@@ -1,4 +1,4 @@
-package com.monovoca.server.common.domain.model.vo
+package com.monovoca.server.common.domain.model.vocabulary.vo.components
 
 object SpellingPolicy {
     const val regex = "^[A-Za-z\\s\\-'\\[\\]()]{1,50}$"

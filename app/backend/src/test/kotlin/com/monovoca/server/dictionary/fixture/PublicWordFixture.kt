@@ -1,7 +1,9 @@
 package com.monovoca.server.dictionary.fixture
 
-import com.monovoca.server.common.domain.model.vo.Spelling
-import com.monovoca.server.common.domain.model.vo.enumerated.PartOfSpeech
+import com.monovoca.server.common.domain.model.vocabulary.vo.SenseVo
+import com.monovoca.server.common.domain.model.vocabulary.vo.ExampleVo
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.Spelling
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.PartOfSpeech
 import com.monovoca.server.dictionary.domain.model.word.PublicExample
 import com.monovoca.server.dictionary.domain.model.word.PublicSense
 import com.monovoca.server.dictionary.domain.model.word.PublicWord
@@ -36,13 +38,15 @@ object PublicWordFixture {
     ): PublicSense {
         return PublicSense(
             id = id,
-            definition = definition,
-            engDefinition = engDefinition,
-            britishPhonetic = britishPhonetic,
-            americanPhonetic = americanPhonetic,
-            synonyms = synonyms.map { Spelling(it) },
-            antonyms = antonyms.map { Spelling(it) },
-            partOfSpeech = partOfSpeech,
+            sense = SenseVo(
+                definition = definition,
+                engDefinition = engDefinition,
+                britishPhonetic = britishPhonetic,
+                americanPhonetic = americanPhonetic,
+                partOfSpeech = partOfSpeech,
+                synonyms = synonyms.map { Spelling(it) },
+                antonyms = antonyms.map { Spelling(it) }
+            ),
             displayOrder = displayOrder,
             examples = examples
         )
@@ -58,8 +62,10 @@ object PublicWordFixture {
     ): PublicExample {
         return PublicExample(
             id = id,
-            sentence = sentence,
-            translation = translation,
+            example = ExampleVo(
+                sentence = sentence,
+                translation = translation
+            ),
             isOfficial = isOfficial,
             sourceInfo = sourceInfo,
             displayOrder = displayOrder
