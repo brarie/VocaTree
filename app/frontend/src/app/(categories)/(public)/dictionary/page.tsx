@@ -69,15 +69,15 @@ export default function DictionaryPage() {
                 <p className="text-sm text-gray-400">
                   현재까지
                   <span className="text-white font-semibold">
-                    {counts.totalWords}개
+                    &nbsp;{counts.totalWords}개
                   </span>
                   의 단어,
                   <span className="text-white font-semibold">
-                    {counts.totalSenses}개
+                    &nbsp;{counts.totalSenses}개
                   </span>
                   의 뜻,
                   <span className="text-white font-semibold">
-                    {counts.totalExamples}개
+                    &nbsp;{counts.totalExamples}개
                   </span>
                   의 예문이 등록되어 있습니다.
                 </p>

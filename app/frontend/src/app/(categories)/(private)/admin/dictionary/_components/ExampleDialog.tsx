@@ -203,12 +203,12 @@ export function CreateExampleDialog({
 export function EditExampleDialog({
   wordId,
   senseId,
-  example,
+  publicWordExample,
   onSuccess,
 }: {
   wordId: number;
   senseId: number;
-  example: PublicWordExample;
+  publicWordExample: PublicWordExample;
   onSuccess: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -216,21 +216,21 @@ export function EditExampleDialog({
   const form = useForm({
     resolver: zodResolver(UpdateExampleRequestSchema),
     defaultValues: {
-      sentence: example.sentence,
-      translation: example.translation || '',
-      isOfficial: example.isOfficial,
-      sourceInfo: example.sourceInfo || '',
+      sentence: publicWordExample.example.sentence || '',
+      translation: publicWordExample.example.translation || '',
+      isOfficial: publicWordExample.isOfficial,
+      sourceInfo: publicWordExample.sourceInfo || '',
     },
   });
 
   useEffect(() => {
     form.reset({
-      sentence: example.sentence,
-      translation: example.translation || '',
-      isOfficial: example.isOfficial,
-      sourceInfo: example.sourceInfo || '',
+      sentence: publicWordExample.example.sentence || '',
+      translation: publicWordExample.example.translation || '',
+      isOfficial: publicWordExample.isOfficial,
+      sourceInfo: publicWordExample.sourceInfo || '',
     });
-  }, [example, form]);
+  }, [publicWordExample, form]);
 
   const onSubmit = async (data: UpdateExampleRequest) => {
     const cleanedData = {
@@ -242,7 +242,7 @@ export function EditExampleDialog({
     await updateMutation.mutateAsync({
       wordId,
       senseId,
-      exampleId: example.id,
+      exampleId: publicWordExample.id,
       data: cleanedData,
     });
     setOpen(false);

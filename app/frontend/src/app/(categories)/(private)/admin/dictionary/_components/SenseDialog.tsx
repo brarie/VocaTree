@@ -272,43 +272,43 @@ export function CreateSenseDialog({
 
 export function EditSenseDialog({
   wordId,
-  sense,
+  publicWordSense,
   onSuccess,
 }: {
   wordId: number;
-  sense: PublicWordSense;
+  publicWordSense: PublicWordSense;
   onSuccess: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [synonymsText, setSynonymsText] = useState(
-    sense.synonyms?.join(', ') || '',
+    publicWordSense.sense.synonyms?.join(', ') || '',
   );
   const [antonymsText, setAntonymsText] = useState(
-    sense.antonyms?.join(', ') || '',
+    publicWordSense.sense.antonyms?.join(', ') || '',
   );
   const updateMutation = useUpdateSense();
   const form = useForm({
     resolver: zodResolver(UpdateSenseRequestSchema),
     defaultValues: {
-      definition: sense.definition,
-      engDefinition: sense.engDefinition || '',
-      britishPhonetic: sense.britishPhonetic || '',
-      americanPhonetic: sense.americanPhonetic || '',
-      partOfSpeech: sense.partOfSpeech || '',
+      definition: publicWordSense.sense.definition || '',
+      engDefinition: publicWordSense.sense.engDefinition || '',
+      britishPhonetic: publicWordSense.sense.britishPhonetic || '',
+      americanPhonetic: publicWordSense.sense.americanPhonetic || '',
+      partOfSpeech: publicWordSense.sense.partOfSpeech || '',
     },
   });
 
   useEffect(() => {
     form.reset({
-      definition: sense.definition,
-      engDefinition: sense.engDefinition || '',
-      britishPhonetic: sense.britishPhonetic || '',
-      americanPhonetic: sense.americanPhonetic || '',
-      partOfSpeech: sense.partOfSpeech || '',
+      definition: publicWordSense.sense.definition || '',
+      engDefinition: publicWordSense.sense.engDefinition || '',
+      britishPhonetic: publicWordSense.sense.britishPhonetic || '',
+      americanPhonetic: publicWordSense.sense.americanPhonetic || '',
+      partOfSpeech: publicWordSense.sense.partOfSpeech || '',
     });
-    setSynonymsText(sense.synonyms?.join(', ') || '');
-    setAntonymsText(sense.antonyms?.join(', ') || '');
-  }, [sense, form]);
+    setSynonymsText(publicWordSense.sense.synonyms?.join(', ') || '');
+    setAntonymsText(publicWordSense.sense.antonyms?.join(', ') || '');
+  }, [publicWordSense, form]);
 
   const onSubmit = async (data: UpdateSenseRequest) => {
     const synonymsArray = synonymsText
@@ -337,7 +337,7 @@ export function EditSenseDialog({
     };
     await updateMutation.mutateAsync({
       wordId,
-      senseId: sense.id,
+      senseId: publicWordSense.id,
       data: cleanedData,
     });
     setOpen(false);

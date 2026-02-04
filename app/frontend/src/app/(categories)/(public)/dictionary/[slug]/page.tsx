@@ -40,7 +40,7 @@ export default function WordDetailPage() {
     word.senses.length > 0
       ? word.senses
           .slice(0, 3)
-          .map((s) => s.definition)
+          .map((s) => s.sense.definition)
           .join(', ')
       : '의미 없음';
 
@@ -70,8 +70,12 @@ export default function WordDetailPage() {
       </PageHeader>
 
       <div className="space-y-4">
-        {word.senses.map((sense, senseIdx) => (
-          <DictionarySense key={sense.id} sense={sense} index={senseIdx} />
+        {word.senses.map((publicWordSense, senseIdx) => (
+          <DictionarySense
+            key={publicWordSense.id}
+            publicWordSense={publicWordSense}
+            index={senseIdx}
+          />
         ))}
       </div>
 

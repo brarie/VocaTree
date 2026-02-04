@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SenseResponse, ExampleResponse } from './common/vocabulary';
 
 export const CreateWordRequestSchema = z.object({
   spelling: z.string().min(1, '단어를 입력해주세요.'),
@@ -78,8 +79,7 @@ export type ReorderRequest = z.infer<typeof ReorderRequestSchema>;
 
 export interface PublicWordExample {
   id: number;
-  sentence: string;
-  translation: string | null;
+  example: ExampleResponse;
   isOfficial: boolean;
   sourceInfo: string | null;
   displayOrder: number;
@@ -87,13 +87,7 @@ export interface PublicWordExample {
 
 export interface PublicWordSense {
   id: number;
-  definition: string;
-  engDefinition: string | null;
-  britishPhonetic: string | null;
-  americanPhonetic: string | null;
-  partOfSpeech: string | null;
-  synonyms: string[];
-  antonyms: string[];
+  sense: SenseResponse;
   displayOrder: number;
   examples: PublicWordExample[];
 }
