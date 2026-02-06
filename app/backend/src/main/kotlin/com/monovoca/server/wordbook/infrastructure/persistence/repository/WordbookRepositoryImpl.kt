@@ -1,0 +1,39 @@
+package com.monovoca.server.wordbook.infrastructure.persistence.repository
+
+import com.monovoca.server.wordbook.domain.model.Wordbook
+import com.monovoca.server.wordbook.domain.port.WordbookRepository
+import com.monovoca.server.wordbook.infrastructure.persistence.entity.WordbookNodeEntity
+import com.monovoca.server.wordbook.infrastructure.persistence.entity.WordbookNodeTable
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.springframework.stereotype.Repository
+
+@Repository
+class WordbookRepositoryImpl : WordbookRepository {
+
+    override fun findById(id: Long): Wordbook? = transaction {
+        WordbookNodeEntity.findById(id)?.let {
+            it.toDomain() as Wordbook
+        }
+    }
+
+    override fun save(wordbook: Wordbook): Wordbook = transaction {
+        val wordbookEntity = if (wordbook.id == null) {
+            WordbookNodeEntity.new { applyDomain(wordbook) }
+        } else {
+            WordbookNodeEntity.findById(wordbook.id)?.apply { applyDomain(wordbook) }
+                ?: error("WordbookEntity with ID ${wordbook.id} not found")
+        }
+
+        wordbookEntity.toDomain() as Wordbook
+    }
+
+    override fun delete(wordbook: Wordbook): Unit = transaction {
+        WordbookNodeEntity.findById(wordbook.id!!)?.delete()
+    }
+
+    override fun existsByBundleId(bundleId: Long): Boolean = transaction {
+        WordbookNodeTable.select(WordbookNodeTable.id)
+            .where { WordbookNodeTable.parentId eq bundleId }
+            .empty().not()
+    }
+}
