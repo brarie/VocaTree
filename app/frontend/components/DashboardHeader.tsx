@@ -6,7 +6,7 @@ import { BookOpen, BarChart3, LayoutDashboard } from 'lucide-react';
 
 const menuItems = [
   { label: '대시보드', href: '/dashboard', icon: LayoutDashboard },
-  { label: '내 단어장', href: '/dashboard/my-words', icon: BookOpen },
+  { label: '내 단어장', href: '/dashboard/my-words/wordbook', icon: BookOpen },
   { label: '통계', href: '/dashboard/stats', icon: BarChart3 },
 ];
 
