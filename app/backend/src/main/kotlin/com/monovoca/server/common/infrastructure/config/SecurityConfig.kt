@@ -45,7 +45,7 @@ class SecurityConfig(
                 it.requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
                 it.requestMatchers("/api/users/sign-up", "/api/users/verify", "/api/users/resend-verification").permitAll()
                 it.requestMatchers("/api/support-categories/**", "/api/support-posts/**").permitAll()
-                it.requestMatchers(HttpMethod.GET, "/api/dictionary/search", "/api/dictionary/words/slug/{slug}", "/api/dictionary/search/autocomplete", "/api/dictionary/words", "/api/dictionary/count").permitAll()
+                it.requestMatchers(HttpMethod.GET, "/api/dictionary/search", "/api/dictionary/words/slug/{slug}", "/api/dictionary/search/autocomplete", "/api/dictionary/words", "/api/dictionary/count", "/api/dictionary/words/spelling/{spelling}").permitAll()
                 it.anyRequest().authenticated()
             }
             .headers { it.frameOptions { it.sameOrigin() } }

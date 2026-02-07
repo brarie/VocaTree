@@ -4,5 +4,6 @@ import com.monovoca.server.wordbook.domain.model.WordbookWordList
 
 interface WordbookWordListRepository {
 
-    fun findById(id: Long): WordbookWordList?
+    fun findById(wordbookId: Long): WordbookWordList
+    fun save(wordbookWordList: WordbookWordList): WordbookWordList
 }

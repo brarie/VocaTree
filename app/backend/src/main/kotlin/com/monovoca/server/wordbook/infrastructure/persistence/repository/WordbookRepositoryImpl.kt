@@ -2,6 +2,7 @@ package com.monovoca.server.wordbook.infrastructure.persistence.repository
 
 import com.monovoca.server.wordbook.domain.model.Wordbook
 import com.monovoca.server.wordbook.domain.port.WordbookRepository
+import com.monovoca.server.wordbook.infrastructure.persistence.entity.WordbookColumnSettingEntity
 import com.monovoca.server.wordbook.infrastructure.persistence.entity.WordbookNodeEntity
 import com.monovoca.server.wordbook.infrastructure.persistence.entity.WordbookNodeTable
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -24,7 +25,34 @@ class WordbookRepositoryImpl : WordbookRepository {
                 ?: error("WordbookEntity with ID ${wordbook.id} not found")
         }
 
+        syncWordbookColumnSettings(wordbookEntity, wordbook)
+
         wordbookEntity.toDomain() as Wordbook
+    }
+
+    private fun syncWordbookColumnSettings(
+        wordbookEntity: WordbookNodeEntity,
+        wordbook: Wordbook
+    ) {
+        val existingSettings = wordbookEntity.settings.associateBy { it.columnType }
+        val wordbookId = wordbookEntity.id.value
+
+        for ((columnType, setting) in wordbook.columns) {
+            val existingSetting = existingSettings[columnType]
+            if (existingSetting != null) {
+                existingSetting.applyDomain(columnType, setting, wordbookId)
+            } else {
+                WordbookColumnSettingEntity.new {
+                    applyDomain(columnType, setting, wordbookId)
+                }
+            }
+        }
+
+        for ((columnType, existingSetting) in existingSettings) {
+            if (!wordbook.columns.containsKey(columnType)) {
+                existingSetting.delete()
+            }
+        }
     }
 
     override fun delete(wordbook: Wordbook): Unit = transaction {

@@ -58,6 +58,12 @@ class DictionaryWordController(
         return ResponseEntity.ok(PublicWordResponse.from(word))
     }
 
+    @GetMapping("/words/spelling/{spelling}")
+    fun getWordBySpelling(@PathVariable spelling: String): ResponseEntity<PublicWordResponse> {
+        val word = dictionaryWordService.findBySpelling(spelling)
+        return ResponseEntity.ok(PublicWordResponse.from(word))
+    }
+
     @PostMapping("/words")
     @PreAuthorize("hasRole('ADMIN')")
     fun createWord(@RequestBody @Valid request: CreatePublicWordRequest): ResponseEntity<PublicWordResponse> {

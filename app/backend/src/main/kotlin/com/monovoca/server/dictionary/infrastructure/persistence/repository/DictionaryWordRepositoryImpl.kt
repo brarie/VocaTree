@@ -105,6 +105,13 @@ class DictionaryWordRepositoryImpl : DictionaryWordRepository {
             ?.toDomain()
     }
 
+    override fun findBySpelling(spelling: Spelling): PublicWord? = transaction {
+        PublicWordEntity.find { PublicWordTable.spelling eq spelling.value }
+            .firstOrNull()
+            ?.load(PublicWordEntity::senses, PublicSenseEntity::examples)
+            ?.toDomain()
+    }
+
     override fun delete(word: PublicWord) = transaction {
         PublicWordEntity.findById(word.id!!)!!.delete()
     }

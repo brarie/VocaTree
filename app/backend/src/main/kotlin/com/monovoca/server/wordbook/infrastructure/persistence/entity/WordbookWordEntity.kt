@@ -25,13 +25,13 @@ class WordbookWordEntity(id: EntityID<Long>) : LongEntity(id) {
 
     fun toDomain(): WordbookWord = WordbookWord(
         id = this.id.value,
-        wordbookId = this.wordbookId.value,
         spelling = this.spelling?.let { Spelling(it) },
         displayOrder = this.displayOrder,
         senses = this.senses.sortedBy { it.displayOrder }.map { it.toDomain() }
     )
 
-    fun applyDomain(wordbookWord: WordbookWord) {
+    fun applyDomain(wordbookWord: WordbookWord, wordbookId: Long) {
+        this.wordbookId = EntityID(wordbookId, WordbookNodeTable)
         this.spelling = wordbookWord.spelling?.value
         this.displayOrder = wordbookWord.displayOrder
     }

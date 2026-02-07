@@ -25,7 +25,6 @@ class WordbookExampleEntity(id: EntityID<Long>) : LongEntity(id) {
 
     fun toDomain(): WordbookExample = WordbookExample(
         id = this.id.value,
-        senseId = this.senseId.value,
         example = ExampleVo(
             sentence = this.sentence,
             translation = this.translation

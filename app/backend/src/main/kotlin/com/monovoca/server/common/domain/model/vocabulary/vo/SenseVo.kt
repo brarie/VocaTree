@@ -4,11 +4,11 @@ import com.monovoca.server.common.domain.model.vocabulary.vo.components.PartOfSp
 import com.monovoca.server.common.domain.model.vocabulary.vo.components.Spelling
 
 data class SenseVo(
-    val definition: String?,
-    val engDefinition: String?,
-    val britishPhonetic: String?,
-    val americanPhonetic: String?,
-    val partOfSpeech: PartOfSpeech?,
+    val definition: String? = null,
+    val engDefinition: String? = null,
+    val britishPhonetic: String? = null,
+    val americanPhonetic: String? = null,
+    val partOfSpeech: PartOfSpeech? = null,
     val synonyms: List<Spelling> = emptyList(),
     val antonyms: List<Spelling> = emptyList()
 )

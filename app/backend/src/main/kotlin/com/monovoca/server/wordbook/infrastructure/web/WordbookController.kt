@@ -2,8 +2,11 @@ package com.monovoca.server.wordbook.infrastructure.web
 
 import com.monovoca.server.common.infrastructure.UserPrincipal
 import com.monovoca.server.wordbook.application.WordbookService
+import com.monovoca.server.wordbook.domain.model.enumerated.ColumnType
 import com.monovoca.server.wordbook.infrastructure.web.request.CreateWordbookRequest
+import com.monovoca.server.wordbook.infrastructure.web.request.UpdateColumnWidthRequest
 import com.monovoca.server.wordbook.infrastructure.web.request.UpdateWordbookTitleRequest
+import com.monovoca.server.wordbook.infrastructure.web.response.WordbookColumnResponse
 import com.monovoca.server.wordbook.infrastructure.web.response.WordbookNodeResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -84,5 +87,47 @@ class WordbookController(
     ): ResponseEntity<Unit> {
         wordbookService.delete(userPrincipal.id, wordbookId)
         return ResponseEntity.ok().build()
+    }
+
+    @GetMapping("/{wordbookId}/columns")
+    fun getWordbookColumns(
+        @AuthenticationPrincipal userPrincipal: UserPrincipal,
+        @PathVariable wordbookId: Long,
+    ): ResponseEntity<WordbookColumnResponse> {
+        val columns = wordbookService.getWordbookColumns(userPrincipal.id, wordbookId)
+        val response = WordbookColumnResponse.from(columns)
+        return ResponseEntity.ok(response)
+    }
+
+    @PatchMapping("/{wordbookId}/columns/{columnType}/width")
+    fun updateWordbookColumnWidth(
+        @AuthenticationPrincipal userPrincipal: UserPrincipal,
+        @PathVariable wordbookId: Long,
+        @PathVariable columnType: ColumnType,
+        @RequestBody request: UpdateColumnWidthRequest
+    ): ResponseEntity<WordbookColumnResponse> {
+        val updatedColumns = wordbookService.updateColumnWidth(
+            userPrincipal.id,
+            wordbookId,
+            columnType,
+            request.width
+        )
+        val response = WordbookColumnResponse.from(updatedColumns)
+        return ResponseEntity.ok(response)
+    }
+
+    @PatchMapping("/{wordbookId}/columns/{columnType}/toggle")
+    fun updateWordbookColumnActiveStatus(
+        @AuthenticationPrincipal userPrincipal: UserPrincipal,
+        @PathVariable wordbookId: Long,
+        @PathVariable columnType: ColumnType,
+    ): ResponseEntity<WordbookColumnResponse> {
+        val updatedColumns = wordbookService.toggleColumnActiveStatus(
+            userPrincipal.id,
+            wordbookId,
+            columnType
+        )
+        val response = WordbookColumnResponse.from(updatedColumns)
+        return ResponseEntity.ok(response)
     }
 }

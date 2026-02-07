@@ -7,3 +7,7 @@ data class CreateWordbookRequest(
 data class UpdateWordbookTitleRequest(
     val title: String,
 )
+
+data class UpdateColumnWidthRequest(
+    val width: Int,
+)

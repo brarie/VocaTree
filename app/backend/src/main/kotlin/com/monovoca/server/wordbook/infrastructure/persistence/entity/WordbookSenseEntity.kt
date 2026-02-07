@@ -41,7 +41,6 @@ class WordbookSenseEntity(id: EntityID<Long>) : LongEntity(id) {
 
     fun toDomain(): WordbookSense = WordbookSense(
         id = this.id.value,
-        wordId = this.wordId.value,
         sense = SenseVo(
             definition = this.definition,
             engDefinition = this.engDefinition,

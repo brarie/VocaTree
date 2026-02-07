@@ -31,6 +31,7 @@ class WordbookNodeEntity(id: EntityID<Long>) : LongEntity(id) {
     var isStarred by WordbookNodeTable.isStarred
     var title by WordbookNodeTable.title
     var createdAt by WordbookNodeTable.createdAt
+    val settings by WordbookColumnSettingEntity referrersOn WordbookColumnSettingTable.wordbookId
 
     fun toDomain(): WordbookNode =
         when (nodeType) {
@@ -42,6 +43,7 @@ class WordbookNodeEntity(id: EntityID<Long>) : LongEntity(id) {
                     isStarred = this.isStarred,
                     bundleId = this.parentId?.value,
                     createdAt = this.createdAt,
+                    columns = settings.associateBy({ it.columnType }) { it.toDomain() } // todo
                 )
 
             NodeType.BUNDLE ->

@@ -50,6 +50,10 @@ class DictionaryWordService(
     fun findBySlug(slug: String): PublicWord =
         dictionaryWordRepository.findBySlug(slug) ?: throw PublicWordNotFoundException()
 
+    @Transactional(readOnly = true)
+    fun findBySpelling(spelling: String): PublicWord =
+        dictionaryWordRepository.findBySpelling(Spelling(spelling)) ?: throw PublicWordNotFoundException()
+
     @Transactional
     fun createWord(spelling: String): PublicWord {
         val spellingVo = Spelling(spelling)

@@ -3,6 +3,8 @@ package com.monovoca.server.wordbook.application
 import com.monovoca.server.wordbook.domain.exception.WordbookBundleNotFoundException
 import com.monovoca.server.wordbook.domain.exception.WordbookNotFoundException
 import com.monovoca.server.wordbook.domain.model.Wordbook
+import com.monovoca.server.wordbook.domain.model.WordbookColumnSetting
+import com.monovoca.server.wordbook.domain.model.enumerated.ColumnType
 import com.monovoca.server.wordbook.domain.port.WordbookBundleRepository
 import com.monovoca.server.wordbook.domain.port.WordbookRepository
 import org.springframework.stereotype.Service
@@ -16,7 +18,7 @@ class WordbookService(
 
     @Transactional
     fun create(userId: String, title: String): Wordbook {
-        val wordbook = Wordbook(ownerId = userId, title = title)
+        val wordbook = Wordbook.create(ownerId = userId, title = title)
         return wordbookRepository.save(wordbook)
     }
 
@@ -77,5 +79,50 @@ class WordbookService(
 
         wordbook.validateOwner(userId)
         return wordbook
+    }
+
+    @Transactional(readOnly = true)
+    fun getWordbookColumns(userId: String, wordbookId: Long): Map<ColumnType, WordbookColumnSetting> {
+        val wordbook = wordbookRepository.findById(wordbookId)
+            ?: throw WordbookNotFoundException()
+
+        wordbook.validateOwner(userId)
+
+        return wordbook.columns
+    }
+
+    @Transactional
+    fun updateColumnWidth(
+        userId: String,
+        wordbookId: Long,
+        columnType: ColumnType,
+        newWidth: Int
+    ): Map<ColumnType, WordbookColumnSetting> {
+        val wordbook = wordbookRepository.findById(wordbookId)
+            ?: throw WordbookNotFoundException()
+
+        wordbook.validateOwner(userId)
+
+        val updatedWordbook = wordbook.updateColumnWidth(columnType, newWidth)
+        val saved = wordbookRepository.save(updatedWordbook)
+
+        return saved.columns
+    }
+
+    @Transactional
+    fun toggleColumnActiveStatus(
+        userId: String,
+        wordbookId: Long,
+        columnType: ColumnType,
+    ): Map<ColumnType, WordbookColumnSetting> {
+        val wordbook = wordbookRepository.findById(wordbookId)
+            ?: throw WordbookNotFoundException()
+
+        wordbook.validateOwner(userId)
+
+        val updatedWordbook = wordbook.toggleColumnActiveStatus(columnType)
+        val saved = wordbookRepository.save(updatedWordbook)
+
+        return saved.columns
     }
 }

@@ -13,6 +13,7 @@ interface DictionaryWordRepository {
     fun existsBySlug(slug: String): Boolean
     fun findById(wordId: Long): PublicWord?
     fun findBySlug(slug: String): PublicWord?
+    fun findBySpelling(spelling: Spelling): PublicWord?
     fun paginateViewsBySpelling(query: String, pageable: Pageable): Page<PublicWordSimpleView>
     fun delete(word: PublicWord)
     fun getDictionaryCounts(): DictionaryCountView
