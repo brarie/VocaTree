@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getWordList,
   getColumns,
+  createWordSeries,
+  createSenseSeries,
   createWord,
   createSense,
   createExample,
@@ -51,6 +53,37 @@ export function useColumns(wordbookId: number) {
     queryKey: wordbookWordKeys.columns(wordbookId),
     queryFn: () => getColumns(wordbookId),
     enabled: wordbookId > 0,
+  });
+}
+
+export function useCreateWordSeries() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (wordbookId: number) => createWordSeries(wordbookId),
+    onSuccess: (data) => {
+      queryClient.setQueryData(wordbookWordKeys.wordList(data.wordbookId), data);
+      toast.success('단어가 추가되었습니다.');
+    },
+    onError: (error: ApiError) => {
+      toast.error(error.message);
+    },
+  });
+}
+
+export function useCreateSenseSeries() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ wordbookId, wordId }: { wordbookId: number; wordId: number }) =>
+      createSenseSeries(wordbookId, wordId),
+    onSuccess: (data) => {
+      queryClient.setQueryData(wordbookWordKeys.wordList(data.wordbookId), data);
+      toast.success('의미가 추가되었습니다.');
+    },
+    onError: (error: ApiError) => {
+      toast.error(error.message);
+    },
   });
 }
 

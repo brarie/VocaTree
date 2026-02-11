@@ -27,6 +27,32 @@ class WordbookWordListService(
     }
 
     @Transactional
+    fun createWordSeries(userId: String, wordbookId: Long): WordbookWordList {
+        val wordbook = wordbookRepository.findById(wordbookId)
+            ?: throw WordbookNotFoundException()
+
+        wordbook.validateOwner(userId)
+
+        val wordList = wordbookWordListRepository.findById(wordbookId)
+
+        val updatedWordList = wordList.newWordSeries()
+        return wordbookWordListRepository.save(updatedWordList)
+    }
+
+    @Transactional
+    fun createSenseSeries(userId: String, wordbookId: Long, wordId: Long): WordbookWordList {
+        val wordbook = wordbookRepository.findById(wordbookId)
+            ?: throw WordbookNotFoundException()
+
+        wordbook.validateOwner(userId)
+
+        val wordList = wordbookWordListRepository.findById(wordbookId)
+
+        val updatedWordList = wordList.newSenseSeries(wordId)
+        return wordbookWordListRepository.save(updatedWordList)
+    }
+
+    @Transactional
     fun createWord(userId: String, wordbookId: Long): WordbookWordList {
         val wordbook = wordbookRepository.findById(wordbookId)
             ?: throw WordbookNotFoundException()

@@ -33,6 +33,33 @@ export async function getColumns(
   return await response.json();
 }
 
+export async function createWordSeries(
+  wordbookId: number,
+): Promise<WordbookWordListResponse> {
+  const response = await fetcherWithAuth(
+    `/api/wordbooks/${wordbookId}/words/series`,
+    {
+      method: 'POST',
+    },
+  );
+  await handleApiResponse(response, 'Failed to create word series');
+  return await response.json();
+}
+
+export async function createSenseSeries(
+  wordbookId: number,
+  wordId: number,
+): Promise<WordbookWordListResponse> {
+  const response = await fetcherWithAuth(
+    `/api/wordbooks/${wordbookId}/words/${wordId}/senses/series`,
+    {
+      method: 'POST',
+    },
+  );
+  await handleApiResponse(response, 'Failed to create sense series');
+  return await response.json();
+}
+
 export async function createWord(
   wordbookId: number,
 ): Promise<WordbookWordListResponse> {

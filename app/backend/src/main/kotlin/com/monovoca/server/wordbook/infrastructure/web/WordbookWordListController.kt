@@ -24,6 +24,27 @@ class WordbookWordListController(
         return ResponseEntity.ok(response)
     }
 
+    @PostMapping("/series")
+    fun createWordSeries(
+        @AuthenticationPrincipal userPrincipal: UserPrincipal,
+        @PathVariable wordbookId: Long,
+    ): ResponseEntity<WordbookWordListResponse> {
+        val wordbookWordList = wordbookWordListService.createWordSeries(userPrincipal.id, wordbookId)
+        val response = WordbookWordListResponse.from(wordbookWordList)
+        return ResponseEntity.ok(response)
+    }
+
+    @PostMapping("/{wordId}/senses/series")
+    fun createSenseSeries(
+        @AuthenticationPrincipal userPrincipal: UserPrincipal,
+        @PathVariable wordbookId: Long,
+        @PathVariable wordId: Long,
+    ): ResponseEntity<WordbookWordListResponse> {
+        val wordbookWordList = wordbookWordListService.createSenseSeries(userPrincipal.id, wordbookId, wordId)
+        val response = WordbookWordListResponse.from(wordbookWordList)
+        return ResponseEntity.ok(response)
+    }
+
     @PostMapping
     fun createWord(
         @AuthenticationPrincipal userPrincipal: UserPrincipal,

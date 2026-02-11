@@ -16,6 +16,37 @@ data class WordbookWordList(
         require(wordList.isSortedBy { it.displayOrder }) { "Words must be sorted by displayOrder" }
     }
 
+    /**
+     * 사용자 편의를 위한 Method.
+     * 한 번에 Word + Sense + Example 을 만든다.
+      */
+    fun newWordSeries(): WordbookWordList {
+        if (wordList.size >= 100)
+            throw WordbookOneHundredWordsLimitExceededException()
+
+        val newWordDisplayOrder = (wordList.maxOfOrNull { it.displayOrder } ?: 0) + 1
+        val newExample = WordbookExample.create(displayOrder = 1)
+        val newSense = WordbookSense.create(displayOrder = 1).copy(examples = listOf(newExample))
+        val newWord = WordbookWord.create(displayOrder = newWordDisplayOrder).copy(senses = listOf(newSense))
+        val updatedWordList = wordList + newWord
+        return this.copy(wordList = updatedWordList)
+    }
+
+    fun newSenseSeries(wordId: Long): WordbookWordList {
+        if (wordList.none { it.id == wordId })
+            throw WordbookWordNotFoundException()
+
+        val updatedWords = wordList.map { word ->
+            if (word.id == wordId) {
+                val newSenseDisplayOrder = (word.senses.maxOfOrNull { it.displayOrder } ?: 0) + 1
+                val newExample = WordbookExample.create(displayOrder = 1)
+                val newSense = WordbookSense.create(displayOrder = newSenseDisplayOrder).copy(examples = listOf(newExample))
+                word.copy(senses = word.senses + newSense)
+            } else word
+        }
+        return this.copy(wordList = updatedWords)
+    }
+
     fun newWord(): WordbookWordList {
         if (wordList.size >= 100)
             throw WordbookOneHundredWordsLimitExceededException()

@@ -41,38 +41,84 @@ export function TableCell({
   const level = getColumnLevel(columnType);
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
 
-  // Get field value
   const fieldValue = getCellValue(row, columnType);
   const [editValue, setEditValue] = useState(fieldValue);
 
-  // Mutations
   const updateWord = useUpdateWord();
   const updateSense = useUpdateSense();
   const updateExample = useUpdateExample();
 
-  // Determine which mutation is in progress
   const isSaving =
     updateWord.isPending || updateSense.isPending || updateExample.isPending;
 
-  // Auto-focus input when editing starts
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
     }
   }, [isEditing]);
 
-  // Update editValue when row data changes
   useEffect(() => {
     if (!isEditing) {
       setEditValue(fieldValue);
     }
   }, [fieldValue, isEditing]);
 
-  // Handle save on blur (with optional value override for immediate save)
+  const saveWordLevel = async (finalValue: any, fieldName: string) => {
+    const spellingValue =
+      fieldName === 'spelling'
+        ? finalValue === ''
+          ? null
+          : finalValue
+        : row.spelling;
+
+    await updateWord.mutateAsync({
+      wordbookId,
+      wordId: row.wordId,
+      data: { spelling: spellingValue as any },
+    });
+  };
+
+  const saveSenseLevel = async (finalValue: any, fieldName: string) => {
+    if (!row.senseId) return;
+
+    await updateSense.mutateAsync({
+      wordbookId,
+      wordId: row.wordId,
+      senseId: row.senseId,
+      data: {
+        definition: fieldName === 'definition' ? finalValue : row.definition,
+        engDefinition:
+          fieldName === 'engDefinition' ? finalValue : row.engDefinition,
+        partOfSpeech:
+          fieldName === 'partOfSpeech' ? finalValue : row.partOfSpeech,
+        synonyms: fieldName === 'synonyms' ? finalValue : row.synonyms,
+        antonyms: fieldName === 'antonyms' ? finalValue : row.antonyms,
+        americanPhonetic:
+          fieldName === 'americanPhonetic' ? finalValue : row.usPhonetic,
+        britishPhonetic:
+          fieldName === 'britishPhonetic' ? finalValue : row.ukPhonetic,
+      },
+    });
+  };
+
+  const saveExampleLevel = async (finalValue: any, fieldName: string) => {
+    if (!row.senseId || !row.exampleId) return;
+
+    await updateExample.mutateAsync({
+      wordbookId,
+      wordId: row.wordId,
+      senseId: row.senseId,
+      exampleId: row.exampleId,
+      data: {
+        sentence: fieldName === 'sentence' ? finalValue : row.sentence,
+        translation: fieldName === 'translation' ? finalValue : row.translation,
+      },
+    });
+  };
+
   const handleSave = async (valueOverride?: any) => {
     const finalValue = valueOverride !== undefined ? valueOverride : editValue;
 
-    // Check if value changed
     if (finalValue === fieldValue) {
       onEndEdit();
       return;
@@ -82,71 +128,24 @@ export function TableCell({
 
     try {
       if (level === 1) {
-        // Level 1: Word (spelling만 있음)
-        // 빈 문자열은 null로 변환
-        const spellingValue =
-          fieldName === 'spelling'
-            ? finalValue === ''
-              ? null
-              : finalValue
-            : row.spelling;
-
-        await updateWord.mutateAsync({
-          wordbookId,
-          wordId: row.wordId,
-          data: {
-            spelling: spellingValue as any,
-          },
-        });
-      } else if (level === 2 && row.senseId) {
-        // Level 2: Sense (모든 필드 포함)
-        await updateSense.mutateAsync({
-          wordbookId,
-          wordId: row.wordId,
-          senseId: row.senseId,
-          data: {
-            definition:
-              fieldName === 'definition' ? finalValue : row.definition,
-            engDefinition:
-              fieldName === 'engDefinition' ? finalValue : row.engDefinition,
-            partOfSpeech:
-              fieldName === 'partOfSpeech' ? finalValue : row.partOfSpeech,
-            synonyms: fieldName === 'synonyms' ? finalValue : row.synonyms,
-            antonyms: fieldName === 'antonyms' ? finalValue : row.antonyms,
-            americanPhonetic:
-              fieldName === 'americanPhonetic' ? finalValue : row.usPhonetic,
-            britishPhonetic:
-              fieldName === 'britishPhonetic' ? finalValue : row.ukPhonetic,
-          },
-        });
-      } else if (level === 3 && row.senseId && row.exampleId) {
-        // Level 3: Example (모든 필드 포함)
-        await updateExample.mutateAsync({
-          wordbookId,
-          wordId: row.wordId,
-          senseId: row.senseId,
-          exampleId: row.exampleId,
-          data: {
-            sentence: fieldName === 'sentence' ? finalValue : row.sentence,
-            translation:
-              fieldName === 'translation' ? finalValue : row.translation,
-          },
-        });
+        await saveWordLevel(finalValue, fieldName);
+      } else if (level === 2) {
+        await saveSenseLevel(finalValue, fieldName);
+      } else if (level === 3) {
+        await saveExampleLevel(finalValue, fieldName);
       }
     } catch (error) {
-      // Error already handled by mutation
+      // Error handled by mutation
     }
 
     onEndEdit();
   };
 
-  // Handle cancel
   const handleCancel = () => {
     setEditValue(fieldValue);
     onEndEdit();
   };
 
-  // Render cell content
   return (
     <div
       data-row-id={row.rowId}
@@ -169,14 +168,12 @@ export function TableCell({
         <DisplayCell value={fieldValue} columnType={columnType} />
       )}
 
-      {/* Loading indicator */}
       {isSaving && (
         <div className="absolute top-1 right-1">
           <Loader2 className="h-3 w-3 animate-spin text-blue-400" />
         </div>
       )}
 
-      {/* Move up/down buttons - show only on selected cell */}
       {isSelected && !isEditing && !isSaving && (
         <div className="absolute top-1 right-1 flex gap-0.5">
           <button
@@ -252,7 +249,6 @@ function EditingCell({
   onCancel: () => void;
   inputRef: React.RefObject<any>;
 }) {
-  // Part of Speech: Combobox
   if (columnType === ColumnType.PART_OF_SPEECH) {
     return (
       <PartOfSpeechCombobox
@@ -264,7 +260,6 @@ function EditingCell({
     );
   }
 
-  // Synonyms/Antonyms: Multi-value editor
   if (
     columnType === ColumnType.SYNONYMS ||
     columnType === ColumnType.ANTONYMS
@@ -283,36 +278,29 @@ function EditingCell({
     );
   }
 
-  // Auto-resize textarea when value changes
   useEffect(() => {
     if (inputRef.current && inputRef.current instanceof HTMLTextAreaElement) {
-      // Reset height to auto to get correct scrollHeight
       inputRef.current.style.height = 'auto';
-      // Set height to scrollHeight (content height)
       inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
     }
   }, [value]);
 
-  // Handle keyboard events
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
       e.preventDefault();
       onCancel();
     }
-    // Enter saves (no line break)
     if (e.key === 'Enter') {
       e.preventDefault();
       onSave();
     }
   };
 
-  // Use Textarea with auto-resize for all fields
   return (
     <Textarea
       ref={inputRef as any}
       value={value || ''}
       onChange={(e) => {
-        // Remove line breaks (prevent Enter from creating new lines)
         const newValue = e.target.value.replace(/\n/g, ' ');
         onChange(newValue);
       }}
