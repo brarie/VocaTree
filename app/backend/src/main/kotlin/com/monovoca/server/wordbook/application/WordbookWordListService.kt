@@ -72,12 +72,10 @@ class WordbookWordListService(
 
         wordbook.validateOwner(userId)
 
-        println("wordList 가져오는 쿼리")
         val wordList = wordbookWordListRepository.findById(wordbookId)
 
         val updatedWordList = wordList.newSense(wordId)
-        
-        println("wordList 저장하는 쿼리")
+
         return wordbookWordListRepository.save(updatedWordList)
     }
 
