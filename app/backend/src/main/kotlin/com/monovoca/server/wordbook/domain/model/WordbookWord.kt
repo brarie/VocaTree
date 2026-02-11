@@ -82,4 +82,29 @@ data class WordbookWord(
         }
         return this.copy(senses = updatedSenses)
     }
+
+    fun swapSensesOrder(senseId1: Long, senseId2: Long): WordbookWord {
+        val sense1 = senses.find { it.id == senseId1 } ?: throw WordbookSenseNotFoundException()
+        val sense2 = senses.find { it.id == senseId2 } ?: throw WordbookSenseNotFoundException()
+
+        val newSenses = senses.map { sense ->
+            when (sense.id) {
+                senseId1 -> sense.copy(displayOrder = sense2.displayOrder)
+                senseId2 -> sense.copy(displayOrder = sense1.displayOrder)
+                else -> sense
+            }
+        }.sortedBy { it.displayOrder }
+
+        return this.copy(senses = newSenses)
+    }
+
+    fun swapExamplesOrder(senseId: Long, exampleId1: Long, exampleId2: Long): WordbookWord {
+        if (senses.none { it.id == senseId })
+            throw WordbookSenseNotFoundException()
+
+        val updatedSenses = senses.map { sense ->
+            if (sense.id == senseId) sense.swapExamplesOrder(exampleId1, exampleId2) else sense
+        }
+        return this.copy(senses = updatedSenses)
+    }
 }

@@ -6,9 +6,10 @@ import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.LongIdTable
+import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
 
 object WordbookColumnSettingTable : LongIdTable(name = "wordbook_column_setting") {
-    val wordbookId = reference("wordbook_id", WordbookNodeTable)
+    val wordbookId = reference("wordbook_id", WordbookNodeTable, onDelete = CASCADE)
     val columnType = enumerationByName("column_type", 50, ColumnType::class)
     val isActive = bool("is_active")
     val width = integer("width")

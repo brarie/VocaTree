@@ -3,7 +3,7 @@ package com.monovoca.server.wordbook.domain.model
 import com.monovoca.server.wordbook.domain.exception.CannotDeactivateSpellingColumnException
 import com.monovoca.server.wordbook.domain.exception.MissingParentDependencyColumnException
 import com.monovoca.server.wordbook.domain.exception.ParentColumnDeactivationRestrictedException
-import com.monovoca.server.wordbook.domain.exception.WordbookNotFoundException
+import com.monovoca.server.wordbook.domain.exception.WordbookForbiddenException
 import com.monovoca.server.wordbook.domain.model.enumerated.ColumnType
 import com.monovoca.server.wordbook.domain.model.enumerated.NodeType
 import java.time.LocalDateTime
@@ -48,7 +48,7 @@ data class Wordbook(
 
     override fun validateOwner(userId: String) {
         if (ownerId != userId)
-            throw WordbookNotFoundException()
+            throw WordbookForbiddenException()
     }
 
     fun moveToBundle(newBundleId: Long?): Wordbook =

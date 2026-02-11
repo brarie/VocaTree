@@ -158,4 +158,56 @@ class WordbookWordListService(
         val updatedWordList = wordList.deleteExample(wordId, senseId, exampleId)
         return wordbookWordListRepository.save(updatedWordList)
     }
+
+    @Transactional
+    fun swapWordsOrder(userId: String, wordbookId: Long, wordId1: Long, wordId2: Long): WordbookWordList {
+        val wordbook = wordbookRepository.findById(wordbookId)
+            ?: throw WordbookNotFoundException()
+
+        wordbook.validateOwner(userId)
+
+        val wordList = wordbookWordListRepository.findById(wordbookId)
+
+        val updatedWordList = wordList.swapWordsOrder(wordId1, wordId2)
+        return wordbookWordListRepository.save(updatedWordList)
+    }
+
+    @Transactional
+    fun swapSensesOrder(
+        userId: String,
+        wordbookId: Long,
+        wordId: Long,
+        senseId1: Long,
+        senseId2: Long
+    ): WordbookWordList {
+        val wordbook = wordbookRepository.findById(wordbookId)
+            ?: throw WordbookNotFoundException()
+
+        wordbook.validateOwner(userId)
+
+        val wordList = wordbookWordListRepository.findById(wordbookId)
+
+        val updatedWordList = wordList.swapSensesOrder(wordId, senseId1, senseId2)
+        return wordbookWordListRepository.save(updatedWordList)
+    }
+
+    @Transactional
+    fun swapExamplesOrder(
+        userId: String,
+        wordbookId: Long,
+        wordId: Long,
+        senseId: Long,
+        exampleId1: Long,
+        exampleId2: Long
+    ): WordbookWordList {
+        val wordbook = wordbookRepository.findById(wordbookId)
+            ?: throw WordbookNotFoundException()
+
+        wordbook.validateOwner(userId)
+
+        val wordList = wordbookWordListRepository.findById(wordbookId)
+
+        val updatedWordList = wordList.swapExamplesOrder(wordId, senseId, exampleId1, exampleId2)
+        return wordbookWordListRepository.save(updatedWordList)
+    }
 }

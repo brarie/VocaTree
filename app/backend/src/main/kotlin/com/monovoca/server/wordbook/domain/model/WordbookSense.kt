@@ -60,4 +60,19 @@ data class WordbookSense(
         val updatedExamples = examples.filter { it.id != exampleId }
         return this.copy(examples = updatedExamples)
     }
+
+    fun swapExamplesOrder(exampleId1: Long, exampleId2: Long): WordbookSense {
+        val example1 = examples.find { it.id == exampleId1 } ?: throw WordbookExampleNotFoundException()
+        val example2 = examples.find { it.id == exampleId2 } ?: throw WordbookExampleNotFoundException()
+
+        val newExamples = examples.map { example ->
+            when (example.id) {
+                exampleId1 -> example.copy(displayOrder = example2.displayOrder)
+                exampleId2 -> example.copy(displayOrder = example1.displayOrder)
+                else -> example
+            }
+        }.sortedBy { it.displayOrder }
+
+        return this.copy(examples = newExamples)
+    }
 }

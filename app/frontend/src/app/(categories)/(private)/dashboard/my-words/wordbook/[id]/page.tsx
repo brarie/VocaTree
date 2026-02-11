@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useWordbook } from '@/hooks/wordbook/queries';
 import { usePageHeader } from '@/contexts/PageHeaderContext';
+import { WordbookTable } from './_components/WordbookTable';
 
 export default function WordbookDetailPage() {
   const params = useParams();
@@ -40,9 +41,7 @@ export default function WordbookDetailPage() {
 
   return (
     <div className="space-y-6">
-      <p className="text-muted-foreground">
-        이 페이지는 아직 구현되지 않았습니다.
-      </p>
+      <WordbookTable wordbookId={wordbookId} />
     </div>
   );
 }

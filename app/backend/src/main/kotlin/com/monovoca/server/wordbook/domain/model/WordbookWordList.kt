@@ -1,6 +1,7 @@
 package com.monovoca.server.wordbook.domain.model
 
 import com.monovoca.server.common.util.isSortedBy
+import com.monovoca.server.wordbook.domain.exception.WordbookOneHundredWordsLimitExceededException
 import com.monovoca.server.wordbook.domain.exception.WordbookWordNotFoundException
 import com.monovoca.server.wordbook.domain.model.command.UpdateExampleCommand
 import com.monovoca.server.wordbook.domain.model.command.UpdateSenseCommand
@@ -16,6 +17,9 @@ data class WordbookWordList(
     }
 
     fun newWord(): WordbookWordList {
+        if (wordList.size >= 100)
+            throw WordbookOneHundredWordsLimitExceededException()
+
         val newDisplayOrder = (wordList.maxOfOrNull { it.displayOrder } ?: 0) + 1
         val newWord = WordbookWord.create(displayOrder = newDisplayOrder)
         val updatedWordList = wordList + newWord
@@ -101,6 +105,41 @@ data class WordbookWordList(
             if (word.id == wordId) word.deleteExample(senseId, exampleId) else word
         }
 
+        return this.copy(wordList = updatedWords)
+    }
+
+    fun swapWordsOrder(wordId1: Long, wordId2: Long): WordbookWordList {
+        val word1 = wordList.find { it.id == wordId1 } ?: throw WordbookWordNotFoundException()
+        val word2 = wordList.find { it.id == wordId2 } ?: throw WordbookWordNotFoundException()
+
+        val newWordList = wordList.map { word ->
+            when (word.id) {
+                wordId1 -> word.copy(displayOrder = word2.displayOrder)
+                wordId2 -> word.copy(displayOrder = word1.displayOrder)
+                else -> word
+            }
+        }.sortedBy { it.displayOrder }
+
+        return this.copy(wordList = newWordList)
+    }
+
+    fun swapSensesOrder(wordId: Long, senseId1: Long, senseId2: Long): WordbookWordList {
+        if (wordList.none { it.id == wordId })
+            throw WordbookWordNotFoundException()
+
+        val updatedWords = wordList.map { word ->
+            if (word.id == wordId) word.swapSensesOrder(senseId1, senseId2) else word
+        }
+        return this.copy(wordList = updatedWords)
+    }
+
+    fun swapExamplesOrder(wordId: Long, senseId: Long, exampleId1: Long, exampleId2: Long): WordbookWordList {
+        if (wordList.none { it.id == wordId })
+            throw WordbookWordNotFoundException()
+
+        val updatedWords = wordList.map { word ->
+            if (word.id == wordId) word.swapExamplesOrder(senseId, exampleId1, exampleId2) else word
+        }
         return this.copy(wordList = updatedWords)
     }
 }

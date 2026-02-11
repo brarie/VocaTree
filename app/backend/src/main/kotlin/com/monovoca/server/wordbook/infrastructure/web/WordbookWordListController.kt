@@ -2,20 +2,11 @@ package com.monovoca.server.wordbook.infrastructure.web
 
 import com.monovoca.server.common.infrastructure.UserPrincipal
 import com.monovoca.server.wordbook.application.WordbookWordListService
-import com.monovoca.server.wordbook.infrastructure.web.request.UpdateWordbookExampleRequest
-import com.monovoca.server.wordbook.infrastructure.web.request.UpdateWordbookSenseRequest
-import com.monovoca.server.wordbook.infrastructure.web.request.UpdateWordbookWordRequest
+import com.monovoca.server.wordbook.infrastructure.web.request.*
 import com.monovoca.server.wordbook.infrastructure.web.response.WordbookWordListResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/wordbooks/{wordbookId}/words")
@@ -156,6 +147,60 @@ class WordbookWordListController(
             senseId,
             exampleId,
             request.toCommand()
+        )
+        val response = WordbookWordListResponse.from(wordbookWordList)
+        return ResponseEntity.ok(response)
+    }
+
+    @PostMapping("/swap-order")
+    fun swapWordsOrder(
+        @AuthenticationPrincipal userPrincipal: UserPrincipal,
+        @PathVariable wordbookId: Long,
+        @RequestBody request: SwapWordbookWordsOrderRequest,
+    ): ResponseEntity<WordbookWordListResponse> {
+        val wordbookWordList = wordbookWordListService.swapWordsOrder(
+            userPrincipal.id,
+            wordbookId,
+            request.wordId1,
+            request.wordId2
+        )
+        val response = WordbookWordListResponse.from(wordbookWordList)
+        return ResponseEntity.ok(response)
+    }
+
+    @PostMapping("/{wordId}/senses/swap-order")
+    fun swapSensesOrder(
+        @AuthenticationPrincipal userPrincipal: UserPrincipal,
+        @PathVariable wordbookId: Long,
+        @PathVariable wordId: Long,
+        @RequestBody request: SwapWordbookSensesOrderRequest,
+    ): ResponseEntity<WordbookWordListResponse> {
+        val wordbookWordList = wordbookWordListService.swapSensesOrder(
+            userPrincipal.id,
+            wordbookId,
+            wordId,
+            request.senseId1,
+            request.senseId2
+        )
+        val response = WordbookWordListResponse.from(wordbookWordList)
+        return ResponseEntity.ok(response)
+    }
+
+    @PostMapping("/{wordId}/senses/{senseId}/examples/swap-order")
+    fun swapExamplesOrder(
+        @AuthenticationPrincipal userPrincipal: UserPrincipal,
+        @PathVariable wordbookId: Long,
+        @PathVariable wordId: Long,
+        @PathVariable senseId: Long,
+        @RequestBody request: SwapWordbookExamplesOrderRequest,
+    ): ResponseEntity<WordbookWordListResponse> {
+        val wordbookWordList = wordbookWordListService.swapExamplesOrder(
+            userPrincipal.id,
+            wordbookId,
+            wordId,
+            senseId,
+            request.exampleId1,
+            request.exampleId2
         )
         val response = WordbookWordListResponse.from(wordbookWordList)
         return ResponseEntity.ok(response)

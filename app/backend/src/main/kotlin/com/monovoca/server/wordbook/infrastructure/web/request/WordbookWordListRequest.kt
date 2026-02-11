@@ -43,3 +43,18 @@ data class UpdateWordbookExampleRequest(
         translation = translation,
     )
 }
+
+data class SwapWordbookWordsOrderRequest(
+    val wordId1: Long,
+    val wordId2: Long
+)
+
+data class SwapWordbookSensesOrderRequest(
+    val senseId1: Long,
+    val senseId2: Long
+)
+
+data class SwapWordbookExamplesOrderRequest(
+    val exampleId1: Long,
+    val exampleId2: Long
+)
