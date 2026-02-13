@@ -6,6 +6,8 @@ import {
   NodeResponseWithCountView,
   CreateWordbookRequest,
   UpdateWordbookTitleRequest,
+  CreateBundleRequest,
+  UpdateBundleTitleRequest,
   WordbookNodeSortType,
 } from '@/types/api/wordbook';
 
@@ -67,7 +69,7 @@ export async function getAllBundles(): Promise<WordbookNodeResponse[]> {
 }
 
 export async function createBundle(
-  request: CreateWordbookRequest,
+  request: CreateBundleRequest,
 ): Promise<WordbookNodeResponse> {
   const response = await fetcherWithAuth('/api/wordbook-bundles', {
     method: 'POST',
@@ -82,7 +84,7 @@ export async function createBundle(
 
 export async function updateBundleTitle(
   bundleId: number,
-  request: UpdateWordbookTitleRequest,
+  request: UpdateBundleTitleRequest,
 ): Promise<WordbookNodeResponse> {
   const response = await fetcherWithAuth(
     `/api/wordbook-bundles/${bundleId}/title`,
@@ -129,6 +131,24 @@ export async function createWordbook(
     body: JSON.stringify(request),
   });
   await handleApiResponse(response, 'Failed to create wordbook');
+
+  const data: WordbookNodeResponse = await response.json();
+  return data;
+}
+
+export async function createWordbookInBundle(
+  bundleId: number,
+  request: CreateWordbookRequest,
+): Promise<WordbookNodeResponse> {
+  const response = await fetcherWithAuth(
+    `/api/wordbooks/wordbook-bundle/${bundleId}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(request),
+    },
+  );
+  await handleApiResponse(response, 'Failed to create wordbook in bundle');
 
   const data: WordbookNodeResponse = await response.json();
   return data;

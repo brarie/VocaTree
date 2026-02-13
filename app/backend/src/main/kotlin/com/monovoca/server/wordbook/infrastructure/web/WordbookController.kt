@@ -38,6 +38,17 @@ class WordbookController(
         return ResponseEntity.ok(response)
     }
 
+    @PostMapping("/wordbook-bundle/{bundleId}")
+    fun createWordbookInBundle(
+        @AuthenticationPrincipal userPrincipal: UserPrincipal,
+        @PathVariable bundleId: Long,
+        @RequestBody request: CreateWordbookRequest
+    ): ResponseEntity<WordbookNodeResponse> {
+        val wordbook = wordbookService.createInBundle(userPrincipal.id, bundleId, request.title)
+        val response = WordbookNodeResponse.from(wordbook)
+        return ResponseEntity.ok(response)
+    }
+
     @PatchMapping("/{wordbookId}/title")
     fun updateWordbookTitle(
         @AuthenticationPrincipal userPrincipal: UserPrincipal,

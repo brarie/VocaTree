@@ -26,6 +26,20 @@ export type UpdateWordbookTitleRequest = z.infer<
   typeof UpdateWordbookTitleRequestSchema
 >;
 
+export const CreateBundleRequestSchema = z.object({
+  title: z.string().min(1, '제목을 입력해주세요.'),
+});
+
+export type CreateBundleRequest = z.infer<typeof CreateBundleRequestSchema>;
+
+export const UpdateBundleTitleRequestSchema = z.object({
+  title: z.string().min(1, '제목을 입력해주세요.'),
+});
+
+export type UpdateBundleTitleRequest = z.infer<
+  typeof UpdateBundleTitleRequestSchema
+>;
+
 export interface WordbookNodeResponse {
   id: number;
   title: string;

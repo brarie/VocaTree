@@ -23,6 +23,19 @@ class WordbookService(
     }
 
     @Transactional
+    fun createInBundle(userId: String, bundleId: Long, title: String): Wordbook {
+        val bundle = wordbookBundleRepository.findById(bundleId)
+            ?: throw WordbookBundleNotFoundException()
+
+        bundle.validateOwner(userId)
+
+        val wordbook = Wordbook.create(ownerId = userId, title = title)
+            .moveToBundle(bundleId)
+
+        return wordbookRepository.save(wordbook)
+    }
+
+    @Transactional
     fun updateTitle(userId: String, wordbookId: Long, newTitle: String): Wordbook {
         val wordbook = wordbookRepository.findById(wordbookId)
             ?: throw WordbookNotFoundException()
@@ -55,7 +68,7 @@ class WordbookService(
     }
 
     @Transactional
-    fun move(userId: String, wordbookId: Long, bundleId: Long?) : Wordbook {
+    fun move(userId: String, wordbookId: Long, bundleId: Long?): Wordbook {
         val wordbook = wordbookRepository.findById(wordbookId)
             ?: throw WordbookNotFoundException()
 

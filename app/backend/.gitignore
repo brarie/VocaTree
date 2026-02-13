@@ -42,3 +42,12 @@ out/
 ### Claude ###
 claude.md
 spec/
+
+### TEMPORARY ###
+/src/main/kotlin/com/monovoca/server/dictionary/domain/model/contribution/enumerated/ContributionAction.kt
+/src/main/kotlin/com/monovoca/server/dictionary/domain/model/contribution/enumerated/ContributionResource.kt
+/src/main/kotlin/com/monovoca/server/dictionary/domain/model/contribution/enumerated/ContributionStatus.kt
+/src/main/kotlin/com/monovoca/server/dictionary/domain/model/contribution/ContributionLog.kt
+/src/main/kotlin/com/monovoca/server/dictionary/domain/model/contribution/ContributionOpinion.kt
+/src/main/kotlin/com/monovoca/server/dictionary/infrastructure/persistence/entity/ContributionLogEntity.kt
+/src/main/kotlin/com/monovoca/server/dictionary/infrastructure/persistence/entity/ContributionOpinionEntity.kt

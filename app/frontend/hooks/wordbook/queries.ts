@@ -10,6 +10,7 @@ import {
   toggleBundleStarred,
   deleteBundle,
   createWordbook,
+  createWordbookInBundle,
   updateWordbookTitle,
   toggleWordbookStarred,
   moveWordbookToRoot,
@@ -19,6 +20,8 @@ import {
 import {
   CreateWordbookRequest,
   UpdateWordbookTitleRequest,
+  CreateBundleRequest,
+  UpdateBundleTitleRequest,
   WordbookNodeSortType,
 } from '@/types/api/wordbook';
 import { ApiError } from '@/types/api/error';
@@ -92,7 +95,7 @@ export function useCreateBundle() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (request: CreateWordbookRequest) => createBundle(request),
+    mutationFn: (request: CreateBundleRequest) => createBundle(request),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: wordbookKeys.all });
       toast.success('단어장 모음이 생성되었습니다.');
@@ -112,7 +115,7 @@ export function useUpdateBundleTitle() {
       request,
     }: {
       bundleId: number;
-      request: UpdateWordbookTitleRequest;
+      request: UpdateBundleTitleRequest;
     }) => updateBundleTitle(bundleId, request),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: wordbookKeys.all });
@@ -158,6 +161,27 @@ export function useCreateWordbook() {
 
   return useMutation({
     mutationFn: (request: CreateWordbookRequest) => createWordbook(request),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: wordbookKeys.all });
+      toast.success('단어장이 생성되었습니다.');
+    },
+    onError: (error: ApiError) => {
+      toast.error(error.message);
+    },
+  });
+}
+
+export function useCreateWordbookInBundle() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      bundleId,
+      request,
+    }: {
+      bundleId: number;
+      request: CreateWordbookRequest;
+    }) => createWordbookInBundle(bundleId, request),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: wordbookKeys.all });
       toast.success('단어장이 생성되었습니다.');

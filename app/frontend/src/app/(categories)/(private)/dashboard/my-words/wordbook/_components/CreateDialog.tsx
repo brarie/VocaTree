@@ -6,6 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   CreateWordbookRequestSchema,
   CreateWordbookRequest,
+  CreateBundleRequestSchema,
+  CreateBundleRequest,
 } from '@/types/api/wordbook';
 import { useCreateWordbook, useCreateBundle } from '@/hooks/wordbook/queries';
 import {
@@ -44,23 +46,27 @@ export function CreateDialog({ open, onOpenChange }: CreateDialogProps) {
   const createWordbook = useCreateWordbook();
   const createBundle = useCreateBundle();
 
-  const form = useForm<CreateWordbookRequest>({
-    resolver: zodResolver(CreateWordbookRequestSchema),
+  const form = useForm<CreateWordbookRequest | CreateBundleRequest>({
+    resolver: zodResolver(
+      type === 'wordbook'
+        ? CreateWordbookRequestSchema
+        : CreateBundleRequestSchema,
+    ),
     defaultValues: {
       title: '',
     },
   });
 
-  const onSubmit = async (data: CreateWordbookRequest) => {
+  const onSubmit = async (data: CreateWordbookRequest | CreateBundleRequest) => {
     if (type === 'wordbook') {
-      createWordbook.mutate(data, {
+      createWordbook.mutate(data as CreateWordbookRequest, {
         onSuccess: () => {
           form.reset();
           onOpenChange(false);
         },
       });
     } else {
-      createBundle.mutate(data, {
+      createBundle.mutate(data as CreateBundleRequest, {
         onSuccess: () => {
           form.reset();
           onOpenChange(false);

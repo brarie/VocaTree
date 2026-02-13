@@ -1,11 +1,38 @@
 'use client';
 
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
-import { usePaginateNodesInBundle, useBundle } from '@/hooks/wordbook/queries';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { ArrowLeft, Plus } from 'lucide-react';
+import {
+  usePaginateNodesInBundle,
+  useBundle,
+  useCreateWordbookInBundle,
+} from '@/hooks/wordbook/queries';
+import {
+  CreateWordbookRequestSchema,
+  CreateWordbookRequest,
+} from '@/types/api/wordbook';
 import { usePageHeader } from '@/contexts/PageHeaderContext';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { PaginationBar } from '@/components/PaginationBar';
 import { WordbookCard } from '../../_components/WordbookCard';
 
@@ -25,6 +52,16 @@ export function BundleContent() {
     size,
   );
   const { setPageHeader, clearPageHeader } = usePageHeader();
+  const createWordbookInBundle = useCreateWordbookInBundle();
+
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+
+  const form = useForm<CreateWordbookRequest>({
+    resolver: zodResolver(CreateWordbookRequestSchema),
+    defaultValues: {
+      title: '',
+    },
+  });
 
   const isLoading = isBundleLoading || isPageLoading;
 
@@ -71,6 +108,25 @@ export function BundleContent() {
     updateParams({ page: 0, size: newSize });
   };
 
+  const onSubmit = async (data: CreateWordbookRequest) => {
+    createWordbookInBundle.mutate(
+      { bundleId, request: data },
+      {
+        onSuccess: () => {
+          form.reset();
+          setCreateDialogOpen(false);
+        },
+      },
+    );
+  };
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      form.reset();
+    }
+    setCreateDialogOpen(newOpen);
+  };
+
   if (isLoading) {
     return (
       <div className="text-center py-12 text-muted-foreground">로딩 중...</div>
@@ -87,15 +143,22 @@ export function BundleContent() {
 
   return (
     <div className="space-y-6">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => router.push('/dashboard/my-words/wordbook')}
-        className="gap-2"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        뒤로가기
-      </Button>
+      <div className="flex items-center justify-between">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push('/dashboard/my-words/wordbook')}
+          className="gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          뒤로가기
+        </Button>
+
+        <Button onClick={() => setCreateDialogOpen(true)}>
+          <Plus className="w-4 h-4 mr-2" />
+          단어장 만들기
+        </Button>
+      </div>
 
       {pageData && pageData.content.length > 0 ? (
         <>
@@ -117,6 +180,54 @@ export function BundleContent() {
           이 단어장 모음에는 아직 단어장이 없습니다.
         </div>
       )}
+
+      <Dialog open={createDialogOpen} onOpenChange={handleOpenChange}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>단어장 만들기</DialogTitle>
+            <DialogDescription>
+              {bundle?.title} 모음에 새로운 단어장을 추가합니다.
+            </DialogDescription>
+          </DialogHeader>
+
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>제목</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="단어장 제목을 입력하세요"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => handleOpenChange(false)}
+                >
+                  취소
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={createWordbookInBundle.isPending}
+                >
+                  {createWordbookInBundle.isPending ? '생성 중...' : '생성'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
