@@ -283,10 +283,35 @@ class WordbookWordListServiceTest(
     }
 
     describe("deleteSense") {
-        context("뜻 삭제 요청할 때") {
-            it("뜻이 삭제된다.") {
+        context("2개 이상의 뜻이 있을 때 삭제 요청하면") {
+            it("해당 뜻이 삭제된다.") {
                 val owner = userRepository.save(
                     UserFixture.create(username = "sdelete1", email = "sdelete1@test.com")
+                )
+                val wordbook = wordbookRepository.save(
+                    WordbookFixture.create(ownerId = owner.id!!)
+                )
+                var wordList = wordbookWordListService.createWord(owner.id!!, wordbook.id!!)
+                val wordId = wordList.wordList[0].id!!
+                wordList = wordbookWordListService.createSense(owner.id!!, wordbook.id!!, wordId)
+                wordList = wordbookWordListService.createSense(owner.id!!, wordbook.id!!, wordId)
+                val senseId = wordList.wordList[0].senses[0].id!!
+
+                val updated = wordbookWordListService.deleteSense(
+                    owner.id!!,
+                    wordbook.id!!,
+                    wordId,
+                    senseId
+                )
+
+                updated.wordList[0].senses shouldHaveSize 1
+            }
+        }
+
+        context("마지막 남은 뜻을 삭제 요청할 때") {
+            it("빈 뜻 + 빈 예문 1개로 초기화된다.") {
+                val owner = userRepository.save(
+                    UserFixture.create(username = "sdelete2", email = "sdelete2@test.com")
                 )
                 val wordbook = wordbookRepository.save(
                     WordbookFixture.create(ownerId = owner.id!!)
@@ -303,7 +328,9 @@ class WordbookWordListServiceTest(
                     senseId
                 )
 
-                updated.wordList[0].senses shouldHaveSize 0
+                updated.wordList[0].senses shouldHaveSize 1
+                updated.wordList[0].senses[0].sense.isBlank() shouldBe true
+                updated.wordList[0].senses[0].examples shouldHaveSize 1
             }
         }
     }
@@ -375,10 +402,48 @@ class WordbookWordListServiceTest(
     }
 
     describe("deleteExample") {
-        context("예문 삭제 요청할 때") {
-            it("예문이 삭제된다.") {
+        context("2개 이상의 예문이 있을 때 삭제 요청하면") {
+            it("해당 예문이 삭제된다.") {
                 val owner = userRepository.save(
                     UserFixture.create(username = "edelete1", email = "edelete1@test.com")
+                )
+                val wordbook = wordbookRepository.save(
+                    WordbookFixture.create(ownerId = owner.id!!)
+                )
+                var wordList = wordbookWordListService.createWord(owner.id!!, wordbook.id!!)
+                val wordId = wordList.wordList[0].id!!
+                wordList = wordbookWordListService.createSense(owner.id!!, wordbook.id!!, wordId)
+                val senseId = wordList.wordList[0].senses[0].id!!
+                wordList = wordbookWordListService.createExample(
+                    owner.id!!,
+                    wordbook.id!!,
+                    wordId,
+                    senseId
+                )
+                wordList = wordbookWordListService.createExample(
+                    owner.id!!,
+                    wordbook.id!!,
+                    wordId,
+                    senseId
+                )
+                val exampleId = wordList.wordList[0].senses[0].examples[0].id!!
+
+                val updated = wordbookWordListService.deleteExample(
+                    owner.id!!,
+                    wordbook.id!!,
+                    wordId,
+                    senseId,
+                    exampleId
+                )
+
+                updated.wordList[0].senses[0].examples shouldHaveSize 1
+            }
+        }
+
+        context("마지막 남은 예문을 삭제 요청할 때") {
+            it("빈 예문 1개로 초기화된다.") {
+                val owner = userRepository.save(
+                    UserFixture.create(username = "edelete2", email = "edelete2@test.com")
                 )
                 val wordbook = wordbookRepository.save(
                     WordbookFixture.create(ownerId = owner.id!!)
@@ -403,7 +468,8 @@ class WordbookWordListServiceTest(
                     exampleId
                 )
 
-                updated.wordList[0].senses[0].examples shouldHaveSize 0
+                updated.wordList[0].senses[0].examples shouldHaveSize 1
+                updated.wordList[0].senses[0].examples[0].example.isBlank() shouldBe true
             }
         }
     }
@@ -538,6 +604,85 @@ class WordbookWordListServiceTest(
                 val example2 = updated.wordList[0].senses[0].examples.find { it.id == exampleId2 }
                 example1?.displayOrder shouldBe order2
                 example2?.displayOrder shouldBe order1
+            }
+        }
+    }
+
+    describe("createWordSeries") {
+        context("단어 시리즈 생성 요청할 때") {
+            it("Word + Sense + Example이 한 번에 생성된다.") {
+                val owner = userRepository.save(
+                    UserFixture.create(username = "wseries1", email = "wseries1@test.com")
+                )
+                val wordbook = wordbookRepository.save(
+                    WordbookFixture.create(ownerId = owner.id!!)
+                )
+
+                val wordList = wordbookWordListService.createWordSeries(owner.id!!, wordbook.id!!)
+
+                wordList.wordList shouldHaveSize 1
+                wordList.wordList[0].displayOrder shouldBe 1
+                wordList.wordList[0].senses shouldHaveSize 1
+                wordList.wordList[0].senses[0].displayOrder shouldBe 1
+                wordList.wordList[0].senses[0].examples shouldHaveSize 1
+                wordList.wordList[0].senses[0].examples[0].displayOrder shouldBe 1
+            }
+        }
+
+        context("100개 단어가 이미 있을 때") {
+            it("WordbookOneHundredWordsLimitExceededException이 발생한다.") {
+                val owner = userRepository.save(
+                    UserFixture.create(username = "wseries2", email = "wseries2@test.com")
+                )
+                val wordbook = wordbookRepository.save(
+                    WordbookFixture.create(ownerId = owner.id!!)
+                )
+
+                // 100개 단어 생성
+                repeat(100) {
+                    wordbookWordListService.createWord(owner.id!!, wordbook.id!!)
+                }
+
+                shouldThrow<WordbookOneHundredWordsLimitExceededException> {
+                    wordbookWordListService.createWordSeries(owner.id!!, wordbook.id!!)
+                }
+            }
+        }
+    }
+
+    describe("createSenseSeries") {
+        context("뜻 시리즈 생성 요청할 때") {
+            it("Sense + Example이 한 번에 생성된다.") {
+                val owner = userRepository.save(
+                    UserFixture.create(username = "sseries1", email = "sseries1@test.com")
+                )
+                val wordbook = wordbookRepository.save(
+                    WordbookFixture.create(ownerId = owner.id!!)
+                )
+                var wordList = wordbookWordListService.createWord(owner.id!!, wordbook.id!!)
+                val wordId = wordList.wordList[0].id!!
+
+                wordList = wordbookWordListService.createSenseSeries(owner.id!!, wordbook.id!!, wordId)
+
+                wordList.wordList[0].senses shouldHaveSize 1
+                wordList.wordList[0].senses[0].displayOrder shouldBe 1
+                wordList.wordList[0].senses[0].examples shouldHaveSize 1
+                wordList.wordList[0].senses[0].examples[0].displayOrder shouldBe 1
+            }
+        }
+
+        context("존재하지 않는 단어 ID로 요청할 때") {
+            it("WordbookWordNotFoundException이 발생한다.") {
+                val owner = userRepository.save(
+                    UserFixture.create(username = "sseries2", email = "sseries2@test.com")
+                )
+                val wordbook = wordbookRepository.save(
+                    WordbookFixture.create(ownerId = owner.id!!)
+                )
+
+                shouldThrow<WordbookWordNotFoundException> {
+                    wordbookWordListService.createSenseSeries(owner.id!!, wordbook.id!!, 999999L)
+                }
             }
         }
     }

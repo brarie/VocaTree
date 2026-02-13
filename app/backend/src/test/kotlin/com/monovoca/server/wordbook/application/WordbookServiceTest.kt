@@ -292,8 +292,11 @@ class WordbookServiceTest(
 
                 val columns = wordbookService.getWordbookColumns(owner.id!!, wordbook.id!!)
 
-                columns.size shouldBe 3
+                columns.size shouldBe 4
                 columns[ColumnType.SPELLING]?.isActive shouldBe true
+                columns[ColumnType.DEFINITION]?.isActive shouldBe true
+                columns[ColumnType.PART_OF_SPEECH]?.isActive shouldBe true
+                columns[ColumnType.SENTENCE]?.isActive shouldBe true
             }
         }
     }
@@ -391,11 +394,14 @@ class WordbookServiceTest(
                     WordbookFixture.create(ownerId = owner.id!!)
                 )
 
+                // Level 3 먼저 비활성화
+                wordbook = wordbook.toggleColumnActiveStatus(ColumnType.SENTENCE)
                 // Level 2 모두 비활성화
                 wordbook = wordbook.toggleColumnActiveStatus(ColumnType.DEFINITION)
                 wordbook = wordbook.toggleColumnActiveStatus(ColumnType.PART_OF_SPEECH)
                 wordbookRepository.save(wordbook)
 
+                // Level 3 다시 활성화 시도
                 shouldThrow<MissingParentDependencyColumnException> {
                     wordbookService.toggleColumnActiveStatus(
                         owner.id!!,
@@ -415,12 +421,12 @@ class WordbookServiceTest(
                     WordbookFixture.create(ownerId = owner.id!!)
                 )
 
-                // Level 2 중 하나만 남기고 비활성화
+                // Level 2 중 하나만 남기고 비활성화 (DEFINITION만 남김)
                 wordbook = wordbook.toggleColumnActiveStatus(ColumnType.PART_OF_SPEECH)
-                // Level 3 활성화
-                wordbook = wordbook.toggleColumnActiveStatus(ColumnType.SENTENCE)
+                // SENTENCE는 이미 활성화되어 있음
                 wordbookRepository.save(wordbook)
 
+                // 마지막 Level 2 (DEFINITION) 비활성화 시도
                 shouldThrow<ParentColumnDeactivationRestrictedException> {
                     wordbookService.toggleColumnActiveStatus(
                         owner.id!!,

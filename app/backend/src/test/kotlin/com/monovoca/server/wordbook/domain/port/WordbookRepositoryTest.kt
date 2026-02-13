@@ -132,10 +132,11 @@ class WordbookRepositoryTest(
 
             val found = wordbookRepository.findById(saved.id!!)
             found shouldNotBe null
-            found!!.columns.size shouldBe 3
+            found!!.columns.size shouldBe 4
             found.columns[com.monovoca.server.wordbook.domain.model.enumerated.ColumnType.SPELLING]?.isActive shouldBe true
             found.columns[com.monovoca.server.wordbook.domain.model.enumerated.ColumnType.DEFINITION]?.isActive shouldBe true
             found.columns[com.monovoca.server.wordbook.domain.model.enumerated.ColumnType.PART_OF_SPEECH]?.isActive shouldBe true
+            found.columns[com.monovoca.server.wordbook.domain.model.enumerated.ColumnType.SENTENCE]?.isActive shouldBe true
         }
 
         it("칼럼 너비를 변경하면 반영된다.") {
