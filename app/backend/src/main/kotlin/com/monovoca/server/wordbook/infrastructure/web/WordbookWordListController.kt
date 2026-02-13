@@ -46,6 +46,7 @@ class WordbookWordListController(
     }
 
     @PostMapping
+    @Deprecated(message = "사용자의 UX 개선을 위해 createWordSeries로 대체되었습니다.")
     fun createWord(
         @AuthenticationPrincipal userPrincipal: UserPrincipal,
         @PathVariable wordbookId: Long,
@@ -56,6 +57,7 @@ class WordbookWordListController(
     }
 
     @PostMapping("/{wordId}/senses")
+    @Deprecated(message = "사용자의 UX 개선을 위해 createSenseSeries로 대체되었습니다.")
     fun createSense(
         @AuthenticationPrincipal userPrincipal: UserPrincipal,
         @PathVariable wordbookId: Long,
@@ -222,6 +224,23 @@ class WordbookWordListController(
             senseId,
             request.exampleId1,
             request.exampleId2
+        )
+        val response = WordbookWordListResponse.from(wordbookWordList)
+        return ResponseEntity.ok(response)
+    }
+
+    @PostMapping("/{wordId}/auto-complete-from-dictionary")
+    fun autoCompleteFromDictionary(
+        @AuthenticationPrincipal userPrincipal: UserPrincipal,
+        @PathVariable wordbookId: Long,
+        @PathVariable wordId: Long,
+        @RequestBody request: AutoCompleteFromDictionaryRequest,
+    ): ResponseEntity<WordbookWordListResponse> {
+        val wordbookWordList = wordbookWordListService.autoCompleteFromDictionary(
+            userPrincipal.id,
+            wordbookId,
+            wordId,
+            request.toRequestCommand()
         )
         val response = WordbookWordListResponse.from(wordbookWordList)
         return ResponseEntity.ok(response)

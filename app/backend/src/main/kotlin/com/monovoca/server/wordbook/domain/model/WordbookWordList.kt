@@ -3,6 +3,7 @@ package com.monovoca.server.wordbook.domain.model
 import com.monovoca.server.common.util.isSortedBy
 import com.monovoca.server.wordbook.domain.exception.WordbookOneHundredWordsLimitExceededException
 import com.monovoca.server.wordbook.domain.exception.WordbookWordNotFoundException
+import com.monovoca.server.wordbook.domain.model.command.AutoCompleteCommand
 import com.monovoca.server.wordbook.domain.model.command.UpdateExampleCommand
 import com.monovoca.server.wordbook.domain.model.command.UpdateSenseCommand
 import com.monovoca.server.wordbook.domain.model.command.UpdateWordCommand
@@ -19,7 +20,7 @@ data class WordbookWordList(
     /**
      * 사용자 편의를 위한 Method.
      * 한 번에 Word + Sense + Example 을 만든다.
-      */
+     */
     fun newWordSeries(): WordbookWordList {
         if (wordList.size >= 100)
             throw WordbookOneHundredWordsLimitExceededException()
@@ -40,7 +41,8 @@ data class WordbookWordList(
             if (word.id == wordId) {
                 val newSenseDisplayOrder = (word.senses.maxOfOrNull { it.displayOrder } ?: 0) + 1
                 val newExample = WordbookExample.create(displayOrder = 1)
-                val newSense = WordbookSense.create(displayOrder = newSenseDisplayOrder).copy(examples = listOf(newExample))
+                val newSense =
+                    WordbookSense.create(displayOrder = newSenseDisplayOrder).copy(examples = listOf(newExample))
                 word.copy(senses = word.senses + newSense)
             } else word
         }
@@ -171,6 +173,17 @@ data class WordbookWordList(
         val updatedWords = wordList.map { word ->
             if (word.id == wordId) word.swapExamplesOrder(senseId, exampleId1, exampleId2) else word
         }
+        return this.copy(wordList = updatedWords)
+    }
+
+    fun autoCompleteWord(wordId: Long, command: AutoCompleteCommand): WordbookWordList {
+        if (wordList.none { it.id == wordId })
+            throw WordbookWordNotFoundException()
+
+        val updatedWords = wordList.map { word ->
+            if (word.id == wordId) word.autoComplete(command) else word
+        }
+
         return this.copy(wordList = updatedWords)
     }
 }

@@ -18,6 +18,7 @@ import {
   swapWordsOrder,
   swapSensesOrder,
   swapExamplesOrder,
+  autoCompleteFromDictionary,
 } from '@/api/wordbookWord';
 import {
   UpdateWordbookWordRequest,
@@ -27,6 +28,7 @@ import {
   SwapWordbookWordsOrderRequest,
   SwapWordbookSensesOrderRequest,
   SwapWordbookExamplesOrderRequest,
+  AutoCompleteFromDictionaryRequest,
   ColumnType,
 } from '@/types/api/wordbookWord';
 import { ApiError } from '@/types/api/error';
@@ -518,6 +520,32 @@ export function useSwapExamplesOrder() {
         wordbookWordKeys.wordList(variables.wordbookId),
         data,
       );
+    },
+    onError: (error: ApiError) => {
+      toast.error(error.message);
+    },
+  });
+}
+
+export function useAutoCompleteFromDictionary() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      wordbookId,
+      wordId,
+      data,
+    }: {
+      wordbookId: number;
+      wordId: number;
+      data: AutoCompleteFromDictionaryRequest;
+    }) => autoCompleteFromDictionary(wordbookId, wordId, data),
+    onSuccess: (data, variables) => {
+      queryClient.setQueryData(
+        wordbookWordKeys.wordList(variables.wordbookId),
+        data,
+      );
+      toast.success('자동완성이 적용되었습니다.');
     },
     onError: (error: ApiError) => {
       toast.error(error.message);

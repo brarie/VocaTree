@@ -3,7 +3,10 @@ import {
   FlattenedRow,
   WordbookWordResponse,
   ColumnType,
+  UpdateWordbookSenseRequest,
+  UpdateWordbookExampleRequest,
 } from '@/types/api/wordbookWord';
+import { PublicWordSense, PublicWordExample } from '@/types/api/dictionary';
 
 /**
  * Flatten hierarchical wordbook data into rows for TanStack Table
@@ -246,4 +249,74 @@ export function getFieldName(columnType: ColumnType): string {
   };
 
   return fieldMap[columnType];
+}
+
+/**
+ * Get active columns from column settings
+ */
+export function getActiveColumns(
+  columnsData: WordbookWordListResponse | { columns: Record<ColumnType, { isActive: boolean }> } | undefined
+): Set<ColumnType> {
+  if (!columnsData) return new Set<ColumnType>();
+
+  const columns = 'columns' in columnsData ? columnsData.columns : {};
+
+  return new Set(
+    Object.entries(columns)
+      .filter(([_, setting]) => (setting as { isActive: boolean }).isActive)
+      .map(([key, _]) => key as ColumnType)
+  );
+}
+
+/**
+ * Filter sense data to only include active columns
+ */
+export function filterSenseData(
+  sense: PublicWordSense,
+  activeColumns: Set<ColumnType>
+): UpdateWordbookSenseRequest {
+  const data: UpdateWordbookSenseRequest = {};
+
+  if (activeColumns.has(ColumnType.DEFINITION)) {
+    data.definition = sense.sense.definition;
+  }
+  if (activeColumns.has(ColumnType.ENG_DEFINITION)) {
+    data.engDefinition = sense.sense.engDefinition;
+  }
+  if (activeColumns.has(ColumnType.PART_OF_SPEECH)) {
+    data.partOfSpeech = sense.sense.partOfSpeech;
+  }
+  if (activeColumns.has(ColumnType.US_PHONETIC)) {
+    data.americanPhonetic = sense.sense.americanPhonetic;
+  }
+  if (activeColumns.has(ColumnType.UK_PHONETIC)) {
+    data.britishPhonetic = sense.sense.britishPhonetic;
+  }
+  if (activeColumns.has(ColumnType.SYNONYMS)) {
+    data.synonyms = sense.sense.synonyms;
+  }
+  if (activeColumns.has(ColumnType.ANTONYMS)) {
+    data.antonyms = sense.sense.antonyms;
+  }
+
+  return data;
+}
+
+/**
+ * Filter example data to only include active columns
+ */
+export function filterExampleData(
+  example: PublicWordExample,
+  activeColumns: Set<ColumnType>
+): UpdateWordbookExampleRequest {
+  const data: UpdateWordbookExampleRequest = {};
+
+  if (activeColumns.has(ColumnType.SENTENCE)) {
+    data.sentence = example.example.sentence;
+  }
+  if (activeColumns.has(ColumnType.TRANSLATION)) {
+    data.translation = example.example.translation;
+  }
+
+  return data;
 }

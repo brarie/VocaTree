@@ -11,4 +11,14 @@ data class SenseVo(
     val partOfSpeech: PartOfSpeech? = null,
     val synonyms: List<Spelling> = emptyList(),
     val antonyms: List<Spelling> = emptyList()
-)
+) {
+    fun isBlank(): Boolean {
+        return definition.isNullOrBlank()
+            && engDefinition.isNullOrBlank()
+            && britishPhonetic.isNullOrBlank()
+            && americanPhonetic.isNullOrBlank()
+            && partOfSpeech == null
+            && synonyms.isEmpty()
+            && antonyms.isEmpty()
+    }
+}

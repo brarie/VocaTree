@@ -1,10 +1,14 @@
 package com.monovoca.server.wordbook.application
 
+import com.monovoca.server.wordbook.domain.exception.AutoCompleteDataNotFoundException
 import com.monovoca.server.wordbook.domain.exception.WordbookNotFoundException
 import com.monovoca.server.wordbook.domain.model.WordbookWordList
+import com.monovoca.server.wordbook.domain.model.command.AutoCompleteCommand
+import com.monovoca.server.wordbook.domain.model.command.AutoCompleteDataRequestCommand
 import com.monovoca.server.wordbook.domain.model.command.UpdateExampleCommand
 import com.monovoca.server.wordbook.domain.model.command.UpdateSenseCommand
 import com.monovoca.server.wordbook.domain.model.command.UpdateWordCommand
+import com.monovoca.server.wordbook.domain.port.DictionaryDataProvider
 import com.monovoca.server.wordbook.domain.port.WordbookRepository
 import com.monovoca.server.wordbook.domain.port.WordbookWordListRepository
 import org.springframework.stereotype.Service
@@ -13,7 +17,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class WordbookWordListService(
     private val wordbookRepository: WordbookRepository,
-    private val wordbookWordListRepository: WordbookWordListRepository
+    private val wordbookWordListRepository: WordbookWordListRepository,
+    private val dictionaryDataProvider: DictionaryDataProvider
 ) {
 
     @Transactional(readOnly = true)
@@ -232,6 +237,29 @@ class WordbookWordListService(
         val wordList = wordbookWordListRepository.findById(wordbookId)
 
         val updatedWordList = wordList.swapExamplesOrder(wordId, senseId, exampleId1, exampleId2)
+        return wordbookWordListRepository.save(updatedWordList)
+    }
+
+    @Transactional
+    fun autoCompleteFromDictionary(
+        userId: String,
+        wordbookId: Long,
+        wordId: Long,
+        requestCommand: AutoCompleteDataRequestCommand
+    ): WordbookWordList {
+        val wordbook = wordbookRepository.findById(wordbookId)
+            ?: throw WordbookNotFoundException()
+
+        wordbook.validateOwner(userId)
+
+        val autoCompleteData = dictionaryDataProvider.getAutoCompleteData(requestCommand)
+            ?: throw AutoCompleteDataNotFoundException()
+
+        val command = AutoCompleteCommand.from(autoCompleteData)
+
+        val wordList = wordbookWordListRepository.findById(wordbookId)
+
+        val updatedWordList = wordList.autoCompleteWord(wordId, command)
         return wordbookWordListRepository.save(updatedWordList)
     }
 }

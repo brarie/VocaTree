@@ -45,11 +45,11 @@ export const dictionaryKeys = {
     [...dictionaryKeys.all, 'allWords', page, size] as const,
 };
 
-export function useAutocomplete(query: string, limit: number = 10) {
+export function useAutocomplete(query: string | null, limit: number = 10) {
   return useQuery({
-    queryKey: dictionaryKeys.autocomplete(query, limit),
-    queryFn: () => searchAutocomplete(query, limit),
-    enabled: query.length > 0,
+    queryKey: dictionaryKeys.autocomplete(query || '', limit),
+    queryFn: () => searchAutocomplete(query || '', limit),
+    enabled: !!query && query.length > 0,
     staleTime: 1000 * 60 * 5,
   });
 }

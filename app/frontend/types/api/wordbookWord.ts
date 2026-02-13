@@ -55,6 +55,16 @@ export const SwapWordbookExamplesOrderRequestSchema = z.object({
   exampleId2: z.number(),
 });
 
+export const AutoCompleteFromDictionaryRequestSchema = z.object({
+  dictionaryWordId: z.number(),
+  selectedSenses: z.array(
+    z.object({
+      dictionarySenseId: z.number(),
+      dictionaryExampleIds: z.array(z.number()),
+    }),
+  ),
+});
+
 export type UpdateWordbookWordRequest = z.infer<
   typeof UpdateWordbookWordRequestSchema
 >;
@@ -75,6 +85,9 @@ export type SwapWordbookSensesOrderRequest = z.infer<
 >;
 export type SwapWordbookExamplesOrderRequest = z.infer<
   typeof SwapWordbookExamplesOrderRequestSchema
+>;
+export type AutoCompleteFromDictionaryRequest = z.infer<
+  typeof AutoCompleteFromDictionaryRequestSchema
 >;
 
 // Response interfaces (TypeScript - backend trusted)

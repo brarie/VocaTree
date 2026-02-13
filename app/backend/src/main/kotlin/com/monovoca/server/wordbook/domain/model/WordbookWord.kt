@@ -1,8 +1,10 @@
 package com.monovoca.server.wordbook.domain.model
 
+import com.monovoca.server.common.domain.model.vocabulary.vo.SenseVo
 import com.monovoca.server.common.domain.model.vocabulary.vo.components.Spelling
 import com.monovoca.server.common.util.isSortedBy
 import com.monovoca.server.wordbook.domain.exception.WordbookSenseNotFoundException
+import com.monovoca.server.wordbook.domain.model.command.AutoCompleteCommand
 import com.monovoca.server.wordbook.domain.model.command.UpdateExampleCommand
 import com.monovoca.server.wordbook.domain.model.command.UpdateSenseCommand
 import com.monovoca.server.wordbook.domain.model.command.UpdateWordCommand
@@ -69,7 +71,11 @@ data class WordbookWord(
         if (senses.none { it.id == senseId })
             throw WordbookSenseNotFoundException()
 
-        val updatedSenses = senses.filter { it.id != senseId }
+        val updatedSenses = if (senses.size > 1) {
+            senses.filter { it.id != senseId }
+        } else {
+            senses.map { it.copy(sense = SenseVo(), examples = emptyList()).newExample() }
+        }
         return this.copy(senses = updatedSenses)
     }
 
@@ -106,5 +112,51 @@ data class WordbookWord(
             if (sense.id == senseId) sense.swapExamplesOrder(exampleId1, exampleId2) else sense
         }
         return this.copy(senses = updatedSenses)
+    }
+
+    fun autoComplete(command: AutoCompleteCommand): WordbookWord {
+        val isCompletelyEmpty = senses.size == 1
+                && senses[0].examples.size == 1
+                && senses[0].sense.isBlank()
+                && senses[0].examples[0].example.isBlank()
+
+        val newSenses = if (isCompletelyEmpty) {
+            command.senses.mapIndexed { index, senseData ->
+                createSenseFromCommand(senseData, displayOrder = index + 1)
+            }
+        } else {
+            val maxOrder = senses.maxOfOrNull { it.displayOrder } ?: 0
+            val additionalSenses = command.senses.mapIndexed { index, senseData ->
+                createSenseFromCommand(senseData, displayOrder = maxOrder + index + 1)
+            }
+            senses + additionalSenses
+        }
+
+        return this.copy(
+            spelling = command.spelling,
+            senses = newSenses
+        )
+    }
+
+    private fun createSenseFromCommand(
+        senseData: AutoCompleteCommand.SenseData,
+        displayOrder: Int
+    ): WordbookSense {
+        val examples = if (senseData.examples.isNotEmpty()) {
+            senseData.examples.mapIndexed { index, exampleVo ->
+                WordbookExample(
+                    example = exampleVo,
+                    displayOrder = index + 1
+                )
+            }
+        } else {
+            listOf(WordbookExample.create(displayOrder = 1))
+        }
+
+        return WordbookSense(
+            sense = senseData.senseVo,
+            displayOrder = displayOrder,
+            examples = examples
+        )
     }
 }

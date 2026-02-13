@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -13,8 +13,6 @@ import {
   useColumns,
   useCreateWordSeries,
   useCreateSenseSeries,
-  useCreateWord,
-  useCreateSense,
   useCreateExample,
   useUpdateWord,
   useUpdateSense,
@@ -56,8 +54,6 @@ export function WordbookTable({ wordbookId }: WordbookTableProps) {
     useColumns(wordbookId);
   const createWordSeriesMutation = useCreateWordSeries();
   const createSenseSeriesMutation = useCreateSenseSeries();
-  const createWordMutation = useCreateWord();
-  const createSenseMutation = useCreateSense();
   const createExampleMutation = useCreateExample();
   const updateWordMutation = useUpdateWord();
   const updateSenseMutation = useUpdateSense();
@@ -90,11 +86,78 @@ export function WordbookTable({ wordbookId }: WordbookTableProps) {
     col: string;
   } | null>(null);
 
+  const [pendingAutoCompleteFocus, setPendingAutoCompleteFocus] = useState<{
+    wordId: number;
+    timestamp: number;
+  } | null>(null);
+
+  const handleMoveRef = useRef<(direction: 'up' | 'down') => void>(() => {});
+  const keydownHandlerRef = useRef<(e: KeyboardEvent) => void>(() => {});
+
+  const isReordering =
+    swapWordsMutation.isPending ||
+    swapSensesMutation.isPending ||
+    swapExamplesMutation.isPending;
+
+  // Stable callbacks for TableCell (prevent unnecessary re-renders via React.memo)
+  const stableHandleEndEdit = useCallback(() => {
+    setEditingCell(null);
+  }, []);
+
+  const stableHandleMoveUp = useCallback(() => {
+    handleMoveRef.current('up');
+  }, []);
+
+  const stableHandleMoveDown = useCallback(() => {
+    handleMoveRef.current('down');
+  }, []);
+
+  const stableHandleAutoCompleteSuccess = useCallback((wordId: number) => {
+    setPendingAutoCompleteFocus({ wordId, timestamp: Date.now() });
+  }, []);
+
   // Cell click handler - 바로 editing mode로 진입
   const handleCellClick = (rowId: string, columnType: string) => {
     setSelectedCell({ row: rowId, col: columnType });
     setEditingCell({ row: rowId, col: columnType });
   };
+
+  // 데이터 갱신 후 focus 재설정
+  useEffect(() => {
+    if (!pendingAutoCompleteFocus || !wordListData || !columnsData) return;
+
+    const { wordId } = pendingAutoCompleteFocus;
+    const newRows = flattenWordListToRows(wordListData.wordList);
+    const firstRowOfWord = newRows.find((r) => r.wordId === wordId);
+
+    if (firstRowOfWord) {
+      // 첫 번째 active column 찾기
+      const firstActiveColumn = Object.entries(columnsData.columns).find(
+        ([_, setting]) => setting.isActive,
+      );
+
+      if (firstActiveColumn) {
+        const firstColumnType = firstActiveColumn[0] as ColumnType;
+
+        // selected 모드만 설정 (editing 모드 아님)
+        setSelectedCell({ row: firstRowOfWord.rowId, col: firstColumnType });
+        setEditingCell(null);
+
+        setPendingAutoCompleteFocus(null);
+      }
+    }
+  }, [wordListData, pendingAutoCompleteFocus, columnsData]);
+
+  // Auto-scroll to selected cell
+  useEffect(() => {
+    if (!selectedCell) return;
+    const td = document.querySelector(
+      `td[data-row-id="${selectedCell.row}"][data-col-id="${selectedCell.col}"]`,
+    );
+    if (td) {
+      td.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
+  }, [selectedCell]);
 
   // Flatten data
   const flattenedRows = useMemo(() => {
@@ -102,13 +165,12 @@ export function WordbookTable({ wordbookId }: WordbookTableProps) {
     return flattenWordListToRows(wordListData.wordList);
   }, [wordListData]);
 
-  // Build columns based on active columns
+  // Build columns based on active columns (no dynamic state in deps)
   const columns = useMemo<ColumnDef<FlattenedRow>[]>(() => {
     if (!columnsData) return [];
 
     const cols: ColumnDef<FlattenedRow>[] = [];
 
-    // Build columns from ColumnType enum
     Object.entries(columnsData.columns).forEach(([key, setting]) => {
       if (!setting.isActive) return;
 
@@ -118,46 +180,11 @@ export function WordbookTable({ wordbookId }: WordbookTableProps) {
         id: columnType,
         header: getColumnHeader(columnType),
         size: setting.width,
-        cell: ({ row }) => (
-          <TableCell
-            row={row.original}
-            columnType={columnType}
-            wordbookId={wordbookId}
-            isSelected={
-              selectedCell?.row === row.original.rowId &&
-              selectedCell?.col === columnType &&
-              !editingCell
-            }
-            isEditing={
-              editingCell?.row === row.original.rowId &&
-              editingCell?.col === columnType
-            }
-            onEndEdit={() => {
-              setEditingCell(null);
-              // selectedCell은 유지
-            }}
-            onMoveUp={() => handleMove('up')}
-            onMoveDown={() => handleMove('down')}
-            isReordering={
-              swapWordsMutation.isPending ||
-              swapSensesMutation.isPending ||
-              swapExamplesMutation.isPending
-            }
-          />
-        ),
       });
     });
 
     return cols;
-  }, [
-    columnsData,
-    wordbookId,
-    selectedCell,
-    editingCell,
-    swapWordsMutation,
-    swapSensesMutation,
-    swapExamplesMutation,
-  ]);
+  }, [columnsData]);
 
   const [columnResizeMode] = useState<ColumnResizeMode>('onChange');
   const [resizingColumn, setResizingColumn] = useState<string | null>(null);
@@ -168,6 +195,7 @@ export function WordbookTable({ wordbookId }: WordbookTableProps) {
     getCoreRowModel: getCoreRowModel(),
     columnResizeMode,
     enableColumnResizing: true,
+    getRowId: (row) => row.rowId,
   });
 
   // Save column width on resize end
@@ -565,118 +593,15 @@ export function WordbookTable({ wordbookId }: WordbookTableProps) {
     }
   };
 
+  // Keyboard handler via ref (stable effect, always uses latest closures)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (
-        editingCell ||
-        showDeleteDialog ||
-        showKeyboardShortcuts ||
-        showHelp ||
-        showColumnManager
-      )
-        return;
-
-      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && e.shiftKey) {
-        e.preventDefault();
-        handleCreateWord();
-        return;
-      }
-
-      if (!selectedCell) {
-        const shouldSelectFirst =
-          e.key === 'ArrowDown' ||
-          e.key === 'ArrowUp' ||
-          e.key === 'ArrowLeft' ||
-          e.key === 'ArrowRight' ||
-          e.key === 'Tab' ||
-          (e.key === 'Enter' &&
-            !e.ctrlKey &&
-            !e.shiftKey &&
-            !e.altKey &&
-            !e.metaKey);
-
-        if (shouldSelectFirst) {
-          e.preventDefault();
-          selectFirstCell();
-        }
-        return;
-      }
-
-      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault();
-        handleCreateSubLevel();
-        return;
-      }
-
-      if (
-        e.key === 'Enter' &&
-        !e.ctrlKey &&
-        !e.shiftKey &&
-        !e.altKey &&
-        !e.metaKey
-      ) {
-        e.preventDefault();
-        setEditingCell(selectedCell);
-        return;
-      }
-
-      if (e.key === 'Delete') {
-        e.preventDefault();
-        handleDeleteCellContent();
-        return;
-      }
-
-      if (e.key === 'D' && (e.ctrlKey || e.metaKey) && e.shiftKey) {
-        e.preventDefault();
-        handleDeleteLevel();
-        return;
-      }
-
-      if (
-        (e.key === 'ArrowUp' || e.key === 'ArrowDown') &&
-        e.altKey &&
-        !e.ctrlKey &&
-        !e.shiftKey &&
-        !e.metaKey
-      ) {
-        e.preventDefault();
-        handleMove(e.key === 'ArrowUp' ? 'up' : 'down');
-        return;
-      }
-
-      if (
-        e.key === 'ArrowUp' ||
-        e.key === 'ArrowDown' ||
-        e.key === 'ArrowLeft' ||
-        e.key === 'ArrowRight' ||
-        e.key === 'Tab'
-      ) {
-        e.preventDefault();
-        handleCellNavigation(e);
-      }
+      keydownHandlerRef.current(e);
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [
-    selectedCell,
-    editingCell,
-    flattenedRows,
-    columns,
-    wordListData,
-    columnsData,
-    showDeleteDialog,
-    showKeyboardShortcuts,
-    showHelp,
-    showColumnManager,
-    createWordSeriesMutation,
-    createSenseSeriesMutation,
-    createSenseMutation,
-    createExampleMutation,
-    updateWordMutation,
-    updateSenseMutation,
-    updateExampleMutation,
-  ]);
+  }, []);
 
   const handleAddWord = async () => {
     if (wordListData && wordListData.wordList.length >= 100) {
@@ -819,6 +744,99 @@ export function WordbookTable({ wordbookId }: WordbookTableProps) {
       swapSenses(currentRow, isUp);
     } else if (level === 3) {
       swapExamples(currentRow, isUp);
+    }
+  };
+
+  // Update refs with latest closures (runs every render, before any events fire)
+  handleMoveRef.current = handleMove;
+
+  keydownHandlerRef.current = (e: KeyboardEvent) => {
+    if (
+      editingCell ||
+      showDeleteDialog ||
+      showKeyboardShortcuts ||
+      showHelp ||
+      showColumnManager
+    )
+      return;
+
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && e.shiftKey) {
+      e.preventDefault();
+      handleCreateWord();
+      return;
+    }
+
+    if (!selectedCell) {
+      const shouldSelectFirst =
+        e.key === 'ArrowDown' ||
+        e.key === 'ArrowUp' ||
+        e.key === 'ArrowLeft' ||
+        e.key === 'ArrowRight' ||
+        e.key === 'Tab' ||
+        (e.key === 'Enter' &&
+          !e.ctrlKey &&
+          !e.shiftKey &&
+          !e.altKey &&
+          !e.metaKey);
+
+      if (shouldSelectFirst) {
+        e.preventDefault();
+        selectFirstCell();
+      }
+      return;
+    }
+
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      handleCreateSubLevel();
+      return;
+    }
+
+    if (
+      e.key === 'Enter' &&
+      !e.ctrlKey &&
+      !e.shiftKey &&
+      !e.altKey &&
+      !e.metaKey
+    ) {
+      e.preventDefault();
+      setEditingCell(selectedCell);
+      return;
+    }
+
+    if (e.key === 'Delete') {
+      e.preventDefault();
+      handleDeleteCellContent();
+      return;
+    }
+
+    if (e.key === 'D' && (e.ctrlKey || e.metaKey) && e.shiftKey) {
+      e.preventDefault();
+      handleDeleteLevel();
+      return;
+    }
+
+    if (
+      (e.key === 'ArrowUp' || e.key === 'ArrowDown') &&
+      e.altKey &&
+      !e.ctrlKey &&
+      !e.shiftKey &&
+      !e.metaKey
+    ) {
+      e.preventDefault();
+      handleMove(e.key === 'ArrowUp' ? 'up' : 'down');
+      return;
+    }
+
+    if (
+      e.key === 'ArrowUp' ||
+      e.key === 'ArrowDown' ||
+      e.key === 'ArrowLeft' ||
+      e.key === 'ArrowRight' ||
+      e.key === 'Tab'
+    ) {
+      e.preventDefault();
+      handleCellNavigation(e);
     }
   };
 
@@ -1082,6 +1100,8 @@ export function WordbookTable({ wordbookId }: WordbookTableProps) {
                         return (
                           <td
                             key={cell.id}
+                            data-row-id={cellRow.rowId}
+                            data-col-id={columnType}
                             rowSpan={rowspan}
                             onMouseDown={handleTdClick}
                             className={cn(
@@ -1101,10 +1121,21 @@ export function WordbookTable({ wordbookId }: WordbookTableProps) {
                               }),
                             }}
                           >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
+                            <TableCell
+                              row={cellRow}
+                              columnType={columnType}
+                              wordbookId={wordbookId}
+                              columnsData={columnsData}
+                              isSelected={isSelected && !editingCell}
+                              isEditing={isEditing}
+                              onEndEdit={stableHandleEndEdit}
+                              onMoveUp={stableHandleMoveUp}
+                              onMoveDown={stableHandleMoveDown}
+                              isReordering={isReordering}
+                              onAutoCompleteSuccess={
+                                stableHandleAutoCompleteSuccess
+                              }
+                            />
                           </td>
                         );
                       })}

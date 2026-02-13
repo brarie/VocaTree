@@ -1,12 +1,17 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { FlattenedRow, ColumnType } from '@/types/api/wordbookWord';
+import { useState, useRef, useEffect, memo } from 'react';
+import {
+  FlattenedRow,
+  ColumnType,
+  WordbookColumnResponse,
+} from '@/types/api/wordbookWord';
 import { Textarea } from '@/components/ui/textarea';
 import {
   useUpdateWord,
   useUpdateSense,
   useUpdateExample,
+  useAutoCompleteFromDictionary,
 } from '@/hooks/wordbookWord/queries';
 import { getColumnLevel, getFieldName } from '@/lib/wordbookTableUtils';
 import { cn } from '@/lib/utils';
@@ -14,225 +19,323 @@ import { Loader2, ArrowUp, ArrowDown } from 'lucide-react';
 import { PartOfSpeechCombobox } from './PartOfSpeechCombobox';
 import { MultiValueEditor } from './MultiValueEditor';
 import { getPartOfSpeechAbbreviation } from '@/types/constants/partOfSpeech';
+import { AutocompleteInput } from './AutocompleteInput';
+import { DictionarySenseModal } from './DictionarySenseModal';
+import { PublicWordSimpleView } from '@/types/api/dictionary';
+import { toast } from 'sonner';
 
 interface TableCellProps {
   row: FlattenedRow;
   columnType: ColumnType;
   wordbookId: number;
+  columnsData: WordbookColumnResponse | undefined;
   isSelected: boolean;
   isEditing: boolean;
   onEndEdit: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
   isReordering: boolean;
+  onAutoCompleteSuccess?: (wordId: number) => void;
 }
 
-export function TableCell({
-  row,
-  columnType,
-  wordbookId,
-  isSelected,
-  isEditing,
-  onEndEdit,
-  onMoveUp,
-  onMoveDown,
-  isReordering,
-}: TableCellProps) {
-  const level = getColumnLevel(columnType);
-  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
+export const TableCell = memo(
+  function TableCell({
+    row,
+    columnType,
+    wordbookId,
+    columnsData,
+    isSelected,
+    isEditing,
+    onEndEdit,
+    onMoveUp,
+    onMoveDown,
+    isReordering,
+    onAutoCompleteSuccess,
+  }: TableCellProps) {
+    const level = getColumnLevel(columnType);
+    const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
 
-  const fieldValue = getCellValue(row, columnType);
-  const [editValue, setEditValue] = useState(fieldValue);
+    const fieldValue = getCellValue(row, columnType);
+    const [editValue, setEditValue] = useState(fieldValue);
+    const [senseModalState, setSenseModalState] = useState<{
+      isOpen: boolean;
+      slug: string;
+    }>({ isOpen: false, slug: '' });
 
-  const updateWord = useUpdateWord();
-  const updateSense = useUpdateSense();
-  const updateExample = useUpdateExample();
+    const updateWord = useUpdateWord();
+    const updateSense = useUpdateSense();
+    const updateExample = useUpdateExample();
+    const autoComplete = useAutoCompleteFromDictionary();
 
-  const isSaving =
-    updateWord.isPending || updateSense.isPending || updateExample.isPending;
+    const isSaving =
+      updateWord.isPending ||
+      updateSense.isPending ||
+      updateExample.isPending ||
+      autoComplete.isPending;
 
-  useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [isEditing]);
-
-  useEffect(() => {
-    if (!isEditing) {
-      setEditValue(fieldValue);
-    }
-  }, [fieldValue, isEditing]);
-
-  const saveWordLevel = async (finalValue: any, fieldName: string) => {
-    const spellingValue =
-      fieldName === 'spelling'
-        ? finalValue === ''
-          ? null
-          : finalValue
-        : row.spelling;
-
-    await updateWord.mutateAsync({
-      wordbookId,
-      wordId: row.wordId,
-      data: { spelling: spellingValue as any },
-    });
-  };
-
-  const saveSenseLevel = async (finalValue: any, fieldName: string) => {
-    if (!row.senseId) return;
-
-    await updateSense.mutateAsync({
-      wordbookId,
-      wordId: row.wordId,
-      senseId: row.senseId,
-      data: {
-        definition: fieldName === 'definition' ? finalValue : row.definition,
-        engDefinition:
-          fieldName === 'engDefinition' ? finalValue : row.engDefinition,
-        partOfSpeech:
-          fieldName === 'partOfSpeech' ? finalValue : row.partOfSpeech,
-        synonyms: fieldName === 'synonyms' ? finalValue : row.synonyms,
-        antonyms: fieldName === 'antonyms' ? finalValue : row.antonyms,
-        americanPhonetic:
-          fieldName === 'americanPhonetic' ? finalValue : row.usPhonetic,
-        britishPhonetic:
-          fieldName === 'britishPhonetic' ? finalValue : row.ukPhonetic,
-      },
-    });
-  };
-
-  const saveExampleLevel = async (finalValue: any, fieldName: string) => {
-    if (!row.senseId || !row.exampleId) return;
-
-    await updateExample.mutateAsync({
-      wordbookId,
-      wordId: row.wordId,
-      senseId: row.senseId,
-      exampleId: row.exampleId,
-      data: {
-        sentence: fieldName === 'sentence' ? finalValue : row.sentence,
-        translation: fieldName === 'translation' ? finalValue : row.translation,
-      },
-    });
-  };
-
-  const handleSave = async (valueOverride?: any) => {
-    const finalValue = valueOverride !== undefined ? valueOverride : editValue;
-
-    if (finalValue === fieldValue) {
-      onEndEdit();
-      return;
-    }
-
-    const fieldName = getFieldName(columnType);
-
-    try {
-      if (level === 1) {
-        await saveWordLevel(finalValue, fieldName);
-      } else if (level === 2) {
-        await saveSenseLevel(finalValue, fieldName);
-      } else if (level === 3) {
-        await saveExampleLevel(finalValue, fieldName);
+    useEffect(() => {
+      if (isEditing && inputRef.current) {
+        inputRef.current.focus();
       }
-    } catch (error) {
-      // Error handled by mutation
+    }, [isEditing]);
+
+    useEffect(() => {
+      if (!isEditing) {
+        setEditValue(fieldValue);
+      }
+    }, [fieldValue, isEditing]);
+
+    const saveWordLevel = async (finalValue: any, fieldName: string) => {
+      const spellingValue =
+        fieldName === 'spelling'
+          ? finalValue === ''
+            ? null
+            : finalValue
+          : row.spelling;
+
+      await updateWord.mutateAsync({
+        wordbookId,
+        wordId: row.wordId,
+        data: { spelling: spellingValue as any },
+      });
+    };
+
+    const saveSenseLevel = async (finalValue: any, fieldName: string) => {
+      if (!row.senseId) return;
+
+      await updateSense.mutateAsync({
+        wordbookId,
+        wordId: row.wordId,
+        senseId: row.senseId,
+        data: {
+          definition: fieldName === 'definition' ? finalValue : row.definition,
+          engDefinition:
+            fieldName === 'engDefinition' ? finalValue : row.engDefinition,
+          partOfSpeech:
+            fieldName === 'partOfSpeech' ? finalValue : row.partOfSpeech,
+          synonyms: fieldName === 'synonyms' ? finalValue : row.synonyms,
+          antonyms: fieldName === 'antonyms' ? finalValue : row.antonyms,
+          americanPhonetic:
+            fieldName === 'americanPhonetic' ? finalValue : row.usPhonetic,
+          britishPhonetic:
+            fieldName === 'britishPhonetic' ? finalValue : row.ukPhonetic,
+        },
+      });
+    };
+
+    const saveExampleLevel = async (finalValue: any, fieldName: string) => {
+      if (!row.senseId || !row.exampleId) return;
+
+      await updateExample.mutateAsync({
+        wordbookId,
+        wordId: row.wordId,
+        senseId: row.senseId,
+        exampleId: row.exampleId,
+        data: {
+          sentence: fieldName === 'sentence' ? finalValue : row.sentence,
+          translation:
+            fieldName === 'translation' ? finalValue : row.translation,
+        },
+      });
+    };
+
+    const handleSave = async (valueOverride?: any) => {
+      const finalValue =
+        valueOverride !== undefined ? valueOverride : editValue;
+
+      if (finalValue === fieldValue) {
+        onEndEdit();
+        return;
+      }
+
+      const fieldName = getFieldName(columnType);
+
+      try {
+        if (level === 1) {
+          await saveWordLevel(finalValue, fieldName);
+        } else if (level === 2) {
+          await saveSenseLevel(finalValue, fieldName);
+        } else if (level === 3) {
+          await saveExampleLevel(finalValue, fieldName);
+        }
+      } catch (error) {
+        // Error handled by mutation
+      }
+
+      onEndEdit();
+    };
+
+    const handleCancel = () => {
+      setEditValue(fieldValue);
+      onEndEdit();
+    };
+
+    const handleSelectWord = (word: PublicWordSimpleView) => {
+      setSenseModalState({ isOpen: true, slug: word.slug });
+    };
+
+    const handleCloseSenseModal = () => {
+      setSenseModalState({ isOpen: false, slug: '' });
+      onEndEdit();
+    };
+
+    const handleApplyAutoComplete = async (
+      dictionaryWordId: number,
+      selectedSenses: Array<{
+        sense: any;
+        selectedExamples: any[];
+      }>,
+    ) => {
+      if (selectedSenses.length === 0) {
+        toast.error('선택된 뜻이 없습니다.');
+        return;
+      }
+
+      try {
+        await autoComplete.mutateAsync({
+          wordbookId,
+          wordId: row.wordId,
+          data: {
+            dictionaryWordId,
+            selectedSenses: selectedSenses.map((s) => ({
+              dictionarySenseId: s.sense.id,
+              dictionaryExampleIds: s.selectedExamples.map((e) => e.id),
+            })),
+          },
+        });
+
+        setSenseModalState({ isOpen: false, slug: '' });
+
+        // 자동완성 성공 후 focus 재설정을 위해 wordId 전달
+        if (onAutoCompleteSuccess) {
+          onAutoCompleteSuccess(row.wordId);
+        }
+      } catch (error) {
+        // 에러는 mutation에서 처리됨
+      }
+    };
+
+    return (
+      <div
+        data-row-id={row.rowId}
+        data-column-id={columnType}
+        className={cn(
+          'w-full h-full p-2 outline-none relative break-words',
+          !fieldValue && !isEditing && 'text-white/30 italic',
+        )}
+      >
+        {isEditing ? (
+          <EditingCell
+            columnType={columnType}
+            value={editValue}
+            onChange={setEditValue}
+            onSave={handleSave}
+            onCancel={handleCancel}
+            onSelectWord={handleSelectWord}
+            inputRef={inputRef}
+          />
+        ) : (
+          <DisplayCell value={fieldValue} columnType={columnType} />
+        )}
+
+        {isSaving && (
+          <div className="absolute top-1 right-1">
+            <Loader2 className="h-3 w-3 animate-spin text-blue-400" />
+          </div>
+        )}
+
+        {isSelected && !isEditing && !isSaving && (
+          <div className="absolute top-1 right-1 flex gap-0.5">
+            <button
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!isReordering) {
+                  onMoveUp();
+                }
+              }}
+              disabled={isReordering}
+              className={cn(
+                'p-0.5 bg-zinc-800/90 rounded transition-colors',
+                isReordering
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:bg-zinc-700/90',
+              )}
+              title="위로 이동 (Alt+Up)"
+            >
+              <ArrowUp
+                className={cn(
+                  'h-3 w-3',
+                  isReordering
+                    ? 'text-zinc-600'
+                    : 'text-zinc-400 hover:text-zinc-200',
+                )}
+              />
+            </button>
+            <button
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!isReordering) {
+                  onMoveDown();
+                }
+              }}
+              disabled={isReordering}
+              className={cn(
+                'p-0.5 bg-zinc-800/90 rounded transition-colors',
+                isReordering
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:bg-zinc-700/90',
+              )}
+              title="아래로 이동 (Alt+Down)"
+            >
+              <ArrowDown
+                className={cn(
+                  'h-3 w-3',
+                  isReordering
+                    ? 'text-zinc-600'
+                    : 'text-zinc-400 hover:text-zinc-200',
+                )}
+              />
+            </button>
+          </div>
+        )}
+
+        {senseModalState.isOpen && (
+          <DictionarySenseModal
+            isOpen={senseModalState.isOpen}
+            onClose={handleCloseSenseModal}
+            slug={senseModalState.slug}
+            columnsData={columnsData}
+            onApply={handleApplyAutoComplete}
+          />
+        )}
+      </div>
+    );
+  },
+  (prevProps, nextProps) => {
+    if (prevProps.isSelected !== nextProps.isSelected) return false;
+    if (prevProps.isEditing !== nextProps.isEditing) return false;
+    if (prevProps.isReordering !== nextProps.isReordering) return false;
+    if (prevProps.wordbookId !== nextProps.wordbookId) return false;
+    if (prevProps.row.rowId !== nextProps.row.rowId) return false;
+    if (prevProps.columnType !== nextProps.columnType) return false;
+
+    const prevValue = getCellValue(prevProps.row, prevProps.columnType);
+    const nextValue = getCellValue(nextProps.row, nextProps.columnType);
+
+    if (Array.isArray(prevValue) || Array.isArray(nextValue)) {
+      if (!Array.isArray(prevValue) || !Array.isArray(nextValue)) return false;
+      if (prevValue.length !== nextValue.length) return false;
+      for (let i = 0; i < prevValue.length; i++) {
+        if (prevValue[i] !== nextValue[i]) return false;
+      }
+      return true;
     }
 
-    onEndEdit();
-  };
-
-  const handleCancel = () => {
-    setEditValue(fieldValue);
-    onEndEdit();
-  };
-
-  return (
-    <div
-      data-row-id={row.rowId}
-      data-column-id={columnType}
-      className={cn(
-        'w-full h-full p-2 outline-none relative break-words',
-        !fieldValue && !isEditing && 'text-white/30 italic',
-      )}
-    >
-      {isEditing ? (
-        <EditingCell
-          columnType={columnType}
-          value={editValue}
-          onChange={setEditValue}
-          onSave={handleSave}
-          onCancel={handleCancel}
-          inputRef={inputRef}
-        />
-      ) : (
-        <DisplayCell value={fieldValue} columnType={columnType} />
-      )}
-
-      {isSaving && (
-        <div className="absolute top-1 right-1">
-          <Loader2 className="h-3 w-3 animate-spin text-blue-400" />
-        </div>
-      )}
-
-      {isSelected && !isEditing && !isSaving && (
-        <div className="absolute top-1 right-1 flex gap-0.5">
-          <button
-            onMouseDown={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              if (!isReordering) {
-                onMoveUp();
-              }
-            }}
-            disabled={isReordering}
-            className={cn(
-              'p-0.5 bg-zinc-800/90 rounded transition-colors',
-              isReordering
-                ? 'opacity-50 cursor-not-allowed'
-                : 'hover:bg-zinc-700/90',
-            )}
-            title="위로 이동 (Alt+Up)"
-          >
-            <ArrowUp
-              className={cn(
-                'h-3 w-3',
-                isReordering
-                  ? 'text-zinc-600'
-                  : 'text-zinc-400 hover:text-zinc-200',
-              )}
-            />
-          </button>
-          <button
-            onMouseDown={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              if (!isReordering) {
-                onMoveDown();
-              }
-            }}
-            disabled={isReordering}
-            className={cn(
-              'p-0.5 bg-zinc-800/90 rounded transition-colors',
-              isReordering
-                ? 'opacity-50 cursor-not-allowed'
-                : 'hover:bg-zinc-700/90',
-            )}
-            title="아래로 이동 (Alt+Down)"
-          >
-            <ArrowDown
-              className={cn(
-                'h-3 w-3',
-                isReordering
-                  ? 'text-zinc-600'
-                  : 'text-zinc-400 hover:text-zinc-200',
-              )}
-            />
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
+    return prevValue === nextValue;
+  },
+);
 
 function EditingCell({
   columnType,
@@ -240,6 +343,7 @@ function EditingCell({
   onChange,
   onSave,
   onCancel,
+  onSelectWord,
   inputRef,
 }: {
   columnType: ColumnType;
@@ -247,8 +351,22 @@ function EditingCell({
   onChange: (value: any) => void;
   onSave: () => void;
   onCancel: () => void;
+  onSelectWord: (word: PublicWordSimpleView) => void;
   inputRef: React.RefObject<any>;
 }) {
+  if (columnType === ColumnType.SPELLING) {
+    return (
+      <AutocompleteInput
+        value={value}
+        onChange={onChange}
+        onSelectWord={onSelectWord}
+        onSave={onSave}
+        onCancel={onCancel}
+        inputRef={inputRef as React.RefObject<HTMLInputElement>}
+      />
+    );
+  }
+
   if (columnType === ColumnType.PART_OF_SPEECH) {
     return (
       <PartOfSpeechCombobox

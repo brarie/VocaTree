@@ -18,6 +18,6 @@ enum class ColumnType(
     ANTONYMS(2, isDefaultEnabled = false, defaultWidth = 150),
 
     /* LEVEL 3 */
-    SENTENCE(3, isDefaultEnabled = false, defaultWidth = 300),
+    SENTENCE(3, isDefaultEnabled = true, defaultWidth = 300),
     TRANSLATION(3, isDefaultEnabled = false, defaultWidth = 200),
 }

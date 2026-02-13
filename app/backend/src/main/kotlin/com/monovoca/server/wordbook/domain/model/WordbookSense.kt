@@ -1,5 +1,6 @@
 package com.monovoca.server.wordbook.domain.model
 
+import com.monovoca.server.common.domain.model.vocabulary.vo.ExampleVo
 import com.monovoca.server.common.domain.model.vocabulary.vo.SenseVo
 import com.monovoca.server.common.util.isSortedBy
 import com.monovoca.server.wordbook.domain.exception.WordbookExampleNotFoundException
@@ -57,7 +58,11 @@ data class WordbookSense(
         if (examples.none { it.id == exampleId })
             throw WordbookExampleNotFoundException()
 
-        val updatedExamples = examples.filter { it.id != exampleId }
+        val updatedExamples = if (examples.size > 1 ) {
+            examples.filter { it.id != exampleId }
+        } else {
+            examples.map { it.copy(example = ExampleVo() )}
+        }
         return this.copy(examples = updatedExamples)
     }
 

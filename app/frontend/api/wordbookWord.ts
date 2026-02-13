@@ -10,6 +10,7 @@ import {
   SwapWordbookWordsOrderRequest,
   SwapWordbookSensesOrderRequest,
   SwapWordbookExamplesOrderRequest,
+  AutoCompleteFromDictionaryRequest,
   ColumnType,
 } from '@/types/api/wordbookWord';
 
@@ -269,5 +270,22 @@ export async function swapExamplesOrder(
     },
   );
   await handleApiResponse(response, 'Failed to swap examples order');
+  return await response.json();
+}
+
+export async function autoCompleteFromDictionary(
+  wordbookId: number,
+  wordId: number,
+  data: AutoCompleteFromDictionaryRequest,
+): Promise<WordbookWordListResponse> {
+  const response = await fetcherWithAuth(
+    `/api/wordbooks/${wordbookId}/words/${wordId}/auto-complete-from-dictionary`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    },
+  );
+  await handleApiResponse(response, 'Failed to auto-complete from dictionary');
   return await response.json();
 }
