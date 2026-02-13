@@ -15,7 +15,7 @@ import {
 } from '@/hooks/wordbookWord/queries';
 import { getColumnLevel, getFieldName } from '@/lib/wordbookTableUtils';
 import { cn } from '@/lib/utils';
-import { Loader2, ArrowUp, ArrowDown } from 'lucide-react';
+import { Loader2, ArrowUp, ArrowDown, Plus, Trash2 } from 'lucide-react';
 import { PartOfSpeechCombobox } from './PartOfSpeechCombobox';
 import { MultiValueEditor } from './MultiValueEditor';
 import { getPartOfSpeechAbbreviation } from '@/types/constants/partOfSpeech';
@@ -34,6 +34,8 @@ interface TableCellProps {
   onEndEdit: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
+  onAddSubLevel: () => void;
+  onDelete: () => void;
   isReordering: boolean;
   onAutoCompleteSuccess?: (wordId: number) => void;
 }
@@ -49,6 +51,8 @@ export const TableCell = memo(
     onEndEdit,
     onMoveUp,
     onMoveDown,
+    onAddSubLevel,
+    onDelete,
     isReordering,
     onAutoCompleteSuccess,
   }: TableCellProps) {
@@ -297,6 +301,34 @@ export const TableCell = memo(
                     : 'text-zinc-400 hover:text-zinc-200',
                 )}
               />
+            </button>
+            {(level === 1 || level === 2) && (
+              <button
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onAddSubLevel();
+                }}
+                className="p-0.5 bg-zinc-800/90 rounded transition-colors hover:bg-green-900/90"
+                title={
+                  level === 1
+                    ? '의미 추가 (Ctrl+Enter)'
+                    : '예문 추가 (Ctrl+Enter)'
+                }
+              >
+                <Plus className="h-3 w-3 text-green-400 hover:text-green-200" />
+              </button>
+            )}
+            <button
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onDelete();
+              }}
+              className="p-0.5 bg-zinc-800/90 rounded transition-colors hover:bg-red-900/90"
+              title="삭제 (Ctrl+Shift+D)"
+            >
+              <Trash2 className="h-3 w-3 text-red-400 hover:text-red-200" />
             </button>
           </div>
         )}

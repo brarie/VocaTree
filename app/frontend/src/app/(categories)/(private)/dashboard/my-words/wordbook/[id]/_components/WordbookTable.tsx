@@ -92,6 +92,8 @@ export function WordbookTable({ wordbookId }: WordbookTableProps) {
   } | null>(null);
 
   const handleMoveRef = useRef<(direction: 'up' | 'down') => void>(() => {});
+  const handleCreateSubLevelRef = useRef<() => void>(() => {});
+  const handleDeleteLevelRef = useRef<() => void>(() => {});
   const keydownHandlerRef = useRef<(e: KeyboardEvent) => void>(() => {});
 
   const isReordering =
@@ -110,6 +112,14 @@ export function WordbookTable({ wordbookId }: WordbookTableProps) {
 
   const stableHandleMoveDown = useCallback(() => {
     handleMoveRef.current('down');
+  }, []);
+
+  const stableHandleAddSubLevel = useCallback(() => {
+    handleCreateSubLevelRef.current();
+  }, []);
+
+  const stableHandleDelete = useCallback(() => {
+    handleDeleteLevelRef.current();
   }, []);
 
   const stableHandleAutoCompleteSuccess = useCallback((wordId: number) => {
@@ -749,6 +759,8 @@ export function WordbookTable({ wordbookId }: WordbookTableProps) {
 
   // Update refs with latest closures (runs every render, before any events fire)
   handleMoveRef.current = handleMove;
+  handleCreateSubLevelRef.current = handleCreateSubLevel;
+  handleDeleteLevelRef.current = handleDeleteLevel;
 
   keydownHandlerRef.current = (e: KeyboardEvent) => {
     if (
@@ -1131,6 +1143,8 @@ export function WordbookTable({ wordbookId }: WordbookTableProps) {
                               onEndEdit={stableHandleEndEdit}
                               onMoveUp={stableHandleMoveUp}
                               onMoveDown={stableHandleMoveDown}
+                              onAddSubLevel={stableHandleAddSubLevel}
+                              onDelete={stableHandleDelete}
                               isReordering={isReordering}
                               onAutoCompleteSuccess={
                                 stableHandleAutoCompleteSuccess
