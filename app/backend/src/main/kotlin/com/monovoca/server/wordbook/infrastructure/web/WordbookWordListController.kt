@@ -4,6 +4,7 @@ import com.monovoca.server.common.infrastructure.UserPrincipal
 import com.monovoca.server.wordbook.application.WordbookWordListService
 import com.monovoca.server.wordbook.infrastructure.web.request.*
 import com.monovoca.server.wordbook.infrastructure.web.response.WordbookWordListResponse
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
@@ -123,7 +124,7 @@ class WordbookWordListController(
         @AuthenticationPrincipal userPrincipal: UserPrincipal,
         @PathVariable wordbookId: Long,
         @PathVariable wordId: Long,
-        @RequestBody request: UpdateWordbookWordRequest,
+        @RequestBody @Valid request: UpdateWordbookWordRequest,
     ): ResponseEntity<WordbookWordListResponse> {
         val wordbookWordList = wordbookWordListService.updateWord(
             userPrincipal.id,

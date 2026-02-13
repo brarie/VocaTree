@@ -2,11 +2,14 @@ package com.monovoca.server.wordbook.infrastructure.web.request
 
 import com.monovoca.server.common.domain.model.vocabulary.vo.components.PartOfSpeech
 import com.monovoca.server.common.domain.model.vocabulary.vo.components.Spelling
+import com.monovoca.server.common.domain.model.vocabulary.vo.components.SpellingPolicy
 import com.monovoca.server.wordbook.domain.model.command.UpdateExampleCommand
 import com.monovoca.server.wordbook.domain.model.command.UpdateSenseCommand
 import com.monovoca.server.wordbook.domain.model.command.UpdateWordCommand
+import jakarta.validation.constraints.Pattern
 
 data class UpdateWordbookWordRequest(
+    @field:Pattern(regexp = SpellingPolicy.regex, message = SpellingPolicy.message)
     val spelling: String?,
 ) {
     fun toCommand(): UpdateWordCommand = UpdateWordCommand(
