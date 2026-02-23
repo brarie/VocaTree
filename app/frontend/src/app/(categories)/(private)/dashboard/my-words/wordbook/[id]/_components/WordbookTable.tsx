@@ -95,6 +95,8 @@ export function WordbookTable({ wordbookId }: WordbookTableProps) {
   const handleCreateSubLevelRef = useRef<() => void>(() => {});
   const handleDeleteLevelRef = useRef<() => void>(() => {});
   const keydownHandlerRef = useRef<(e: KeyboardEvent) => void>(() => {});
+  const resizingColumnRef = useRef<string | null>(null);
+  const handleResizeMouseUpRef = useRef<() => void>(() => {});
 
   const isReordering =
     swapWordsMutation.isPending ||
@@ -197,7 +199,6 @@ export function WordbookTable({ wordbookId }: WordbookTableProps) {
   }, [columnsData]);
 
   const [columnResizeMode] = useState<ColumnResizeMode>('onChange');
-  const [resizingColumn, setResizingColumn] = useState<string | null>(null);
 
   const table = useReactTable({
     data: flattenedRows,
@@ -210,24 +211,7 @@ export function WordbookTable({ wordbookId }: WordbookTableProps) {
 
   // Save column width on resize end
   useEffect(() => {
-    const handleMouseUp = () => {
-      if (resizingColumn) {
-        const size = table.getState().columnSizing[resizingColumn];
-        if (size) {
-          const columnType = resizingColumn as ColumnType;
-          const currentSize = columnsData?.columns[columnType]?.width;
-
-          if (currentSize && currentSize !== size) {
-            updateColumnWidthMutation.mutate({
-              wordbookId,
-              columnType,
-              data: { width: size as number },
-            });
-          }
-        }
-        setResizingColumn(null);
-      }
-    };
+    const handleMouseUp = () => handleResizeMouseUpRef.current();
 
     document.addEventListener('mouseup', handleMouseUp);
     document.addEventListener('touchend', handleMouseUp);
@@ -236,13 +220,7 @@ export function WordbookTable({ wordbookId }: WordbookTableProps) {
       document.removeEventListener('mouseup', handleMouseUp);
       document.removeEventListener('touchend', handleMouseUp);
     };
-  }, [
-    resizingColumn,
-    table,
-    columnsData,
-    wordbookId,
-    updateColumnWidthMutation,
-  ]);
+  }, []);
 
   const isCellRendered = (
     row: FlattenedRow,
@@ -762,6 +740,25 @@ export function WordbookTable({ wordbookId }: WordbookTableProps) {
   handleCreateSubLevelRef.current = handleCreateSubLevel;
   handleDeleteLevelRef.current = handleDeleteLevel;
 
+  handleResizeMouseUpRef.current = () => {
+    const columnId = resizingColumnRef.current;
+    if (columnId) {
+      const size = table.getState().columnSizing[columnId];
+      if (size) {
+        const columnType = columnId as ColumnType;
+        const currentSize = columnsData?.columns[columnType]?.width;
+        if (currentSize !== undefined && currentSize !== size) {
+          updateColumnWidthMutation.mutate({
+            wordbookId,
+            columnType,
+            data: { width: size as number },
+          });
+        }
+      }
+      resizingColumnRef.current = null;
+    }
+  };
+
   keydownHandlerRef.current = (e: KeyboardEvent) => {
     if (
       editingCell ||
@@ -1033,7 +1030,7 @@ export function WordbookTable({ wordbookId }: WordbookTableProps) {
                           }}
                           onMouseDown={(e) => {
                             if (e.detail !== 2) {
-                              setResizingColumn(header.column.id);
+                              resizingColumnRef.current = header.column.id;
                               header.getResizeHandler()(e);
                             }
                           }}
