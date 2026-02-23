@@ -9,6 +9,7 @@ import com.monovoca.server.auth.domain.port.RefreshTokenRepository
 import com.monovoca.server.common.domain.model.vo.Username
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class AuthService(
@@ -18,6 +19,7 @@ class AuthService(
     private val tokenIssuer: TokenIssuer,
 ) {
 
+    @Transactional
     fun login(username: String, rawPassword: String): TokenResult {
         val authUser = authUserRepository.findAuthUserByUsername(Username(username))
             ?: throw AuthUserNotFoundException()
@@ -31,10 +33,12 @@ class AuthService(
         return tokenResult
     }
 
+    @Transactional
     fun logout(userId: String) {
         refreshTokenRepository.deleteByUserId(userId)
     }
 
+    @Transactional
     fun refresh(refreshToken: String): TokenResult {
         val userId = refreshTokenRepository.findUserIdByRefreshToken(refreshToken)
             ?: throw InvalidRefreshTokenException()
