@@ -34,13 +34,16 @@ export default function RootLayout({
     <html lang="ko" className="dark">
       <body
         className={`${pretendard.variable} ${exo2.variable} font-sans antialiased bg-black`}
-        style={{ fontFamily: 'var(--font-pretendard), -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+        style={{
+          fontFamily:
+            'var(--font-pretendard), -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+        }}
       >
         <QueryProvider>
           <AuthProvider>
             {children}
             <ParticlesBackground />
-            <Toaster position="top-center" theme="dark" />
+            <Toaster position="top-center" theme="dark" closeButton />
           </AuthProvider>
         </QueryProvider>
       </body>

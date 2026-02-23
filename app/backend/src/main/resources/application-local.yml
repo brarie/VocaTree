@@ -1,0 +1,31 @@
+spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  exposed:
+    generate-ddl: true
+    show-sql: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+logging:
+  level:
+    Exposed: DEBUG
+
+app:
+  certificate-redirect-url: http://localhost:3000/verify
+  data:
+    init-enabled: true
+  cors:
+    allowed-origins: http://localhost:3000

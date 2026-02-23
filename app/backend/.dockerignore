@@ -1,0 +1,29 @@
+# Gradle
+.gradle
+build
+!gradle/wrapper/gradle-wrapper.jar
+bin
+
+# IDE
+.idea
+.vscode
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Logs
+*.log
+
+# Test results
+test-results
+
+# Misc
+README.md

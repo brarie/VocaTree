@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: backend-test
+
+  h2:
+    console:
+      enabled: false
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  exposed:
+    generate-ddl: true
+    show-sql: true
+
+  mail:
+    host: localhost
+    port: 3025
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+            required: false
+
+logging:
+  level:
+    Exposed: DEBUG
+
+app:
+  certificate-redirect-url: http://localhost:3000/verify
+  jwt:
+    access-token-expiration-ms: 60000
+    refresh-token-expiration-ms: 120000
+    secret-key: test-secret-key-for-jwt-signing-must-be-at-least-256-bits-long
+  data:
+    init-enabled: false
+  cors:
+    allowed-origins: http://localhost:3000

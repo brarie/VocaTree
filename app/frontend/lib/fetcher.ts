@@ -2,7 +2,7 @@ const ACCESS_TOKEN_KEY = 'access_token';
 const TOKEN_EXPIRY_KEY = 'token_expiry';
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
 
 export const tokenStorage = {
   getAccessToken: (): string | null => {

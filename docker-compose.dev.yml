@@ -1,0 +1,98 @@
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: monovoca-nginx-dev
+    ports:
+      - '80:80'
+    volumes:
+      - ./docker/nginx/nginx-dev.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+    networks:
+      - monovoca-network
+
+  backend:
+    build:
+      context: ./app/backend
+      dockerfile: Dockerfile
+    container_name: monovoca-backend-dev
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - JWT_SECRET_KEY=dev-secret-key-for-testing-only-long-bit-secure
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=monovoca
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=dev_root_password
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    env_file:
+      - .env.mail
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - monovoca-network
+
+  frontend:
+    build:
+      context: ./app/frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ''
+    container_name: monovoca-frontend-dev
+    restart: unless-stopped
+    networks:
+      - monovoca-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: monovoca-mysql-dev
+    environment:
+      - MYSQL_ROOT_PASSWORD=dev_root_password
+      - MYSQL_DATABASE=monovoca
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'mysqladmin',
+          'ping',
+          '-h',
+          'localhost',
+          '-u',
+          'root',
+          '-pdev_root_password',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - monovoca-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: monovoca-redis-dev
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - monovoca-network
+
+volumes:
+  mysql-data:
+    driver: local
+
+networks:
+  monovoca-network:
+    driver: bridge

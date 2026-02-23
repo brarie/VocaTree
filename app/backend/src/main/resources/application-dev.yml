@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:mysql}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:monovoca}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&readOnlyPropagatesToServer=false
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD}
+
+  exposed:
+    generate-ddl: true
+    show-sql: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+
+logging:
+  level:
+    Exposed: DEBUG
+
+app:
+  certificate-redirect-url: http://localhost:3000/verify
+  data:
+    init-enabled: false
+  cors:
+    allowed-origins: http://localhost:3000

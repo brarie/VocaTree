@@ -3,9 +3,11 @@ package com.monovoca.server.common.infrastructure.config
 import com.monovoca.server.auth.infrastructure.security.JWTAuthFilter
 import com.monovoca.server.common.infrastructure.security.CustomAccessDeniedHandler
 import com.monovoca.server.common.infrastructure.security.CustomAuthenticationEntryPoint
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.env.Environment
 import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -25,7 +27,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 class SecurityConfig(
     private val jwtAuthFilter: JWTAuthFilter,
     private val customAuthenticationEntryPoint: CustomAuthenticationEntryPoint,
-    private val customAccessDeniedHandler: CustomAccessDeniedHandler
+    private val customAccessDeniedHandler: CustomAccessDeniedHandler,
+    @Value("\${app.cors.allowed-origins}") private val allowedOrigins: String,
+    private val environment: Environment
 ) {
 
     @Bean
@@ -40,7 +44,9 @@ class SecurityConfig(
                     it.accessDeniedHandler(customAccessDeniedHandler)
             }
             .authorizeHttpRequests {
-                it.requestMatchers(PathRequest.toH2Console()).permitAll()
+                if (environment.activeProfiles.contains("local")) {
+                    it.requestMatchers(PathRequest.toH2Console()).permitAll()
+                }
                 it.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 it.requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
                 it.requestMatchers("/api/users/sign-up", "/api/users/verify", "/api/users/resend-verification").permitAll()
@@ -48,7 +54,11 @@ class SecurityConfig(
                 it.requestMatchers(HttpMethod.GET, "/api/dictionary/search", "/api/dictionary/words/slug/{slug}", "/api/dictionary/search/autocomplete", "/api/dictionary/words", "/api/dictionary/count", "/api/dictionary/words/spelling/{spelling}").permitAll()
                 it.anyRequest().authenticated()
             }
-            .headers { it.frameOptions { it.sameOrigin() } }
+            .apply {
+                if (environment.activeProfiles.contains("local")) {
+                    headers { it.frameOptions { it.sameOrigin() } }
+                }
+            }
 
         http.sessionManagement {
             it.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -62,7 +72,7 @@ class SecurityConfig(
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()
-        configuration.allowedOrigins = listOf("http://localhost:3000")
+        configuration.allowedOrigins = allowedOrigins.split(",").map { it.trim() }
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
         configuration.allowedHeaders = listOf("*")
         configuration.allowCredentials = true

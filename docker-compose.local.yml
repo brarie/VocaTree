@@ -1,0 +1,50 @@
+services:
+  backend:
+    build:
+      context: ./app/backend
+      dockerfile: Dockerfile
+    container_name: monovoca-backend-local
+    ports:
+      - '8080:8080'
+    env_file:
+      - .env.mail
+    environment:
+      - JWT_SECRET_KEY=a-string-secret-at-least-256-bits-long
+      - SPRING_PROFILES_ACTIVE=local
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - monovoca-network
+
+  frontend:
+    build:
+      context: ./app/frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
+    container_name: monovoca-frontend-local
+    ports:
+      - '3000:3000'
+    networks:
+      - monovoca-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: monovoca-redis-local
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - monovoca-network
+
+networks:
+  monovoca-network:
+    driver: bridge
