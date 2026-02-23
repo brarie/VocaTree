@@ -1035,7 +1035,7 @@ export function WordbookTable({ wordbookId }: WordbookTableProps) {
                             }
                           }}
                           onTouchStart={(e) => {
-                            setResizingColumn(header.column.id);
+                            resizingColumnRef.current = header.column.id;
                             header.getResizeHandler()(e);
                           }}
                           className={cn(
