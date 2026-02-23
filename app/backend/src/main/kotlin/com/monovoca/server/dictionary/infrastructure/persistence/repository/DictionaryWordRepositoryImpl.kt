@@ -17,7 +17,6 @@ import org.jetbrains.exposed.sql.CustomFunction
 import org.jetbrains.exposed.sql.IntegerColumnType
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
@@ -26,7 +25,7 @@ import org.springframework.stereotype.Repository
 @Repository
 class DictionaryWordRepositoryImpl : DictionaryWordRepository {
 
-    override fun save(word: PublicWord): PublicWord = transaction {
+    override fun save(word: PublicWord): PublicWord {
         val wordEntity = if (word.id == null) {
             PublicWordEntity.new { applyDomain(word) }
         } else {
@@ -35,7 +34,7 @@ class DictionaryWordRepositoryImpl : DictionaryWordRepository {
         }
         syncSenses(wordEntity, word)
 
-        wordEntity.toDomain()
+        return wordEntity.toDomain()
     }
 
     private fun syncSenses(wordEntity: PublicWordEntity, word: PublicWord) {
@@ -87,43 +86,37 @@ class DictionaryWordRepositoryImpl : DictionaryWordRepository {
         }
     }
 
-    override fun existsBySpelling(spelling: Spelling): Boolean = transaction {
+    override fun existsBySpelling(spelling: Spelling): Boolean =
         PublicWordTable.select(PublicWordTable.id)
             .where { PublicWordTable.spelling eq spelling.value }
             .empty().not()
-    }
 
-    override fun existsBySlug(slug: String): Boolean = transaction {
+    override fun existsBySlug(slug: String): Boolean =
         PublicWordTable.select(PublicWordTable.id)
             .where { PublicWordTable.slug eq slug }
             .empty().not()
-    }
 
-    override fun findById(wordId: Long): PublicWord? = transaction {
+    override fun findById(wordId: Long): PublicWord? =
         PublicWordEntity.findById(wordId)
             ?.load(PublicWordEntity::senses, PublicSenseEntity::examples)
             ?.toDomain()
-    }
 
-    override fun findBySpelling(spelling: Spelling): PublicWord? = transaction {
+    override fun findBySpelling(spelling: Spelling): PublicWord? =
         PublicWordEntity.find { PublicWordTable.spelling eq spelling.value }
             .firstOrNull()
             ?.load(PublicWordEntity::senses, PublicSenseEntity::examples)
             ?.toDomain()
-    }
 
-    override fun delete(word: PublicWord) = transaction {
+    override fun delete(word: PublicWord) =
         PublicWordEntity.findById(word.id!!)!!.delete()
-    }
 
-    override fun findBySlug(slug: String): PublicWord? = transaction {
+    override fun findBySlug(slug: String): PublicWord? =
         PublicWordEntity.find { PublicWordTable.slug eq slug }
             .firstOrNull()
             ?.load(PublicWordEntity::senses, PublicSenseEntity::examples)
             ?.toDomain()
-    }
 
-    override fun paginateViewsBySpelling(query: String, pageable: Pageable): Page<PublicWordSimpleView> = transaction {
+    override fun paginateViewsBySpelling(query: String, pageable: Pageable): Page<PublicWordSimpleView> {
         val lengthFunc = CustomFunction("LENGTH", IntegerColumnType(), PublicWordTable.spelling)
 
         val total = PublicWordTable
@@ -142,15 +135,15 @@ class DictionaryWordRepositoryImpl : DictionaryWordRepository {
             .with(PublicWordEntity::senses)
             .map { it.toPublicWordSearchView() }
 
-        PageImpl(content, pageable, total)
+        return PageImpl(content, pageable, total)
     }
 
-    override fun getDictionaryCounts(): DictionaryCountView = transaction {
+    override fun getDictionaryCounts(): DictionaryCountView {
         val wordCount = PublicWordEntity.all().count()
         val senseCount = PublicSenseEntity.all().count()
         val exampleCount = PublicExampleEntity.all().count()
 
-        DictionaryCountView(
+        return DictionaryCountView(
             totalWords = wordCount,
             totalSenses = senseCount,
             totalExamples = exampleCount

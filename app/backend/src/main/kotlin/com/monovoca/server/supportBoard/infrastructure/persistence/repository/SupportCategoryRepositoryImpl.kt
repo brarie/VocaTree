@@ -6,53 +6,45 @@ import com.monovoca.server.supportBoard.infrastructure.persistence.entity.Suppor
 import com.monovoca.server.supportBoard.infrastructure.persistence.entity.SupportCategoryTable
 import com.monovoca.server.supportBoard.infrastructure.persistence.entity.SupportPostEntity
 import com.monovoca.server.supportBoard.infrastructure.persistence.entity.SupportPostTable
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Repository
 
 @Repository
 class SupportCategoryRepositoryImpl : SupportCategoryRepository {
 
-    override fun save(supportCategory: SupportCategory): SupportCategory = transaction {
+    override fun save(supportCategory: SupportCategory): SupportCategory {
         val entity = if (supportCategory.id == null) {
             SupportCategoryEntity.new { applyDomain(supportCategory) }
         } else {
             SupportCategoryEntity.findById(supportCategory.id)?.apply { applyDomain(supportCategory) }
                 ?: error("SupportCategory with ID ${supportCategory.id} not found")
         }
-        entity.toDomain()
+        return entity.toDomain()
     }
 
-    override fun findById(categoryId: Long): SupportCategory? = transaction {
+    override fun findById(categoryId: Long): SupportCategory? =
         SupportCategoryEntity.findById(categoryId)
             ?.toDomain()
-    }
 
-    override fun findAllCategories(): List<SupportCategory> = transaction {
+    override fun findAllCategories(): List<SupportCategory> =
         SupportCategoryEntity.all()
             .map { it.toDomain() }
-    }
 
-    override fun findMainCategories(): List<SupportCategory> = transaction {
+    override fun findMainCategories(): List<SupportCategory> =
         SupportCategoryEntity.find { SupportCategoryTable.parentCategoryId.isNull() }
             .map { it.toDomain() }
-    }
 
-    override fun findSubCategoriesById(categoryId: Long): List<SupportCategory> = transaction {
+    override fun findSubCategoriesById(categoryId: Long): List<SupportCategory> =
         SupportCategoryEntity.find { SupportCategoryTable.parentCategoryId eq categoryId }
             .map { it.toDomain() }
-    }
 
-    override fun delete(supportCategory: SupportCategory) = transaction {
+    override fun delete(supportCategory: SupportCategory) =
         SupportCategoryEntity.findById(supportCategory.id!!)!!.delete()
-    }
 
-    override fun hasSubCategories(categoryId: Long): Boolean = transaction {
+    override fun hasSubCategories(categoryId: Long): Boolean =
         SupportCategoryEntity.find { SupportCategoryTable.parentCategoryId eq categoryId }
             .empty().not()
-    }
 
-    override fun hasRelatedSupportPosts(categoryId: Long): Boolean = transaction {
+    override fun hasRelatedSupportPosts(categoryId: Long): Boolean =
         SupportPostEntity.find { SupportPostTable.supportCategoryId eq categoryId }
             .empty().not()
-    }
 }

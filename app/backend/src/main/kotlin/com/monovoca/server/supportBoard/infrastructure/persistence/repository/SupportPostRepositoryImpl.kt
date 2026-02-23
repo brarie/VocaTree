@@ -11,7 +11,6 @@ import org.jetbrains.exposed.dao.with
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
@@ -20,28 +19,26 @@ import org.springframework.stereotype.Repository
 @Repository
 class SupportPostRepositoryImpl : SupportPostRepository {
 
-    override fun save(supportPost: SupportPost): SupportPost = transaction {
+    override fun save(supportPost: SupportPost): SupportPost {
         val entity = if (supportPost.id == null) {
             SupportPostEntity.new { applyDomain(supportPost) }
         } else {
             SupportPostEntity.findById(supportPost.id)?.apply { applyDomain(supportPost) }
                 ?: error("SupportPost with ID ${supportPost.id} not found")
         }
-        entity.toDomain()
+        return entity.toDomain()
     }
 
-    override fun delete(supportPost: SupportPost) = transaction {
+    override fun delete(supportPost: SupportPost) =
         SupportPostEntity.findById(supportPost.id!!)!!.delete()
-    }
 
-    override fun findById(supportPostId: Long): SupportPost? = transaction {
+    override fun findById(supportPostId: Long): SupportPost? =
         SupportPostEntity.findById(supportPostId)?.toDomain()
-    }
 
     override fun paginateViewsByCategoryTree(
         categoryId: Long,
         pageable: Pageable
-    ): Page<SupportPostView> = transaction {
+    ): Page<SupportPostView> {
         val categoryIds = SupportCategoryTable
             .select(SupportCategoryTable.id)
             .where { (SupportCategoryTable.id eq categoryId) or (SupportCategoryTable.parentCategoryId eq categoryId) }
@@ -62,6 +59,6 @@ class SupportPostRepositoryImpl : SupportPostRepository {
             .with(SupportPostEntity::author, SupportPostEntity::supportCategory)
             .map { it.toSupportPostView() }
 
-        PageImpl(content, pageable, total)
+        return PageImpl(content, pageable, total)
     }
 }

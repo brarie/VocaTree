@@ -9,7 +9,6 @@ import com.monovoca.server.wordbook.infrastructure.persistence.entity.WordbookSe
 import com.monovoca.server.wordbook.infrastructure.persistence.entity.WordbookWordEntity
 import com.monovoca.server.wordbook.infrastructure.persistence.entity.WordbookWordTable
 import org.jetbrains.exposed.dao.with
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -22,18 +21,18 @@ class WordbookWordListRepositoryImpl : WordbookWordListRepository {
         )
     }
 
-    override fun findById(wordbookId: Long): WordbookWordList = transaction {
+    override fun findById(wordbookId: Long): WordbookWordList {
         val wordList = WordbookWordEntity.find { WordbookWordTable.wordbookId eq wordbookId }
             .with(WordbookWordEntity::senses, WordbookSenseEntity::examples)
             .map { it.toDomain() }
 
-        toWordbookWordList(
+        return toWordbookWordList(
             wordbookId = wordbookId,
             wordList = wordList
         )
     }
 
-    override fun save(wordbookWordList: WordbookWordList): WordbookWordList = transaction {
+    override fun save(wordbookWordList: WordbookWordList): WordbookWordList {
         val existingWords = WordbookWordEntity.find { WordbookWordTable.wordbookId eq wordbookWordList.wordbookId }
             .with(WordbookWordEntity::senses, WordbookSenseEntity::examples)
             .associateBy { it.id.value }
@@ -61,7 +60,7 @@ class WordbookWordListRepositoryImpl : WordbookWordListRepository {
             .with(WordbookWordEntity::senses, WordbookSenseEntity::examples)
             .map { it.toDomain() }
 
-        toWordbookWordList(wordbookWordList.wordbookId, savedWords)
+        return toWordbookWordList(wordbookWordList.wordbookId, savedWords)
     }
 
     private fun syncSenses(wordEntity: WordbookWordEntity, word: WordbookWord) {

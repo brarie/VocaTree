@@ -8,7 +8,6 @@ import com.monovoca.server.wordbook.infrastructure.persistence.entity.WordbookNo
 import com.monovoca.server.wordbook.infrastructure.persistence.entity.WordbookWordTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
@@ -23,7 +22,7 @@ class WordbookNodeRepositoryImpl : WordbookNodeRepository {
         pageable: Pageable,
         wordbookNodeSortType: WordbookNodeSortType,
         starOnly: Boolean
-    ): Page<NodeResponseWithCountView> = transaction {
+    ): Page<NodeResponseWithCountView> {
         val ownerUUID = UUID.fromString(ownerId)
         val childNodeTableAlias = WordbookNodeTable.alias("child_node")
         val wordbookCountAlias = childNodeTableAlias[WordbookNodeTable.id].countDistinct().alias("wordbook_count")
@@ -77,14 +76,14 @@ class WordbookNodeRepositoryImpl : WordbookNodeRepository {
                 )
             }
 
-        PageImpl(content, pageable, total)
+        return PageImpl(content, pageable, total)
     }
 
     override fun paginateInBundle(
         ownerId: String,
         bundleId: Long,
         pageable: Pageable
-    ): Page<NodeResponseWithCountView> = transaction {
+    ): Page<NodeResponseWithCountView> {
         val ownerUUID = UUID.fromString(ownerId)
         val wordCountAlias = WordbookWordTable.id.count().alias("word_count")
         val query = (WordbookNodeTable leftJoin WordbookWordTable)
@@ -112,6 +111,6 @@ class WordbookNodeRepositoryImpl : WordbookNodeRepository {
                 )
             }
 
-        PageImpl(content, pageable, total)
+        return PageImpl(content, pageable, total)
     }
 }

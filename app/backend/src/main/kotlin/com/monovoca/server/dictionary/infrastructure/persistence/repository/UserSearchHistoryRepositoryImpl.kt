@@ -6,14 +6,13 @@ import com.monovoca.server.dictionary.infrastructure.persistence.entity.UserSear
 import com.monovoca.server.dictionary.infrastructure.persistence.entity.UserSearchHistoryTable
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import org.springframework.stereotype.Repository
 
 @Repository
 class UserSearchHistoryRepositoryImpl : UserSearchHistoryRepository {
 
-    override fun save(history: UserSearchHistory): UserSearchHistory = transaction {
+    override fun save(history: UserSearchHistory): UserSearchHistory {
         val entity = if (history.id == null) {
             UserSearchHistoryEntity.new {
                 applyDomain(history)
@@ -23,37 +22,33 @@ class UserSearchHistoryRepositoryImpl : UserSearchHistoryRepository {
             UserSearchHistoryEntity.findById(history.id)?.apply { applyDomain(history) }
                 ?: error("UserSearchHistory with ID ${history.id} not found")
         }
-        entity.toDomain()
+        return entity.toDomain()
     }
 
-    override fun delete(history: UserSearchHistory) = transaction {
+    override fun delete(history: UserSearchHistory) {
         UserSearchHistoryEntity.findById(history.id!!)!!.isDeleted = true
     }
 
-    override fun findById(historyId: Long): UserSearchHistory? = transaction {
+    override fun findById(historyId: Long): UserSearchHistory? =
         UserSearchHistoryEntity
             .find { (UserSearchHistoryTable.id eq historyId) and (UserSearchHistoryTable.isDeleted eq false) }
             .firstOrNull()
             ?.toDomain()
-    }
 
-    override fun findByUserIdOrderBySearchedAtDesc(userId: String, limit: Int): List<UserSearchHistory> = transaction {
+    override fun findByUserIdOrderBySearchedAtDesc(userId: String, limit: Int): List<UserSearchHistory> =
         UserSearchHistoryEntity
             .find { (UserSearchHistoryTable.userId eq userId) and (UserSearchHistoryTable.isDeleted eq false) }
             .orderBy(UserSearchHistoryTable.searchedAt to SortOrder.DESC)
             .limit(limit)
             .map { it.toDomain() }
-    }
 
     override fun deleteAllByUserId(userId: String) {
-        transaction {
-            UserSearchHistoryTable.update({ (UserSearchHistoryTable.userId eq userId) and (UserSearchHistoryTable.isDeleted eq false) }) {
-                it[isDeleted] = true
-            }
+        UserSearchHistoryTable.update({ (UserSearchHistoryTable.userId eq userId) and (UserSearchHistoryTable.isDeleted eq false) }) {
+            it[isDeleted] = true
         }
     }
 
-    override fun findByUserIdAndSpelling(userId: String, spelling: String): UserSearchHistory? = transaction {
+    override fun findByUserIdAndSpelling(userId: String, spelling: String): UserSearchHistory? =
         UserSearchHistoryEntity
             .find {
                 (UserSearchHistoryTable.userId eq userId) and
@@ -62,5 +57,4 @@ class UserSearchHistoryRepositoryImpl : UserSearchHistoryRepository {
             }
             .firstOrNull()
             ?.toDomain()
-    }
 }

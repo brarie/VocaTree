@@ -6,25 +6,22 @@ import com.monovoca.server.wordbook.domain.port.WordbookBundleRepository
 import com.monovoca.server.wordbook.infrastructure.persistence.entity.WordbookNodeEntity
 import com.monovoca.server.wordbook.infrastructure.persistence.entity.WordbookNodeTable
 import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
 class WordbookBundleRepositoryImpl : WordbookBundleRepository {
 
-    override fun findAllByOwnerId(userId: String): List<WordbookBundle> = transaction {
+    override fun findAllByOwnerId(userId: String): List<WordbookBundle> =
         WordbookNodeEntity.find { WordbookNodeTable.ownerId eq UUID.fromString(userId) and (WordbookNodeTable.nodeType eq NodeType.BUNDLE) }
             .map { it.toDomain() as WordbookBundle }
-    }
 
-    override fun findById(id: Long): WordbookBundle? = transaction {
+    override fun findById(id: Long): WordbookBundle? =
         WordbookNodeEntity.findById(id)?.let {
             it.toDomain() as WordbookBundle
         }
-    }
 
-    override fun save(wordbookBundle: WordbookBundle): WordbookBundle = transaction {
+    override fun save(wordbookBundle: WordbookBundle): WordbookBundle {
         val wordbookBundleEntity = if (wordbookBundle.id == null) {
             WordbookNodeEntity.new { applyDomain(wordbookBundle) }
         } else {
@@ -32,10 +29,10 @@ class WordbookBundleRepositoryImpl : WordbookBundleRepository {
                 ?: error("WordbookBundleEntity with ID ${wordbookBundle.id} not found")
         }
 
-        wordbookBundleEntity.toDomain() as WordbookBundle
+        return wordbookBundleEntity.toDomain() as WordbookBundle
     }
 
-    override fun delete(wordbookBundle: WordbookBundle): Unit = transaction {
+    override fun delete(wordbookBundle: WordbookBundle) {
         WordbookNodeEntity.findById(wordbookBundle.id!!)?.delete()
     }
 }
