@@ -1,7 +1,7 @@
 services:
   nginx:
     image: nginx:alpine
-    container_name: monovoca-nginx-dev
+    container_name: vocatree-nginx-dev
     ports:
       - '80:80'
     volumes:
@@ -11,19 +11,19 @@ services:
       - frontend
     restart: unless-stopped
     networks:
-      - monovoca-network
+      - vocatree-network
 
   backend:
     build:
       context: ./app/backend
       dockerfile: Dockerfile
-    container_name: monovoca-backend-dev
+    container_name: vocatree-backend-dev
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - JWT_SECRET_KEY=dev-secret-key-for-testing-only-long-bit-secure
       - MYSQL_HOST=mysql
       - MYSQL_PORT=3306
-      - MYSQL_DATABASE=monovoca
+      - MYSQL_DATABASE=vocatree
       - MYSQL_USER=root
       - MYSQL_PASSWORD=dev_root_password
       - REDIS_HOST=redis
@@ -37,7 +37,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     networks:
-      - monovoca-network
+      - vocatree-network
 
   frontend:
     build:
@@ -45,17 +45,17 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_BASE_URL: ''
-    container_name: monovoca-frontend-dev
+    container_name: vocatree-frontend-dev
     restart: unless-stopped
     networks:
-      - monovoca-network
+      - vocatree-network
 
   mysql:
     image: mysql:8.0
-    container_name: monovoca-mysql-dev
+    container_name: vocatree-mysql-dev
     environment:
       - MYSQL_ROOT_PASSWORD=dev_root_password
-      - MYSQL_DATABASE=monovoca
+      - MYSQL_DATABASE=vocatree
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
@@ -75,11 +75,11 @@ services:
       retries: 5
     restart: unless-stopped
     networks:
-      - monovoca-network
+      - vocatree-network
 
   redis:
     image: redis:7-alpine
-    container_name: monovoca-redis-dev
+    container_name: vocatree-redis-dev
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
@@ -87,12 +87,12 @@ services:
       retries: 5
     restart: unless-stopped
     networks:
-      - monovoca-network
+      - vocatree-network
 
 volumes:
   mysql-data:
     driver: local
 
 networks:
-  monovoca-network:
+  vocatree-network:
     driver: bridge

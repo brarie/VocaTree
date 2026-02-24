@@ -99,7 +99,7 @@ docker-compose -f docker-compose.dev.yml up -d
 **데이터베이스**
 
 - MySQL root 비밀번호: `dev_root_password` (하드코딩)
-- 데이터베이스: `monovoca`
+- 데이터베이스: `vocatree`
 - 스키마 자동 생성: enabled
 
 ---
@@ -137,4 +137,73 @@ docker-compose -f docker-compose.{환경}.yml restart backend
 
 ---
 
-**문의**: monovoca0@gmail.com
+### Prod 환경
+
+**특징**
+
+- MySQL database (영속성 볼륨)
+- Redis (영속성 볼륨)
+- Nginx + HTTPS (Let's Encrypt)
+
+**사전 준비**
+
+1. 서버에 Docker 설치
+
+```bash
+sudo apt update && sudo apt install -y docker.io docker-compose-plugin git
+sudo usermod -aG docker $USER
+```
+
+2. 프로젝트 클론
+
+```bash
+git clone https://github.com/your-username/MonoVoca.git
+cd MonoVoca
+```
+
+3. 환경변수 설정
+
+```bash
+# .env.prod 파일 생성 (.env.prod.example 참고)
+cp .env.prod.example .env.prod
+nano .env.prod
+
+# .env.mail 파일 생성
+nano .env.mail
+```
+
+4. init.sql 준비 (dev에서 스키마 export)
+
+```bash
+docker exec vocatree-mysql-dev mysqldump \
+  -u root -pdev_root_password \
+  --no-data vocatree > docker/mysql/init.sql
+```
+
+**첫 배포 (SSL 발급 전)**
+
+```bash
+# 1. nginx를 HTTP 전용으로 실행
+# docker-compose.prod.yml의 nginx volumes를 nginx-prod-init.conf로 임시 변경
+docker-compose -f docker-compose.prod.yml up -d
+
+# 2. SSL 인증서 발급 (가비아에서 도메인 A레코드 설정 완료 후)
+docker run -it --rm \
+  -v $(pwd)/docker/nginx/ssl:/etc/letsencrypt \
+  -v $(pwd)/docker/nginx/certbot:/var/www/certbot \
+  certbot/certbot certonly --webroot \
+  -w /var/www/certbot \
+  -d vocatree.com -d www.vocatree.com \
+  --email your@email.com --agree-tos --no-eff-email
+
+# 3. nginx를 HTTPS 설정으로 전환 (nginx-prod.conf로 복구)
+docker-compose -f docker-compose.prod.yml restart nginx
+```
+
+**접속**
+
+- https://vocatree.com
+
+---
+
+## 주요 명령어

@@ -3,7 +3,7 @@ services:
     build:
       context: ./app/backend
       dockerfile: Dockerfile
-    container_name: monovoca-backend-local
+    container_name: vocatree-backend-local
     ports:
       - '8080:8080'
     env_file:
@@ -18,7 +18,7 @@ services:
         condition: service_healthy
     restart: on-failure
     networks:
-      - monovoca-network
+      - vocatree-network
 
   frontend:
     build:
@@ -26,15 +26,15 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
-    container_name: monovoca-frontend-local
+    container_name: vocatree-frontend-local
     ports:
       - '3000:3000'
     networks:
-      - monovoca-network
+      - vocatree-network
 
   redis:
     image: redis:7-alpine
-    container_name: monovoca-redis-local
+    container_name: vocatree-redis-local
     ports:
       - '6379:6379'
     healthcheck:
@@ -43,8 +43,8 @@ services:
       timeout: 3s
       retries: 5
     networks:
-      - monovoca-network
+      - vocatree-network
 
 networks:
-  monovoca-network:
+  vocatree-network:
     driver: bridge
