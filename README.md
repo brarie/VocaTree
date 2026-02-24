@@ -154,6 +154,8 @@ sudo apt update && sudo apt install -y docker.io docker-compose-plugin git
 sudo usermod -aG docker $USER
 ```
 
+docker-compose-plugin 안깔리면 인터넷 참고해서 환경 변경 필요
+
 2. 프로젝트 클론
 
 ```bash
@@ -175,9 +177,8 @@ nano .env.mail
 4. init.sql 준비 (dev에서 스키마 export)
 
 ```bash
-docker exec vocatree-mysql-dev mysqldump \
-  -u root -pdev_root_password \
-  --no-data vocatree > docker/mysql/init.sql
+docker exec vocatree-mysql-dev bash -c "mysqldump -u root -pdev_root_password --no-data vocatree > /tmp/init.sql"
+docker cp vocatree-mysql-dev:/tmp/init.sql docker/mysql/init.sql
 ```
 
 **첫 배포 (SSL 발급 전)**
@@ -185,7 +186,7 @@ docker exec vocatree-mysql-dev mysqldump \
 ```bash
 # 1. nginx를 HTTP 전용으로 실행
 # docker-compose.prod.yml의 nginx volumes를 nginx-prod-init.conf로 임시 변경
-docker-compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml up -d
 
 # 2. SSL 인증서 발급 (가비아에서 도메인 A레코드 설정 완료 후)
 docker run -it --rm \
@@ -194,10 +195,10 @@ docker run -it --rm \
   certbot/certbot certonly --webroot \
   -w /var/www/certbot \
   -d vocatree.com -d www.vocatree.com \
-  --email your@email.com --agree-tos --no-eff-email
+  --email prarie77@gmail.com --agree-tos --no-eff-email
 
 # 3. nginx를 HTTPS 설정으로 전환 (nginx-prod.conf로 복구)
-docker-compose -f docker-compose.prod.yml restart nginx
+docker compose -f docker-compose.prod.yml restart nginx
 ```
 
 **접속**

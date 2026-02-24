@@ -1,0 +1,103 @@
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: vocatree-nginx-prod
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./docker/nginx/nginx-prod.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/ssl:/etc/letsencrypt:ro
+      - ./docker/nginx/certbot:/var/www/certbot:ro
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+    networks:
+      - vocatree-network
+
+  certbot:
+    image: certbot/certbot
+    container_name: vocatree-certbot-prod
+    volumes:
+      - ./docker/nginx/ssl:/etc/letsencrypt
+      - ./docker/nginx/certbot:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+      - vocatree-network
+
+  backend:
+    build:
+      context: ./app/backend
+      dockerfile: Dockerfile
+    container_name: vocatree-backend-prod
+    env_file:
+      - .env.prod
+      - .env.mail
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - vocatree-network
+
+  frontend:
+    build:
+      context: ./app/frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ''
+    container_name: vocatree-frontend-prod
+    restart: unless-stopped
+    networks:
+      - vocatree-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: vocatree-mysql-prod
+    env_file:
+      - .env.prod
+    volumes:
+      - prod-mysql-data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - vocatree-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: vocatree-redis-prod
+    command: redis-server --appendonly yes
+    volumes:
+      - prod-redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - vocatree-network
+
+volumes:
+  prod-mysql-data:
+    driver: local
+  prod-redis-data:
+    driver: local
+
+networks:
+  vocatree-network:
+    driver: bridge
