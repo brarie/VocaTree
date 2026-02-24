@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Logo } from '@/components/Logo';
 
 export default function FindPassword() {
   const [emailSent, setEmailSent] = useState(false);
@@ -43,14 +44,7 @@ export default function FindPassword() {
           {/* Logo inside Card */}
           <CardHeader>
             <div className="pt-8 pb-4 flex justify-center">
-              <Link href="/" className="group">
-                <h1
-                  className="text-[min(var(--text-5xl),12vw)] font-black italic text-white group-hover:text-white/80 transition-colors"
-                  style={{ fontFamily: 'var(--font-exo-2)' }}
-                >
-                  VocaTree
-                </h1>
-              </Link>
+              <Logo size="lg" />
             </div>
           </CardHeader>
 

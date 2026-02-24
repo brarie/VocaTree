@@ -70,7 +70,7 @@ export function ParticlesBackground() {
       },
       detectRetina: true,
     }),
-    []
+    [],
   );
 
   if (!init) return null;

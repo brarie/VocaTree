@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, Bell, LogOut, User, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Logo } from '@/components/Logo';
 import {
   Sheet,
   SheetContent,
@@ -45,14 +46,7 @@ export function Header() {
       <div className="grid grid-cols-3 h-full items-center">
         {/* Left: Logo */}
         <div className="flex justify-start">
-          <Link href="/" className="flex items-center gap-2">
-            <div
-              className="text-2xl font-black italic"
-              style={{ fontFamily: 'var(--font-exo-2)' }}
-            >
-              VocaTree
-            </div>
-          </Link>
+          <Logo size="md" />
         </div>
 
         {/* Center: Navigation */}

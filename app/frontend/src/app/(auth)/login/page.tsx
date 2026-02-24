@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { login } from '@/api/auth';
 import { useAuth } from '@/contexts/AuthContext';
+import { Logo } from '@/components/Logo';
 
 function LoginForm() {
   const router = useRouter();
@@ -55,14 +56,7 @@ function LoginForm() {
         <Card className="w-[min(var(--container-md),85vw)] bg-black/90 backdrop-blur-sm glow-border">
           <CardHeader>
             <div className="pt-8 pb-4 flex justify-center">
-              <Link href="/" className="group">
-                <h1
-                  className="text-[min(var(--text-5xl),12vw)] font-black italic text-white group-hover:text-white/80 transition-colors"
-                  style={{ fontFamily: 'var(--font-exo-2)' }}
-                >
-                  VocaTree
-                </h1>
-              </Link>
+              <Logo size="lg" />
             </div>
           </CardHeader>
           <CardContent>

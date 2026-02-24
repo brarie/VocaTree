@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Exo_2 } from 'next/font/google';
+import { Space_Grotesk } from 'next/font/google';
 import localFont from 'next/font/local';
 import './globals.css';
 import { ParticlesBackground } from '@/components/ParticlesBackground';
@@ -13,11 +13,10 @@ const pretendard = localFont({
   display: 'swap',
 });
 
-const exo2 = Exo_2({
-  variable: '--font-exo-2',
+const spaceGrotesk = Space_Grotesk({
+  variable: '--font-space-grotesk',
   subsets: ['latin'],
-  weight: ['900'],
-  style: ['italic'],
+  weight: ['700'],
 });
 
 export const metadata: Metadata = {
@@ -33,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="ko" className="dark">
       <body
-        className={`${pretendard.variable} ${exo2.variable} font-sans antialiased bg-black`}
+        className={`${pretendard.variable} ${spaceGrotesk.variable} font-sans antialiased bg-black`}
         style={{
           fontFamily:
             'var(--font-pretendard), -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
@@ -41,8 +40,8 @@ export default function RootLayout({
       >
         <QueryProvider>
           <AuthProvider>
-            {children}
             <ParticlesBackground />
+            {children}
             <Toaster position="top-center" theme="dark" closeButton />
           </AuthProvider>
         </QueryProvider>

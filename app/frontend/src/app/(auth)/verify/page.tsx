@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { verify } from '@/api/user';
+import { Logo } from '@/components/Logo';
 
 function VerifyContent() {
   const searchParams = useSearchParams();
@@ -46,15 +47,8 @@ function VerifyContent() {
       >
         <Card className="w-[min(var(--container-md),85vw)] bg-black/90 backdrop-blur-sm glow-border">
           <CardHeader>
-            <div className="pt-8 pb-4 flex justify-center">
-              <Link href="/" className="group">
-                <h1
-                  className="text-[min(var(--text-5xl),12vw)] font-black italic text-white group-hover:text-white/80 transition-colors"
-                  style={{ fontFamily: 'var(--font-exo-2)' }}
-                >
-                  VocaTree
-                </h1>
-              </Link>
+            <div className="pt-8 pb-8 flex justify-center">
+              <Logo size="lg" />
             </div>
           </CardHeader>
 
