@@ -20,6 +20,7 @@ class UserRepositoryImpl : UserRepository {
             UserEntity.findById(uuid)?.apply { applyDomain(user) }
                 ?: error("User with ID ${user.id} not found")
         }
+        entity.flush()
         return entity.toDomain()
     }
 

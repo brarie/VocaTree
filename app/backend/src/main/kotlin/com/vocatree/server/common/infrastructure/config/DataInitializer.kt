@@ -1,10 +1,10 @@
 package com.vocatree.server.common.infrastructure.config
 
 import com.vocatree.server.common.domain.model.vo.EncryptedPassword
-import com.vocatree.server.common.domain.model.vocabulary.vo.components.Spelling
 import com.vocatree.server.common.domain.model.vo.Username
-import com.vocatree.server.common.domain.model.vocabulary.vo.components.PartOfSpeech
 import com.vocatree.server.common.domain.model.vo.enumerated.UserRole
+import com.vocatree.server.common.domain.model.vocabulary.vo.components.PartOfSpeech
+import com.vocatree.server.common.domain.model.vocabulary.vo.components.Spelling
 import com.vocatree.server.dictionary.application.DictionaryWordService
 import com.vocatree.server.dictionary.domain.model.word.command.CreateExampleCommand
 import com.vocatree.server.dictionary.domain.model.word.command.CreateSenseCommand
@@ -38,7 +38,7 @@ class DataInitializer(
     private val supportPostService: SupportPostService,
     private val dictionaryWordService: DictionaryWordService,
     private val wordbookService: WordbookService,
-    private val wordbookBundleService: WordbookBundleService
+    private val wordbookBundleService: WordbookBundleService,
 ) : ApplicationRunner {
 
     private val klogger = KotlinLogging.logger {}
@@ -57,7 +57,7 @@ class DataInitializer(
         var userAccount = User(
             username = Username("user"),
             email = Email("example@example.com"),
-            nickname = Nickname("모노보카"),
+            nickname = Nickname("보카트리"),
             password = EncryptedPassword.encrypt("12121212", passwordEncoder),
             role = UserRole.USER
         )
