@@ -1,0 +1,74 @@
+package com.vocatree.server.dictionary.fixture
+
+import com.vocatree.server.common.domain.model.vocabulary.vo.SenseVo
+import com.vocatree.server.common.domain.model.vocabulary.vo.ExampleVo
+import com.vocatree.server.common.domain.model.vocabulary.vo.components.Spelling
+import com.vocatree.server.common.domain.model.vocabulary.vo.components.PartOfSpeech
+import com.vocatree.server.dictionary.domain.model.word.PublicExample
+import com.vocatree.server.dictionary.domain.model.word.PublicSense
+import com.vocatree.server.dictionary.domain.model.word.PublicWord
+
+object PublicWordFixture {
+
+    fun createWord(
+        id: Long? = null,
+        spelling: String = "test",
+        slug: String? = null,
+        senses: List<PublicSense> = emptyList()
+    ): PublicWord {
+        return PublicWord(
+            id = id,
+            spelling = Spelling(spelling),
+            slug = slug,
+            senses = senses
+        )
+    }
+
+    fun createSense(
+        id: Long? = null,
+        definition: String = "테스트 뜻",
+        engDefinition: String? = "test definition",
+        britishPhonetic: String? = "/test/",
+        americanPhonetic: String? = "/test/",
+        synonyms: List<String> = emptyList(),
+        antonyms: List<String> = emptyList(),
+        partOfSpeech: PartOfSpeech? = PartOfSpeech.NOUN,
+        displayOrder: Int = 0,
+        examples: List<PublicExample> = emptyList()
+    ): PublicSense {
+        return PublicSense(
+            id = id,
+            sense = SenseVo(
+                definition = definition,
+                engDefinition = engDefinition,
+                britishPhonetic = britishPhonetic,
+                americanPhonetic = americanPhonetic,
+                partOfSpeech = partOfSpeech,
+                synonyms = synonyms.map { Spelling(it) },
+                antonyms = antonyms.map { Spelling(it) }
+            ),
+            displayOrder = displayOrder,
+            examples = examples
+        )
+    }
+
+    fun createExample(
+        id: Long? = null,
+        sentence: String = "This is a test sentence.",
+        translation: String? = "이것은 테스트 문장입니다.",
+        isOfficial: Boolean = false,
+        sourceInfo: String? = null,
+        displayOrder: Int = 0
+    ): PublicExample {
+        return PublicExample(
+            id = id,
+            example = ExampleVo(
+                sentence = sentence,
+                translation = translation
+            ),
+            isOfficial = isOfficial,
+            sourceInfo = sourceInfo,
+            displayOrder = displayOrder
+        )
+    }
+}

@@ -1,0 +1,13 @@
+package com.vocatree.server.wordbook.infrastructure.web.request
+
+data class CreateWordbookRequest(
+    val title: String,
+)
+
+data class UpdateWordbookTitleRequest(
+    val title: String,
+)
+
+data class UpdateColumnWidthRequest(
+    val width: Int,
+)

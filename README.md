@@ -157,8 +157,8 @@ sudo usermod -aG docker $USER
 2. 프로젝트 클론
 
 ```bash
-git clone https://github.com/your-username/MonoVoca.git
-cd MonoVoca
+git clone https://github.com/brarie/VocaTree.git
+cd VocaTree
 ```
 
 3. 환경변수 설정

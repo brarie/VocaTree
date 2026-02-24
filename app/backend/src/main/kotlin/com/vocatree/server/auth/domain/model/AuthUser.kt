@@ -1,0 +1,16 @@
+package com.vocatree.server.auth.domain.model
+
+import com.vocatree.server.common.domain.model.vo.EncryptedPassword
+import com.vocatree.server.common.domain.model.vo.Username
+import com.vocatree.server.common.domain.model.vo.enumerated.UserRole
+
+/**
+ * 인증 관련 사용자 정보 모델
+ * password는 login의 경우에만 존재하며, 그 외의 경우에는 null
+ */
+data class AuthUser(
+    val id: String,
+    val role: UserRole,
+    val username: Username,
+    val password: EncryptedPassword?,
+)
