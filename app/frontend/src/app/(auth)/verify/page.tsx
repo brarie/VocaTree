@@ -52,7 +52,7 @@ function VerifyContent() {
                   className="text-[min(var(--text-5xl),12vw)] font-black italic text-white group-hover:text-white/80 transition-colors"
                   style={{ fontFamily: 'var(--font-exo-2)' }}
                 >
-                  MonoVoca
+                  VocaTree
                 </h1>
               </Link>
             </div>
@@ -76,7 +76,7 @@ function VerifyContent() {
                 <p className="text-gray-300">
                   이메일 인증이 완료되었습니다.
                   <br />
-                  이제 로그인하여 MonoVoca를 사용하실 수 있습니다.
+                  이제 로그인하여 VocaTree 사용하실 수 있습니다.
                 </p>
 
                 <div className="pt-4 -mb-8">

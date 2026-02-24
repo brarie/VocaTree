@@ -109,7 +109,7 @@ export default function SignUp() {
                   className="text-[min(var(--text-5xl),12vw)] font-black italic text-white group-hover:text-white/80 transition-colors"
                   style={{ fontFamily: 'var(--font-exo-2)' }}
                 >
-                  MonoVoca
+                  VocaTree
                 </h1>
               </Link>
             </div>

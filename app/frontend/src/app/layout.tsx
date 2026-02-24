@@ -21,7 +21,7 @@ const exo2 = Exo_2({
 });
 
 export const metadata: Metadata = {
-  title: 'MonoVoca',
+  title: 'VocaTree',
   description: 'Memorize Words Efficiently',
 };
 

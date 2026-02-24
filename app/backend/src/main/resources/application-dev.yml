@@ -19,7 +19,7 @@ logging:
     Exposed: DEBUG
 
 app:
-  certificate-redirect-url: http://localhost:3000/verify
+  certificate-redirect-url: http://localhost/verify
   data:
     init-enabled: false
   cors:

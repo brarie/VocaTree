@@ -60,7 +60,7 @@ function LoginForm() {
                   className="text-[min(var(--text-5xl),12vw)] font-black italic text-white group-hover:text-white/80 transition-colors"
                   style={{ fontFamily: 'var(--font-exo-2)' }}
                 >
-                  MonoVoca
+                  VocaTree
                 </h1>
               </Link>
             </div>
@@ -95,9 +95,7 @@ function LoginForm() {
                 />
               </div>
 
-              {error && (
-                <p className="text-sm text-red-400">{error}</p>
-              )}
+              {error && <p className="text-sm text-red-400">{error}</p>}
 
               <Button
                 type="submit"
@@ -170,11 +168,13 @@ function LoginForm() {
 
 export default function Login() {
   return (
-    <Suspense fallback={
-      <main className="min-h-screen flex items-center justify-center p-4">
-        <div className="text-white">Loading...</div>
-      </main>
-    }>
+    <Suspense
+      fallback={
+        <main className="min-h-screen flex items-center justify-center p-4">
+          <div className="text-white">Loading...</div>
+        </main>
+      }
+    >
       <LoginForm />
     </Suspense>
   );

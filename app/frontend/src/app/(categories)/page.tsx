@@ -83,7 +83,7 @@ export default function Home() {
           className="text-[min(100px,10vw)] font-black italic text-white"
           style={{ fontFamily: 'var(--font-exo-2)' }}
         >
-          MonoVoca
+          VocaTree
         </h1>
 
         <p className="text-[min(20px,2.5vw)] text-gray-300 mb-6 font-medium">

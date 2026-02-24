@@ -50,7 +50,7 @@ export function Header() {
               className="text-2xl font-black italic"
               style={{ fontFamily: 'var(--font-exo-2)' }}
             >
-              MonoVoca
+              VocaTree
             </div>
           </Link>
         </div>
