@@ -188,14 +188,8 @@ docker cp vocatree-mysql-dev:/tmp/init.sql docker/mysql/init.sql
 # docker-compose.prod.yml의 nginx volumes를 nginx-prod-init.conf로 임시 변경
 docker compose -f docker-compose.prod.yml up -d
 
-# 2. SSL 인증서 발급 (가비아에서 도메인 A레코드 설정 완료 후)
-docker run -it --rm \
-  -v $(pwd)/docker/nginx/ssl:/etc/letsencrypt \
-  -v $(pwd)/docker/nginx/certbot:/var/www/certbot \
-  certbot/certbot certonly --webroot \
-  -w /var/www/certbot \
-  -d vocatree.com -d www.vocatree.com \
-  --email prarie77@gmail.com --agree-tos --no-eff-email
+# 2. SSL 인증서 발급
+docker compose -f docker-compose.prod.yml run --rm --entrypoint certbot certbot certonly --webroot -w /var/www/certbot -d vocatree.com -d www.vocatree.com --email prarie77@gmail.com --agree-tos --no-eff-email
 
 # 3. nginx를 HTTPS 설정으로 전환 (nginx-prod.conf로 복구)
 docker compose -f docker-compose.prod.yml restart nginx
