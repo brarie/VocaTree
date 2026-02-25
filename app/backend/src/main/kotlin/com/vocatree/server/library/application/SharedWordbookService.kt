@@ -176,9 +176,4 @@ class SharedWordbookService(
 
         return sharedWordbookRepository.save(shared.updateTrustedLevel(trustedLevel))
     }
-
-    @Transactional
-    fun subscribe() {
-
-    }
 }

@@ -52,6 +52,7 @@ class SecurityConfig(
                 it.requestMatchers("/api/users/sign-up", "/api/users/verify", "/api/users/resend-verification").permitAll()
                 it.requestMatchers("/api/support-categories/**", "/api/support-posts/**").permitAll()
                 it.requestMatchers(HttpMethod.GET, "/api/dictionary/search", "/api/dictionary/words/slug/{slug}", "/api/dictionary/search/autocomplete", "/api/dictionary/words", "/api/dictionary/count", "/api/dictionary/words/spelling/{spelling}").permitAll()
+                it.requestMatchers(HttpMethod.GET, "/api/library/**").permitAll()
                 it.anyRequest().authenticated()
             }
             .apply {

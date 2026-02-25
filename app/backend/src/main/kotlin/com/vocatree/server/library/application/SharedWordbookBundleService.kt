@@ -45,15 +45,4 @@ class SharedWordbookBundleService {
     fun removeSharedWordbookFromBundle() {
 
     }
-
-    /**
-     * 기본 실행 방법
-     * 담겨있는 단어장들을 모두 일단 구독함.
-     * 구독한 단어장 모음을 구독함에 뜨게 함
-     * 얘는 항상 sync됨
-     */
-    @Transactional
-    fun subscribeAll() {
-
-    }
 }
