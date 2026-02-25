@@ -50,7 +50,7 @@ class SharedWordbookBundleEntity(id: EntityID<Long>) : LongEntity(id) {
         slug = this.slug,
         description = this.description,
         sharedState = this.sharedState,
-        trustedLevel = this.trustedLevel,
+        trustedLevel = this.trustedLevel
     )
 
     fun applyDomain(bundle: SharedWordbookBundle) {

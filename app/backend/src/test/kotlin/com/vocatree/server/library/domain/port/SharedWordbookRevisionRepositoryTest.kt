@@ -12,6 +12,7 @@ import io.kotest.extensions.spring.SpringExtension
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import org.springframework.data.domain.PageRequest
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
 
@@ -119,6 +120,95 @@ class SharedWordbookRevisionRepositoryTest(
             val words = sharedWordSnapshotRepository.findByRevisionId(revision.id!!)
             words.size shouldBe 2
             words.map { it.id } shouldContainExactlyInAnyOrder listOf(snapshot1.id!!, snapshot2.id!!)
+        }
+    }
+
+    describe("findVersionViews") {
+        it("버전 목록을 최신 버전 내림차순으로 조회한다.") {
+            val creator = userRepository.save(
+                UserFixture.create(username = "verlist1", email = "verlist1@test.com")
+            )
+            val wordbook = sharedWordbookRepository.save(
+                SharedWordbookFixture.create(creatorId = creator.id!!)
+            )
+            sharedWordbookRevisionRepository.save(SharedWordbookRevisionFixture.create(version = 1L, versionNote = "v1 노트"), wordbook.id!!)
+            sharedWordbookRevisionRepository.save(SharedWordbookRevisionFixture.create(version = 2L, versionNote = "v2 노트"), wordbook.id!!)
+            sharedWordbookRevisionRepository.save(SharedWordbookRevisionFixture.create(version = 3L, versionNote = "v3 노트"), wordbook.id!!)
+
+            val result = sharedWordbookRevisionRepository.findVersionViews(wordbook.id!!, PageRequest.of(0, 10))
+
+            result.totalElements shouldBe 3
+            result.content[0].version shouldBe 3L
+            result.content[1].version shouldBe 2L
+            result.content[2].version shouldBe 1L
+            result.content[0].versionNote shouldBe "v3 노트"
+            result.content[0].sharedWordbookId shouldBe wordbook.id!!
+        }
+
+        it("각 버전의 단어 개수가 정확히 반환된다.") {
+            val creator = userRepository.save(
+                UserFixture.create(username = "verword1", email = "verword1@test.com")
+            )
+            val wordbook = sharedWordbookRepository.save(
+                SharedWordbookFixture.create(creatorId = creator.id!!)
+            )
+            val rev1 = sharedWordbookRevisionRepository.save(
+                SharedWordbookRevisionFixture.create(version = 1L), wordbook.id!!
+            )
+            val snapshot1 = sharedWordSnapshotRepository.findOrCreate(SharedWordSnapshotFixture.create(displayOrder = 1))
+            val snapshot2 = sharedWordSnapshotRepository.findOrCreate(
+                SharedWordSnapshotFixture.create(spelling = Spelling("banana"), displayOrder = 2)
+            )
+            sharedWordbookRevisionRepository.saveEntries(rev1.id!!, listOf(snapshot1.id!!, snapshot2.id!!))
+
+            val rev2 = sharedWordbookRevisionRepository.save(
+                SharedWordbookRevisionFixture.create(version = 2L), wordbook.id!!
+            )
+            val snapshot3 = sharedWordSnapshotRepository.findOrCreate(
+                SharedWordSnapshotFixture.create(spelling = Spelling("cherry"), displayOrder = 1)
+            )
+            sharedWordbookRevisionRepository.saveEntries(rev2.id!!, listOf(snapshot1.id!!, snapshot2.id!!, snapshot3.id!!))
+
+            val result = sharedWordbookRevisionRepository.findVersionViews(wordbook.id!!, PageRequest.of(0, 10))
+
+            result.content.first { it.version == 1L }.wordCount shouldBe 2
+            result.content.first { it.version == 2L }.wordCount shouldBe 3
+        }
+
+        it("페이지네이션이 동작한다.") {
+            val creator = userRepository.save(
+                UserFixture.create(username = "verpage1", email = "verpage1@test.com")
+            )
+            val wordbook = sharedWordbookRepository.save(
+                SharedWordbookFixture.create(creatorId = creator.id!!)
+            )
+            repeat(5) { i ->
+                sharedWordbookRevisionRepository.save(
+                    SharedWordbookRevisionFixture.create(version = (i + 1).toLong()), wordbook.id!!
+                )
+            }
+
+            val page1 = sharedWordbookRevisionRepository.findVersionViews(wordbook.id!!, PageRequest.of(0, 2))
+            val page2 = sharedWordbookRevisionRepository.findVersionViews(wordbook.id!!, PageRequest.of(1, 2))
+
+            page1.content.size shouldBe 2
+            page2.content.size shouldBe 2
+            page1.totalElements shouldBe 5
+            page1.content[0].version shouldBe 5L
+        }
+
+        it("리비전이 없으면 빈 페이지를 반환한다.") {
+            val creator = userRepository.save(
+                UserFixture.create(username = "verempty1", email = "verempty1@test.com")
+            )
+            val wordbook = sharedWordbookRepository.save(
+                SharedWordbookFixture.create(creatorId = creator.id!!)
+            )
+
+            val result = sharedWordbookRevisionRepository.findVersionViews(wordbook.id!!, PageRequest.of(0, 10))
+
+            result.totalElements shouldBe 0
+            result.content shouldBe emptyList()
         }
     }
 

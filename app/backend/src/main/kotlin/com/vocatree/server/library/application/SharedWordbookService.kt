@@ -4,8 +4,15 @@ import com.vocatree.server.common.domain.port.holder.LocalDateTimeHolder
 import com.vocatree.server.library.domain.model.SharedWordbook
 import com.vocatree.server.library.domain.model.SharedWordbookRevision
 import com.vocatree.server.library.domain.model.SharedWordSnapshot
+import com.vocatree.server.library.domain.model.enumerated.TrustedLevel
 import com.vocatree.server.library.domain.model.exception.SharedWordbookNotFoundException
 import com.vocatree.server.library.domain.model.exception.SharedWordbookRevisionNotFoundException
+import com.vocatree.server.library.domain.model.query.SharedWordbookDetailView
+import com.vocatree.server.library.domain.model.query.SharedWordbookListView
+import com.vocatree.server.library.domain.model.query.SharedWordbookVersionView
+import com.vocatree.server.library.domain.port.options.SharedWordbookSortType
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import com.vocatree.server.library.domain.port.SharedWordSnapshotRepository
 import com.vocatree.server.library.domain.port.SharedWordbookRepository
 import com.vocatree.server.library.domain.port.SharedWordbookRevisionRepository
@@ -23,18 +30,28 @@ class SharedWordbookService(
 ) {
 
     @Transactional(readOnly = true)
-    fun paginatePublicSharedWordbooks() {
+    fun paginatePublicSharedWordbooks(
+        titlePrefix: String?,
+        trustedLevels: List<TrustedLevel>,
+        sortType: SharedWordbookSortType,
+        pageable: Pageable,
+    ): Page<SharedWordbookListView> =
+        sharedWordbookRepository.paginatePublicViews(titlePrefix, trustedLevels, sortType, pageable)
 
-    }
-
+    // 이것도 상태 분기를 좀 해야 할 수도...?
+    // 예를 들어 SCOPE가 PRIVATE이면 초대된 사용자만 볼 수 있고, BANNED 면 못 보고 그런 식으로.
     @Transactional(readOnly = true)
-    fun getSharedWordbookDetail() {
+    fun getSharedWordbookDetail(sharedWordbookId: Long): SharedWordbookDetailView =
+        sharedWordbookRepository.findDetailView(sharedWordbookId)
+            ?: throw SharedWordbookNotFoundException()
 
-    }
-
+    // 이것도 마찬가지로 분기 해야 함 ㅋㅋ;
     @Transactional(readOnly = true)
-    fun getSharedWordbookVersions() {
+    fun getSharedWordbookVersions(sharedWordbookId: Long, pageable: Pageable): Page<SharedWordbookVersionView> {
+        sharedWordbookRepository.findById(sharedWordbookId)
+            ?: throw SharedWordbookNotFoundException()
 
+        return sharedWordbookRevisionRepository.findVersionViews(sharedWordbookId, pageable)
     }
 
     @Transactional(readOnly = true)
@@ -135,18 +152,29 @@ class SharedWordbookService(
     }
 
     @Transactional
-    fun deleteMySharedWordbook() {
+    fun deleteMySharedWordbook(userId: String, sharedWordbookId: Long): SharedWordbook {
+        val shared = sharedWordbookRepository.findById(sharedWordbookId)
+            ?: throw SharedWordbookNotFoundException()
 
+        shared.validateOwner(userId)
+
+        return sharedWordbookRepository.save(shared.delete())
     }
 
     @Transactional
-    fun banSharedWordbook() {
+    fun banSharedWordbook(sharedWordbookId: Long): SharedWordbook {
+        val shared = sharedWordbookRepository.findById(sharedWordbookId)
+            ?: throw SharedWordbookNotFoundException()
 
+        return sharedWordbookRepository.save(shared.ban())
     }
 
     @Transactional
-    fun updateTrustedLevel() {
+    fun updateTrustedLevel(sharedWordbookId: Long, trustedLevel: TrustedLevel): SharedWordbook {
+        val shared = sharedWordbookRepository.findById(sharedWordbookId)
+            ?: throw SharedWordbookNotFoundException()
 
+        return sharedWordbookRepository.save(shared.updateTrustedLevel(trustedLevel))
     }
 
     @Transactional

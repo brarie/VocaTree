@@ -35,4 +35,10 @@ data class SharedWordbook(
             slug = generateSlug(title, id)
         )
     }
+
+    fun delete(): SharedWordbook = this.copy(sharedState = SharedState.DELETED_BY_OWNER)
+
+    fun ban(): SharedWordbook = this.copy(sharedState = SharedState.BANNED)
+
+    fun updateTrustedLevel(trustedLevel: TrustedLevel): SharedWordbook = this.copy(trustedLevel = trustedLevel)
 }

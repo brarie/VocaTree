@@ -3,6 +3,7 @@ package com.vocatree.server.library.infrastructure.persistence.entity
 import com.vocatree.server.library.domain.model.SharedWordbook
 import com.vocatree.server.library.domain.model.enumerated.SharedState
 import com.vocatree.server.library.domain.model.enumerated.TrustedLevel
+import com.vocatree.server.user.infrastructure.persistence.entity.UserEntity
 import com.vocatree.server.user.infrastructure.persistence.entity.UserTable
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
@@ -25,6 +26,7 @@ class SharedWordbookEntity(id: EntityID<Long>) : LongEntity(id) {
     companion object : LongEntityClass<SharedWordbookEntity>(SharedWordbookTable)
 
     var creatorId by SharedWordbookTable.creatorId
+    val creator by UserEntity referencedOn SharedWordbookTable.creatorId
     var title by SharedWordbookTable.title
     var slug by SharedWordbookTable.slug
     var description by SharedWordbookTable.description
