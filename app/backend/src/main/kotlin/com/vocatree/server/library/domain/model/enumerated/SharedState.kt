@@ -4,5 +4,4 @@ enum class SharedState {
     PUBLIC,
     DELETED_BY_OWNER,
     BANNED,
-    INVITE_ONLY,
 }

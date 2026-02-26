@@ -8,6 +8,9 @@ import com.vocatree.server.common.domain.model.vocabulary.vo.components.Spelling
 import com.vocatree.server.dictionary.application.DictionaryWordService
 import com.vocatree.server.dictionary.domain.model.word.command.CreateExampleCommand
 import com.vocatree.server.dictionary.domain.model.word.command.CreateSenseCommand
+import com.vocatree.server.library.application.SharedWordbookBundleService
+import com.vocatree.server.library.application.SharedWordbookService
+import com.vocatree.server.library.domain.model.enumerated.TrustedLevel
 import com.vocatree.server.supportBoard.application.SupportCategoryService
 import com.vocatree.server.supportBoard.application.SupportPostService
 import com.vocatree.server.user.domain.model.User
@@ -39,6 +42,8 @@ class DataInitializer(
     private val dictionaryWordService: DictionaryWordService,
     private val wordbookService: WordbookService,
     private val wordbookBundleService: WordbookBundleService,
+    private val sharedWordbookService: SharedWordbookService,
+    private val sharedWordbookBundleService: SharedWordbookBundleService,
 ) : ApplicationRunner {
 
     private val klogger = KotlinLogging.logger {}
@@ -241,6 +246,127 @@ class DataInitializer(
         wordbookService.move(adminAccount.id, w3.id!!, b3.id)
         wordbookService.move(adminAccount.id, w4.id!!, b2.id)
         wordbookService.move(adminAccount.id, w5.id!!, b2.id)
+
+        /* 공유 단어장 초기화 */
+        val userW1 = wordbookService.create(userAccount.id!!, "일상 회화 표현")
+        val userW2 = wordbookService.create(userAccount.id, "영화 속 영어 표현")
+
+        val sw1 = sharedWordbookService.shareOwnWordbook(
+            userId = adminAccount.id!!,
+            title = "TOEIC 900점 숙어 모음",
+            description = "TOEIC에서 자주 출제되는 숙어 표현을 정리한 단어장입니다.",
+            myWordbookId = w1.id!!,
+            versionNote = "초기 버전",
+        )
+        sharedWordbookService.updateTrustedLevel(sw1.id!!, TrustedLevel.OFFICIAL)
+
+        val sw2 = sharedWordbookService.shareOwnWordbook(
+            userId = adminAccount.id,
+            title = "TOEIC 자주 출제 단어",
+            description = "TOEIC 시험에서 빈출되는 필수 단어를 모았습니다.",
+            myWordbookId = w2.id!!,
+            versionNote = "첫 번째 배포",
+        )
+        sharedWordbookService.updateTrustedLevel(sw2.id!!, TrustedLevel.OFFICIAL)
+
+        val sw3 = sharedWordbookService.shareOwnWordbook(
+            userId = adminAccount.id,
+            title = "TOEIC 필수 암기 단어",
+            description = "TOEIC 목표 점수 달성을 위한 필수 암기 단어 모음입니다.",
+            myWordbookId = w3.id!!,
+            versionNote = "v1",
+        )
+        sharedWordbookService.updateTrustedLevel(sw3.id!!, TrustedLevel.VERIFIED)
+
+        val sw4 = sharedWordbookService.shareOwnWordbook(
+            userId = adminAccount.id,
+            title = "비즈니스 이메일 필수 단어",
+            description = "업무 이메일 작성 시 활용할 수 있는 비즈니스 영어 단어 모음입니다.",
+            myWordbookId = w4.id!!,
+            versionNote = "초기 배포",
+        )
+        sharedWordbookService.updateTrustedLevel(sw4.id!!, TrustedLevel.VERIFIED)
+
+        val sw5 = sharedWordbookService.shareOwnWordbook(
+            userId = adminAccount.id,
+            title = "비즈니스 영어 핵심 100단어",
+            description = "직장인이라면 꼭 알아야 할 비즈니스 영어 100단어입니다.",
+            myWordbookId = w5.id!!,
+            versionNote = "v1.0",
+        )
+
+        val sw6 = sharedWordbookService.shareOwnWordbook(
+            userId = adminAccount.id,
+            title = "판타지 소설 단어 모음",
+            description = "판타지 장르 소설에서 자주 등장하는 영어 단어들을 모았습니다.",
+            myWordbookId = w6.id!!,
+            versionNote = "초기 버전",
+        )
+
+        val sw7 = sharedWordbookService.shareOwnWordbook(
+            userId = adminAccount.id,
+            title = "과학 논문 영어 단어",
+            description = "영어 과학 논문을 읽기 위한 전문 어휘를 수록했습니다.",
+            myWordbookId = w7.id!!,
+            versionNote = "v1",
+        )
+
+        val sw8 = sharedWordbookService.shareOwnWordbook(
+            userId = userAccount.id,
+            title = "일상 회화 영어 표현",
+            description = "실생활에서 자주 쓰이는 영어 회화 표현을 모았습니다.",
+            myWordbookId = userW1.id!!,
+            versionNote = "첫 배포",
+        )
+
+        val sw9 = sharedWordbookService.shareOwnWordbook(
+            userId = userAccount.id,
+            title = "영화로 배우는 영어 표현",
+            description = "미국 영화에서 자주 나오는 생생한 영어 표현 모음입니다.",
+            myWordbookId = userW2.id!!,
+            versionNote = "v1",
+        )
+
+        // sw1에 새 버전 추가
+        sharedWordbookService.makeNewVersion(
+            userId = adminAccount.id,
+            sharedWordbookId = sw1.id!!,
+            myWordbookId = w1.id,
+            versionNote = "단어 추가 업데이트",
+        )
+
+        /* 공유 단어장 번들 초기화 */
+        val bundle1 = sharedWordbookBundleService.makeSharedBundle(
+            userId = adminAccount.id,
+            title = "TOEIC 완전 정복 시리즈",
+            description = "TOEIC 고득점을 위한 단어장 모음입니다. 숙어부터 빈출 단어까지 체계적으로 학습하세요.",
+        )
+        sharedWordbookBundleService.updateTrustedLevel(bundle1.id!!, TrustedLevel.OFFICIAL)
+        sharedWordbookBundleService.addSharedWordbookToBundle(adminAccount.id, bundle1.id!!, sw1.id!!)
+        sharedWordbookBundleService.addSharedWordbookToBundle(adminAccount.id, bundle1.id!!, sw2.id!!)
+        sharedWordbookBundleService.addSharedWordbookToBundle(adminAccount.id, bundle1.id!!, sw3.id!!)
+
+        val bundle2 = sharedWordbookBundleService.makeSharedBundle(
+            userId = adminAccount.id,
+            title = "비즈니스 영어 마스터",
+            description = "직장에서 바로 쓸 수 있는 비즈니스 영어 단어장 모음입니다.",
+        )
+        sharedWordbookBundleService.updateTrustedLevel(bundle2.id!!, TrustedLevel.VERIFIED)
+        sharedWordbookBundleService.addSharedWordbookToBundle(adminAccount.id, bundle2.id!!, sw4.id!!)
+        sharedWordbookBundleService.addSharedWordbookToBundle(adminAccount.id, bundle2.id!!, sw5.id!!)
+
+        val bundle3 = sharedWordbookBundleService.makeSharedBundle(
+            userId = adminAccount.id,
+            title = "다양한 주제 영어 단어 컬렉션",
+            description = "일상, 과학, 문학 등 다양한 분야의 영어 단어장을 한곳에 모았습니다.",
+        )
+        sharedWordbookBundleService.addSharedWordbookToBundle(adminAccount.id, bundle3.id!!, sw6.id!!)
+        sharedWordbookBundleService.addSharedWordbookToBundle(adminAccount.id, bundle3.id!!, sw7.id!!)
+        sharedWordbookBundleService.addSharedWordbookToBundle(adminAccount.id, bundle3.id!!, sw8.id!!)
+        sharedWordbookBundleService.addSharedWordbookToBundle(adminAccount.id, bundle3.id!!, sw9.id!!)
+
+        sharedWordbookService.banSharedWordbook(sw8.id!!)
+        sharedWordbookService.deleteMySharedWordbook(userAccount.id, sw9.id!!)
 
         klogger.info { "===== 초기 데이터 삽입 완료 =====" }
     }

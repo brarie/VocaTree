@@ -3,6 +3,7 @@ package com.vocatree.server.library.infrastructure.persistence.entity
 import com.vocatree.server.library.domain.model.SharedWordbookBundle
 import com.vocatree.server.library.domain.model.enumerated.SharedState
 import com.vocatree.server.library.domain.model.enumerated.TrustedLevel
+import com.vocatree.server.user.infrastructure.persistence.entity.UserEntity
 import com.vocatree.server.user.infrastructure.persistence.entity.UserTable
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
@@ -34,6 +35,7 @@ class SharedWordbookBundleEntity(id: EntityID<Long>) : LongEntity(id) {
     companion object : LongEntityClass<SharedWordbookBundleEntity>(SharedWordbookBundleTable)
 
     var creatorId by SharedWordbookBundleTable.creatorId
+    val creator by UserEntity referencedOn SharedWordbookBundleTable.creatorId
     var title by SharedWordbookBundleTable.title
     var slug by SharedWordbookBundleTable.slug
     var description by SharedWordbookBundleTable.description
@@ -50,7 +52,8 @@ class SharedWordbookBundleEntity(id: EntityID<Long>) : LongEntity(id) {
         slug = this.slug,
         description = this.description,
         sharedState = this.sharedState,
-        trustedLevel = this.trustedLevel
+        trustedLevel = this.trustedLevel,
+        createdAt = this.createdAt,
     )
 
     fun applyDomain(bundle: SharedWordbookBundle) {
@@ -60,5 +63,6 @@ class SharedWordbookBundleEntity(id: EntityID<Long>) : LongEntity(id) {
         this.description = bundle.description
         this.sharedState = bundle.sharedState
         this.trustedLevel = bundle.trustedLevel
+        this.createdAt = bundle.createdAt
     }
 }

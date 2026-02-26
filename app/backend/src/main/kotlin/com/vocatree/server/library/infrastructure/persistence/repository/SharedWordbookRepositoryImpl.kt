@@ -13,6 +13,7 @@ import com.vocatree.server.library.infrastructure.persistence.entity.SharedWordb
 import com.vocatree.server.library.infrastructure.persistence.entity.SharedWordbookTable
 import com.vocatree.server.user.infrastructure.persistence.entity.UserTable
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
@@ -62,6 +63,11 @@ class SharedWordbookRepositoryImpl : SharedWordbookRepository {
 
         val maxVersionAlias = SharedWordbookRevisionTable.version.max().alias("latest_version")
 
+        val trustedLevelOrder = Case()
+            .When(SharedWordbookTable.trustedLevel eq TrustedLevel.OFFICIAL, intLiteral(1))
+            .When(SharedWordbookTable.trustedLevel eq TrustedLevel.VERIFIED, intLiteral(2))
+            .Else(intLiteral(3))
+
         val content = SharedWordbookTable
             .innerJoin(UserTable, { SharedWordbookTable.creatorId }, { UserTable.id })
             .innerJoin(SharedWordbookRevisionTable, { SharedWordbookTable.id }, { SharedWordbookRevisionTable.sharedWordbookId })
@@ -78,7 +84,7 @@ class SharedWordbookRepositoryImpl : SharedWordbookRepository {
             )
             .where(conditionBuilder)
             .groupBy(SharedWordbookTable.id, UserTable.id)
-            .orderBy(sortOrder, SharedWordbookTable.id to SortOrder.DESC)
+            .orderBy(trustedLevelOrder to SortOrder.ASC, sortOrder, SharedWordbookTable.id to SortOrder.DESC)
             .limit(pageable.pageSize)
             .offset(pageable.offset)
             .map { row ->
