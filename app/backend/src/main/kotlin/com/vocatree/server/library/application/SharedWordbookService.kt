@@ -42,6 +42,13 @@ class SharedWordbookService(
     ): Page<SharedWordbookListView> =
         sharedWordbookRepository.paginatePublicViews(titlePrefix, trustedLevels, sortType, pageable)
 
+    @Transactional(readOnly = true)
+    fun paginateAllSharedWordbooks(
+        titlePrefix: String?,
+        pageable: Pageable,
+    ): Page<SharedWordbookListView> =
+        sharedWordbookRepository.paginateAllViews(titlePrefix, pageable)
+
     // 이것도 상태 분기를 좀 해야 할 수도...?
     // 예를 들어 SCOPE가 PRIVATE이면 초대된 사용자만 볼 수 있고, BANNED 면 못 보고 그런 식으로.
     @Transactional(readOnly = true)
@@ -172,6 +179,14 @@ class SharedWordbookService(
             ?: throw SharedWordbookNotFoundException()
 
         return sharedWordbookRepository.save(shared.ban())
+    }
+
+    @Transactional
+    fun unbanSharedWordbook(sharedWordbookId: Long): SharedWordbook {
+        val shared = sharedWordbookRepository.findById(sharedWordbookId)
+            ?: throw SharedWordbookNotFoundException()
+
+        return sharedWordbookRepository.save(shared.unban())
     }
 
     @Transactional

@@ -13,7 +13,10 @@ import {
   makeNewVersion,
   deleteMySharedWordbook,
   banSharedWordbook,
+  unbanSharedWordbook,
   updateTrustedLevel,
+  getAdminSharedWordbooks,
+  getAdminSharedBundles,
   getSharedBundles,
   getSharedBundleDetail,
   getWordbooksInBundle,
@@ -23,6 +26,7 @@ import {
   addWordbookToBundle,
   removeWordbookFromBundle,
   banSharedBundle,
+  unbanSharedBundle,
   updateTrustedLevelBundle,
   extractIdFromSlug,
 } from '@/api/library';
@@ -72,6 +76,10 @@ export const libraryKeys = {
     [...libraryKeys.all, 'myWordbooks', page, size] as const,
   myBundles: (page: number, size: number) =>
     [...libraryKeys.all, 'myBundles', page, size] as const,
+  adminWordbooks: (page: number, size: number, titlePrefix?: string) =>
+    [...libraryKeys.all, 'adminWordbooks', page, size, titlePrefix] as const,
+  adminBundles: (page: number, size: number, titlePrefix?: string) =>
+    [...libraryKeys.all, 'adminBundles', page, size, titlePrefix] as const,
 
   // Shared Bundles
   bundles: (
@@ -245,17 +253,52 @@ export function useDeleteMySharedWordbook() {
   });
 }
 
+export function useAdminSharedWordbooks(
+  page: number,
+  size: number,
+  titlePrefix?: string,
+) {
+  return useQuery({
+    queryKey: libraryKeys.adminWordbooks(page, size, titlePrefix),
+    queryFn: () => getAdminSharedWordbooks({ page, size }, titlePrefix),
+  });
+}
+
+export function useAdminSharedBundles(
+  page: number,
+  size: number,
+  titlePrefix?: string,
+) {
+  return useQuery({
+    queryKey: libraryKeys.adminBundles(page, size, titlePrefix),
+    queryFn: () => getAdminSharedBundles({ page, size }, titlePrefix),
+  });
+}
+
 // ADMIN Hooks
 export function useBanSharedWordbook() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id: number) => banSharedWordbook(id),
-    onSuccess: (_, id) => {
-      queryClient.invalidateQueries({
-        queryKey: libraryKeys.wordbookDetail(id),
-      });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: libraryKeys.all });
       toast.success('단어장이 차단되었습니다.');
+    },
+    onError: (error: ApiError) => {
+      toast.error(error.message);
+    },
+  });
+}
+
+export function useUnbanSharedWordbook() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => unbanSharedWordbook(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: libraryKeys.all });
+      toast.success('차단이 해제되었습니다.');
     },
     onError: (error: ApiError) => {
       toast.error(error.message);
@@ -277,6 +320,9 @@ export function useUpdateTrustedLevel() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: libraryKeys.wordbookDetail(variables.id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: [...libraryKeys.all, 'wordbooks'],
       });
       toast.success('신뢰 등급이 변경되었습니다.');
     },
@@ -448,9 +494,24 @@ export function useBanSharedBundle() {
 
   return useMutation({
     mutationFn: (id: number) => banSharedBundle(id),
-    onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey: libraryKeys.bundleDetail(id) });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: libraryKeys.all });
       toast.success('번들이 차단되었습니다.');
+    },
+    onError: (error: ApiError) => {
+      toast.error(error.message);
+    },
+  });
+}
+
+export function useUnbanSharedBundle() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => unbanSharedBundle(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: libraryKeys.all });
+      toast.success('번들 차단이 해제되었습니다.');
     },
     onError: (error: ApiError) => {
       toast.error(error.message);
@@ -472,6 +533,9 @@ export function useUpdateBundleTrustedLevel() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: libraryKeys.bundleDetail(variables.id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: [...libraryKeys.all, 'bundles'],
       });
       toast.success('번들 신뢰 등급이 변경되었습니다.');
     },

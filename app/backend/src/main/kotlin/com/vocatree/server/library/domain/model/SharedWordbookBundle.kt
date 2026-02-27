@@ -39,5 +39,7 @@ data class SharedWordbookBundle(
 
     fun ban(): SharedWordbookBundle = this.copy(sharedState = SharedState.BANNED)
 
+    fun unban(): SharedWordbookBundle = this.copy(sharedState = SharedState.PUBLIC)
+
     fun updateTrustedLevel(trustedLevel: TrustedLevel): SharedWordbookBundle = this.copy(trustedLevel = trustedLevel)
 }

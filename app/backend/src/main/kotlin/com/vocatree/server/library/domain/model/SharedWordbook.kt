@@ -40,5 +40,7 @@ data class SharedWordbook(
 
     fun ban(): SharedWordbook = this.copy(sharedState = SharedState.BANNED)
 
+    fun unban(): SharedWordbook = this.copy(sharedState = SharedState.PUBLIC)
+
     fun updateTrustedLevel(trustedLevel: TrustedLevel): SharedWordbook = this.copy(trustedLevel = trustedLevel)
 }

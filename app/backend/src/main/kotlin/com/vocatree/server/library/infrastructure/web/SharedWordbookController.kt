@@ -55,6 +55,19 @@ class SharedWordbookController(
         return ResponseEntity.ok(result)
     }
 
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    fun getAllSharedWordbooks(
+        @RequestParam(required = false) titlePrefix: String?,
+        pageable: Pageable,
+    ): ResponseEntity<Page<SharedWordbookListView>> {
+        val result = sharedWordbookService.paginateAllSharedWordbooks(
+            titlePrefix = titlePrefix,
+            pageable = pageable,
+        )
+        return ResponseEntity.ok(result)
+    }
+
     @GetMapping
     fun getSharedWordbooks(
         @RequestParam(required = false) titlePrefix: String?,
@@ -160,6 +173,15 @@ class SharedWordbookController(
         @PathVariable sharedWordbookId: Long,
     ): ResponseEntity<SharedWordbookResponse> {
         val wordbook = sharedWordbookService.banSharedWordbook(sharedWordbookId)
+        return ResponseEntity.ok(SharedWordbookResponse.from(wordbook))
+    }
+
+    @PatchMapping("/{sharedWordbookId}/unban")
+    @PreAuthorize("hasRole('ADMIN')")
+    fun unbanSharedWordbook(
+        @PathVariable sharedWordbookId: Long,
+    ): ResponseEntity<SharedWordbookResponse> {
+        val wordbook = sharedWordbookService.unbanSharedWordbook(sharedWordbookId)
         return ResponseEntity.ok(SharedWordbookResponse.from(wordbook))
     }
 

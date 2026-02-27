@@ -54,6 +54,19 @@ class SharedWordbookBundleController(
         return ResponseEntity.ok(result)
     }
 
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    fun getAllSharedBundles(
+        @RequestParam(required = false) titlePrefix: String?,
+        pageable: Pageable,
+    ): ResponseEntity<Page<SharedWordbookBundleListView>> {
+        val result = sharedWordbookBundleService.paginateAllSharedBundles(
+            titlePrefix = titlePrefix,
+            pageable = pageable,
+        )
+        return ResponseEntity.ok(result)
+    }
+
     @GetMapping
     fun getSharedBundles(
         @RequestParam(required = false) titlePrefix: String?,
@@ -161,6 +174,15 @@ class SharedWordbookBundleController(
         @PathVariable bundleId: Long,
     ): ResponseEntity<SharedWordbookBundleResponse> {
         val bundle = sharedWordbookBundleService.banSharedBundle(bundleId)
+        return ResponseEntity.ok(SharedWordbookBundleResponse.from(bundle))
+    }
+
+    @PatchMapping("/{bundleId}/unban")
+    @PreAuthorize("hasRole('ADMIN')")
+    fun unbanSharedBundle(
+        @PathVariable bundleId: Long,
+    ): ResponseEntity<SharedWordbookBundleResponse> {
+        val bundle = sharedWordbookBundleService.unbanSharedBundle(bundleId)
         return ResponseEntity.ok(SharedWordbookBundleResponse.from(bundle))
     }
 

@@ -17,7 +17,7 @@ import {
   SharedWordbookBundleSortType,
 } from '@/types/api/library';
 import { Button } from '@/components/ui/button';
-import { Filter, Plus, Library, Layers } from 'lucide-react';
+import { Filter, Plus, Library, Layers, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import {
   Sheet,
@@ -96,6 +96,20 @@ function LibraryContent() {
                 className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors"
               >
                 <Layers className="w-3.5 h-3.5 shrink-0" />내 공유 번들
+              </Link>
+            </div>
+          </AuthOnly>
+
+          <AuthOnly roles={['ADMIN']}>
+            <div className="bg-white/5 border border-white/10 rounded-lg p-4 space-y-2">
+              <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">
+                관리자
+              </h3>
+              <Link
+                href="/admin/library"
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 shrink-0" />라이브러리 관리
               </Link>
             </div>
           </AuthOnly>

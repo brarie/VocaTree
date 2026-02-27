@@ -109,6 +109,57 @@ class SharedWordbookBundleRepositoryImpl : SharedWordbookBundleRepository {
         return PageImpl(content, pageable, total)
     }
 
+    override fun paginateAllViews(titlePrefix: String?, pageable: Pageable): Page<SharedWordbookBundleListView> {
+        val conditionBuilder: SqlExpressionBuilder.() -> Op<Boolean> = {
+            val conditions = mutableListOf<Op<Boolean>>()
+            if (!titlePrefix.isNullOrBlank()) {
+                conditions.add(SharedWordbookBundleTable.title like "$titlePrefix%")
+            }
+            if (conditions.isEmpty()) Op.TRUE else conditions.compoundAnd()
+        }
+
+        val total = SharedWordbookBundleTable.selectAll().where(conditionBuilder).count()
+
+        val wordbookCountAlias = SharedWordbookBundleItemTable.sharedWordbookId.count().alias("wordbook_count")
+
+        val content = SharedWordbookBundleTable
+            .join(UserTable, JoinType.INNER, SharedWordbookBundleTable.creatorId, UserTable.id)
+            .join(SharedWordbookBundleItemTable, JoinType.LEFT, SharedWordbookBundleTable.id, SharedWordbookBundleItemTable.bundleId)
+            .select(
+                SharedWordbookBundleTable.id,
+                SharedWordbookBundleTable.title,
+                SharedWordbookBundleTable.slug,
+                SharedWordbookBundleTable.sharedState,
+                SharedWordbookBundleTable.trustedLevel,
+                SharedWordbookBundleTable.createdAt,
+                UserTable.id,
+                UserTable.nickname,
+                wordbookCountAlias,
+            )
+            .where(conditionBuilder)
+            .groupBy(SharedWordbookBundleTable.id, UserTable.id)
+            .orderBy(SharedWordbookBundleTable.createdAt to SortOrder.DESC, SharedWordbookBundleTable.id to SortOrder.DESC)
+            .limit(pageable.pageSize)
+            .offset(pageable.offset)
+            .map { row ->
+                SharedWordbookBundleListView(
+                    id = row[SharedWordbookBundleTable.id].value,
+                    title = row[SharedWordbookBundleTable.title],
+                    slug = row[SharedWordbookBundleTable.slug]!!,
+                    sharedState = row[SharedWordbookBundleTable.sharedState],
+                    trustedLevel = row[SharedWordbookBundleTable.trustedLevel],
+                    creator = SimpleUserView(
+                        id = row[UserTable.id].value.toString(),
+                        nickname = row[UserTable.nickname],
+                    ),
+                    wordbookCount = row[wordbookCountAlias].toInt(),
+                    createdAt = row[SharedWordbookBundleTable.createdAt],
+                )
+            }
+
+        return PageImpl(content, pageable, total)
+    }
+
     override fun findDetailView(bundleId: Long): SharedWordbookBundleDetailView? {
         val wordbookCountAlias = SharedWordbookBundleItemTable.sharedWordbookId.count().alias("wordbook_count")
 

@@ -18,6 +18,7 @@ interface SharedWordbookBundleRepository {
         sortType: SharedWordbookBundleSortType,
         pageable: Pageable,
     ): Page<SharedWordbookBundleListView>
+    fun paginateAllViews(titlePrefix: String?, pageable: Pageable): Page<SharedWordbookBundleListView>
     fun findDetailView(bundleId: Long): SharedWordbookBundleDetailView?
     fun addWordbook(bundleId: Long, sharedWordbookId: Long)
     fun removeWordbook(bundleId: Long, sharedWordbookId: Long)

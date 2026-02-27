@@ -33,6 +33,13 @@ class SharedWordbookBundleService(
         sharedWordbookBundleRepository.paginatePublicViews(titlePrefix, trustedLevels, sortType, pageable)
 
     @Transactional(readOnly = true)
+    fun paginateAllSharedBundles(
+        titlePrefix: String?,
+        pageable: Pageable,
+    ): Page<SharedWordbookBundleListView> =
+        sharedWordbookBundleRepository.paginateAllViews(titlePrefix, pageable)
+
+    @Transactional(readOnly = true)
     fun getSharedWordbookBundleDetail(bundleId: Long): SharedWordbookBundleDetailView =
         sharedWordbookBundleRepository.findDetailView(bundleId)
             ?: throw SharedWordbookBundleNotFoundException()
@@ -117,6 +124,14 @@ class SharedWordbookBundleService(
             ?: throw SharedWordbookBundleNotFoundException()
 
         return sharedWordbookBundleRepository.save(bundle.ban())
+    }
+
+    @Transactional
+    fun unbanSharedBundle(bundleId: Long): SharedWordbookBundle {
+        val bundle = sharedWordbookBundleRepository.findById(bundleId)
+            ?: throw SharedWordbookBundleNotFoundException()
+
+        return sharedWordbookBundleRepository.save(bundle.unban())
     }
 
     @Transactional

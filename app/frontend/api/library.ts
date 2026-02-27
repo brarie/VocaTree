@@ -159,17 +159,55 @@ export async function deleteMySharedWordbook(
   return response.json();
 }
 
+// ADMIN List APIs
+export async function getAdminSharedWordbooks(
+  params: PageParams,
+  titlePrefix?: string,
+): Promise<Page<SharedWordbookListView>> {
+  let queryString = pageParamsToQueryString(params);
+  if (titlePrefix)
+    queryString += `&titlePrefix=${encodeURIComponent(titlePrefix)}`;
+  const response = await fetcherWithAuth(
+    `/api/library/shared-wordbooks/admin?${queryString}`,
+  );
+  await handleApiResponse(response, 'Failed to fetch admin shared wordbooks');
+  return response.json();
+}
+
+export async function getAdminSharedBundles(
+  params: PageParams,
+  titlePrefix?: string,
+): Promise<Page<SharedWordbookBundleListView>> {
+  let queryString = pageParamsToQueryString(params);
+  if (titlePrefix)
+    queryString += `&titlePrefix=${encodeURIComponent(titlePrefix)}`;
+  const response = await fetcherWithAuth(
+    `/api/library/shared-wordbook-bundles/admin?${queryString}`,
+  );
+  await handleApiResponse(response, 'Failed to fetch admin shared bundles');
+  return response.json();
+}
+
 // ADMIN APIs
 export async function banSharedWordbook(
   id: number,
 ): Promise<SharedWordbookResponse> {
   const response = await fetcherWithAuth(
     `/api/library/shared-wordbooks/${id}/ban`,
-    {
-      method: 'PATCH',
-    },
+    { method: 'PATCH' },
   );
   await handleApiResponse(response, 'Failed to ban shared wordbook');
+  return response.json();
+}
+
+export async function unbanSharedWordbook(
+  id: number,
+): Promise<SharedWordbookResponse> {
+  const response = await fetcherWithAuth(
+    `/api/library/shared-wordbooks/${id}/unban`,
+    { method: 'PATCH' },
+  );
+  await handleApiResponse(response, 'Failed to unban shared wordbook');
   return response.json();
 }
 
@@ -323,11 +361,20 @@ export async function banSharedBundle(
 ): Promise<SharedWordbookBundleResponse> {
   const response = await fetcherWithAuth(
     `/api/library/shared-wordbook-bundles/${id}/ban`,
-    {
-      method: 'PATCH',
-    },
+    { method: 'PATCH' },
   );
   await handleApiResponse(response, 'Failed to ban shared bundle');
+  return response.json();
+}
+
+export async function unbanSharedBundle(
+  id: number,
+): Promise<SharedWordbookBundleResponse> {
+  const response = await fetcherWithAuth(
+    `/api/library/shared-wordbook-bundles/${id}/unban`,
+    { method: 'PATCH' },
+  );
+  await handleApiResponse(response, 'Failed to unban shared bundle');
   return response.json();
 }
 
