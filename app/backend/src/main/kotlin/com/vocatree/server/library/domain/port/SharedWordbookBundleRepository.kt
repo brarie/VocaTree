@@ -22,4 +22,5 @@ interface SharedWordbookBundleRepository {
     fun addWordbook(bundleId: Long, sharedWordbookId: Long)
     fun removeWordbook(bundleId: Long, sharedWordbookId: Long)
     fun paginateWordbooksInBundle(bundleId: Long, pageable: Pageable): Page<SharedWordbookListView>
+    fun paginateByCreatorId(creatorId: String, pageable: Pageable): Page<SharedWordbookBundleListView>
 }

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
+  getSimpleWordbooks,
   paginateNodes,
   paginateNodesInBundle,
   getWordbook,
@@ -29,6 +30,7 @@ import { toast } from 'sonner';
 
 export const wordbookKeys = {
   all: ['wordbook'] as const,
+  simple: () => [...wordbookKeys.all, 'simple'] as const,
   nodes: (
     page: number,
     size: number,
@@ -43,6 +45,13 @@ export const wordbookKeys = {
     [...wordbookKeys.all, 'bundle', bundleId] as const,
   bundles: () => [...wordbookKeys.all, 'bundles'] as const,
 };
+
+export function useSimpleWordbooks() {
+  return useQuery({
+    queryKey: wordbookKeys.simple(),
+    queryFn: getSimpleWordbooks,
+  });
+}
 
 export function usePaginateNodes(
   page: number,

@@ -4,12 +4,19 @@ import { Page } from '@/types/page';
 import {
   WordbookNodeResponse,
   NodeResponseWithCountView,
+  SimpleWordbookView,
   CreateWordbookRequest,
   UpdateWordbookTitleRequest,
   CreateBundleRequest,
   UpdateBundleTitleRequest,
   WordbookNodeSortType,
 } from '@/types/api/wordbook';
+
+export async function getSimpleWordbooks(): Promise<SimpleWordbookView[]> {
+  const response = await fetcherWithAuth('/api/wordbooks/simple');
+  await handleApiResponse(response, 'Failed to fetch simple wordbooks');
+  return response.json();
+}
 
 export async function paginateNodes(
   page: number = 0,

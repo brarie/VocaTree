@@ -5,6 +5,7 @@ import com.vocatree.server.wordbook.domain.exception.WordbookNotFoundException
 import com.vocatree.server.wordbook.domain.model.Wordbook
 import com.vocatree.server.wordbook.domain.model.WordbookColumnSetting
 import com.vocatree.server.wordbook.domain.model.enumerated.ColumnType
+import com.vocatree.server.wordbook.domain.model.query.SimpleWordbookView
 import com.vocatree.server.wordbook.domain.port.WordbookBundleRepository
 import com.vocatree.server.wordbook.domain.port.WordbookRepository
 import org.springframework.stereotype.Service
@@ -84,6 +85,10 @@ class WordbookService(
         val movedWordbook = wordbook.moveToBundle(bundleId)
         return wordbookRepository.save(movedWordbook)
     }
+
+    @Transactional(readOnly = true)
+    fun getAllSimpleWordbooks(userId: String): List<SimpleWordbookView> =
+        wordbookRepository.findAllSimpleByOwnerId(userId)
 
     @Transactional(readOnly = true)
     fun getWordbook(userId: String, wordbookId: Long): Wordbook {

@@ -6,6 +6,7 @@ import com.vocatree.server.wordbook.domain.model.enumerated.ColumnType
 import com.vocatree.server.wordbook.infrastructure.web.request.CreateWordbookRequest
 import com.vocatree.server.wordbook.infrastructure.web.request.UpdateColumnWidthRequest
 import com.vocatree.server.wordbook.infrastructure.web.request.UpdateWordbookTitleRequest
+import com.vocatree.server.wordbook.domain.model.query.SimpleWordbookView
 import com.vocatree.server.wordbook.infrastructure.web.response.WordbookColumnResponse
 import com.vocatree.server.wordbook.infrastructure.web.response.WordbookNodeResponse
 import org.springframework.http.ResponseEntity
@@ -17,6 +18,14 @@ import org.springframework.web.bind.annotation.*
 class WordbookController(
     private val wordbookService: WordbookService
 ) {
+
+    @GetMapping("/simple")
+    fun getAllSimpleWordbooks(
+        @AuthenticationPrincipal userPrincipal: UserPrincipal,
+    ): ResponseEntity<List<SimpleWordbookView>> {
+        val result = wordbookService.getAllSimpleWordbooks(userPrincipal.id)
+        return ResponseEntity.ok(result)
+    }
 
     @GetMapping("/{wordbookId}")
     fun getWordbook(

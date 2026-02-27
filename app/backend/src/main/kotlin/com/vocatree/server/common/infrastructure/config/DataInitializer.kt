@@ -19,6 +19,9 @@ import com.vocatree.server.user.domain.model.vo.Nickname
 import com.vocatree.server.user.domain.port.UserRepository
 import com.vocatree.server.wordbook.application.WordbookBundleService
 import com.vocatree.server.wordbook.application.WordbookService
+import com.vocatree.server.wordbook.application.WordbookWordListService
+import com.vocatree.server.wordbook.domain.model.command.UpdateSenseCommand
+import com.vocatree.server.wordbook.domain.model.command.UpdateWordCommand
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -41,6 +44,7 @@ class DataInitializer(
     private val supportPostService: SupportPostService,
     private val dictionaryWordService: DictionaryWordService,
     private val wordbookService: WordbookService,
+    private val wordbookWordListService: WordbookWordListService,
     private val wordbookBundleService: WordbookBundleService,
     private val sharedWordbookService: SharedWordbookService,
     private val sharedWordbookBundleService: SharedWordbookBundleService,
@@ -234,6 +238,19 @@ class DataInitializer(
         val b3 = wordbookBundleService.create(adminAccount.id, "TOEIC 900점 목표 단어 모음")
 
         val w1 = wordbookService.create(adminAccount.id, "TOEIC 900점 단어 - 숙어")
+        val w1_word1 = wordbookWordListService.createWordSeries(adminAccount.id, w1.id!!)
+        wordbookWordListService.updateWord(adminAccount.id, w1.id, w1_word1.wordList[0].id!!, UpdateWordCommand(Spelling("look up")))
+        wordbookWordListService.updateSense(adminAccount.id, w1.id, w1_word1.wordList[0].id!!, w1_word1.wordList[0].senses[0].id!!,
+            UpdateSenseCommand(
+                definition = "찾아보다",
+                partOfSpeech = PartOfSpeech.IDIOM,
+                engDefinition = "to search for information in a reference book or database",
+                britishPhonetic = "lʊk ʌp",
+                americanPhonetic = "lʊk ʌp",
+                synonyms = listOf(Spelling("search"), Spelling("consult")),
+                antonyms = listOf(Spelling("ignore"), Spelling("overlook"))
+            )
+        )
         val w2 = wordbookService.create(adminAccount.id, "TOEIC 900점 단어 - 자주 출제되는 단어들")
         val w3 = wordbookService.create(adminAccount.id, "TOEIC 900점 단어 - 필수 암기 단어")
         val w4 = wordbookService.create(adminAccount.id, "비즈니스 이메일 작성 필수 단어")
@@ -365,8 +382,8 @@ class DataInitializer(
         sharedWordbookBundleService.addSharedWordbookToBundle(adminAccount.id, bundle3.id!!, sw8.id!!)
         sharedWordbookBundleService.addSharedWordbookToBundle(adminAccount.id, bundle3.id!!, sw9.id!!)
 
-        sharedWordbookService.banSharedWordbook(sw8.id!!)
-        sharedWordbookService.deleteMySharedWordbook(userAccount.id, sw9.id!!)
+//        sharedWordbookService.banSharedWordbook(sw8.id!!)
+//        sharedWordbookService.deleteMySharedWordbook(userAccount.id, sw9.id!!)
 
         klogger.info { "===== 초기 데이터 삽입 완료 =====" }
     }

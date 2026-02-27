@@ -18,4 +18,5 @@ interface SharedWordbookRepository {
         pageable: Pageable,
     ): Page<SharedWordbookListView>
     fun findDetailView(sharedWordbookId: Long): SharedWordbookDetailView?
+    fun paginateByCreatorId(creatorId: String, pageable: Pageable): Page<SharedWordbookListView>
 }

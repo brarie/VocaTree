@@ -88,6 +88,17 @@ export async function getSharedWordsByVersion(
   return response.json();
 }
 
+export async function getMySharedWordbooks(
+  params: PageParams,
+): Promise<Page<SharedWordbookListView>> {
+  const queryString = pageParamsToQueryString(params);
+  const response = await fetcherWithAuth(
+    `/api/library/shared-wordbooks/my?${queryString}`,
+  );
+  await handleApiResponse(response, 'Failed to fetch my shared wordbooks');
+  return response.json();
+}
+
 export async function shareOwnWordbook(
   data: ShareMyWordbookRequest,
 ): Promise<SharedWordbookResponse> {
@@ -181,6 +192,17 @@ export async function updateTrustedLevel(
 // ==========================================
 // Shared Wordbook Bundle APIs
 // ==========================================
+
+export async function getMySharedBundles(
+  params: PageParams,
+): Promise<Page<SharedWordbookBundleListView>> {
+  const queryString = pageParamsToQueryString(params);
+  const response = await fetcherWithAuth(
+    `/api/library/shared-wordbook-bundles/my?${queryString}`,
+  );
+  await handleApiResponse(response, 'Failed to fetch my shared bundles');
+  return response.json();
+}
 
 export async function getSharedBundles(
   params: PageParams,

@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { PageHeader } from '@/components/PageHeader';
 import { PaginationBar } from '@/components/PaginationBar';
@@ -8,10 +8,12 @@ import { usePageParams } from '@/hooks/usePageParams';
 import {
   useSharedWordbookDetail,
   useSharedWordbookVersions,
+  useSharedWordsByVersion,
 } from '@/hooks/library/queries';
 import { TrustedLevelBadge } from '../../_components/TrustedLevelBadge';
+import { SharedWordbookWordsTable } from '../../_components/SharedWordbookWordsTable';
 import { Button } from '@/components/ui/button';
-import { User, Calendar, ArrowLeft } from 'lucide-react';
+import { User, Calendar, ArrowLeft, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 
 type Tab = 'info' | 'versions';
@@ -24,6 +26,8 @@ function WordbookDetailContent() {
 
   const activeTab = (searchParams.get('tab') as Tab) || 'info';
   const { pageParams, setPage, setSize } = usePageParams({ defaultSize: 10 });
+
+  const [selectedVersion, setSelectedVersion] = useState<number | null>(null);
 
   function setTab(tab: Tab) {
     const next = new URLSearchParams(searchParams.toString());
@@ -46,6 +50,15 @@ function WordbookDetailContent() {
     pageParams.page,
     pageParams.size,
     activeTab === 'versions' && !!detail?.id,
+  );
+
+  // 명시적으로 선택된 버전이 없으면 목록의 첫 번째(최신) 버전을 기본으로 사용
+  const effectiveVersion =
+    selectedVersion ?? versionsQuery.data?.content[0]?.version ?? null;
+
+  const wordsQuery = useSharedWordsByVersion(
+    detail?.id ?? 0,
+    effectiveVersion ?? 0,
   );
 
   if (isLoading) {
@@ -128,7 +141,6 @@ function WordbookDetailContent() {
               <Calendar className="w-3.5 h-3.5" />
               <span>{detail.createdAt.slice(0, 10).replace(/-/g, '.')}</span>
             </div>
-
             <TrustedLevelBadge level={detail.trustedLevel} />
           </div>
 
@@ -167,9 +179,18 @@ function WordbookDetailContent() {
 
           {versionsQuery.data &&
             versionsQuery.data.content.map((v) => (
-              <div
+              <button
                 key={v.id}
-                className="bg-zinc-900 rounded-lg border border-zinc-800 p-4 flex items-center justify-between"
+                onClick={() =>
+                  setSelectedVersion(
+                    effectiveVersion === v.version ? null : v.version,
+                  )
+                }
+                className={`w-full rounded-lg border p-4 flex items-center justify-between transition-colors text-left ${
+                  effectiveVersion === v.version
+                    ? 'bg-zinc-800 border-white/20'
+                    : 'bg-zinc-900 border-zinc-800 hover:border-zinc-600'
+                }`}
               >
                 <div className="flex items-center gap-3">
                   <span className="text-[11px] px-2 py-0.5 rounded bg-zinc-700 text-zinc-300 font-medium shrink-0">
@@ -185,7 +206,12 @@ function WordbookDetailContent() {
                     </p>
                   </div>
                 </div>
-              </div>
+                <BookOpen
+                  className={`w-4 h-4 shrink-0 transition-colors ${
+                    effectiveVersion === v.version ? 'text-white' : 'text-zinc-600'
+                  }`}
+                />
+              </button>
             ))}
 
           {versionsQuery.data && versionsQuery.data.totalElements > 0 && (
@@ -195,6 +221,26 @@ function WordbookDetailContent() {
               onItemsPerPageChange={setSize}
               className="pt-2"
             />
+          )}
+
+          {/* 선택된 버전의 단어 목록 */}
+          {effectiveVersion !== null && (
+            <div className="pt-2 space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] px-2 py-0.5 rounded bg-zinc-700 text-zinc-300 font-medium">
+                  v{effectiveVersion}
+                </span>
+                <p className="text-sm text-gray-400">단어 목록</p>
+              </div>
+
+              {wordsQuery.isLoading && (
+                <div className="h-48 bg-zinc-900 rounded-lg border border-zinc-800 animate-pulse" />
+              )}
+
+              {wordsQuery.data && (
+                <SharedWordbookWordsTable words={wordsQuery.data} />
+              )}
+            </div>
           )}
         </div>
       )}

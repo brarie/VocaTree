@@ -1,5 +1,6 @@
 package com.vocatree.server.common.domain.model.vocabulary.vo
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.vocatree.server.common.domain.model.vocabulary.vo.components.PartOfSpeech
 import com.vocatree.server.common.domain.model.vocabulary.vo.components.Spelling
 
@@ -12,6 +13,7 @@ data class SenseVo(
     val synonyms: List<Spelling> = emptyList(),
     val antonyms: List<Spelling> = emptyList()
 ) {
+    @JsonIgnore
     fun isBlank(): Boolean {
         return definition.isNullOrBlank()
             && engDefinition.isNullOrBlank()

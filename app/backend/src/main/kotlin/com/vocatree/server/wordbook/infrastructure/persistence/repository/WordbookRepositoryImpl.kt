@@ -1,11 +1,17 @@
 package com.vocatree.server.wordbook.infrastructure.persistence.repository
 
 import com.vocatree.server.wordbook.domain.model.Wordbook
+import com.vocatree.server.wordbook.domain.model.enumerated.NodeType
+import com.vocatree.server.wordbook.domain.model.query.SimpleWordbookView
 import com.vocatree.server.wordbook.domain.port.WordbookRepository
 import com.vocatree.server.wordbook.infrastructure.persistence.entity.WordbookColumnSettingEntity
 import com.vocatree.server.wordbook.infrastructure.persistence.entity.WordbookNodeEntity
 import com.vocatree.server.wordbook.infrastructure.persistence.entity.WordbookNodeTable
+import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.selectAll
 import org.springframework.stereotype.Repository
+import java.util.UUID
 
 @Repository
 class WordbookRepositoryImpl : WordbookRepository {
@@ -61,4 +67,19 @@ class WordbookRepositoryImpl : WordbookRepository {
         WordbookNodeTable.select(WordbookNodeTable.id)
             .where { WordbookNodeTable.parentId eq bundleId }
             .empty().not()
+
+    override fun findAllSimpleByOwnerId(ownerId: String): List<SimpleWordbookView> =
+        WordbookNodeTable
+            .selectAll()
+            .where {
+                (WordbookNodeTable.ownerId eq UUID.fromString(ownerId)) and
+                (WordbookNodeTable.nodeType eq NodeType.SINGLE)
+            }
+            .orderBy(WordbookNodeTable.title to SortOrder.ASC)
+            .map { row ->
+                SimpleWordbookView(
+                    id = row[WordbookNodeTable.id].value,
+                    title = row[WordbookNodeTable.title],
+                )
+            }
 }

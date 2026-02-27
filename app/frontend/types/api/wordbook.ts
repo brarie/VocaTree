@@ -56,3 +56,8 @@ export interface NodeResponseWithCountView {
   createdAt: string;
   count: number;
 }
+
+export interface SimpleWordbookView {
+  id: number;
+  title: string;
+}

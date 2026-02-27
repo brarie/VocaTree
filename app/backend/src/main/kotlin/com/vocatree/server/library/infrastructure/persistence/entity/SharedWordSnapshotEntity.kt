@@ -1,5 +1,6 @@
 package com.vocatree.server.library.infrastructure.persistence.entity
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -11,7 +12,10 @@ import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.json.json
 import java.security.MessageDigest
 
-private val mapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
+private val mapper = ObjectMapper()
+    .registerModule(KotlinModule.Builder().build())
+    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+    .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
 
 object SharedWordSnapshotTable : LongIdTable("shared_word_snapshot") {
     val snapshot = json<SharedWordSnapshot>(

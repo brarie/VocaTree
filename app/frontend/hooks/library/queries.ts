@@ -3,6 +3,8 @@ import { toast } from 'sonner';
 import { ApiError } from '@/types/api/error';
 import {
   getSharedWordbooks,
+  getMySharedWordbooks,
+  getMySharedBundles,
   getSharedWordbookDetail,
   getSharedWordbookVersions,
   getSharedWordsByVersion,
@@ -65,6 +67,11 @@ export const libraryKeys = {
     [...libraryKeys.all, 'wordbook', id, 'versions', page, size] as const,
   wordbookWords: (id: number, version: number) =>
     [...libraryKeys.all, 'wordbook', id, 'version', version, 'words'] as const,
+
+  myWordbooks: (page: number, size: number) =>
+    [...libraryKeys.all, 'myWordbooks', page, size] as const,
+  myBundles: (page: number, size: number) =>
+    [...libraryKeys.all, 'myBundles', page, size] as const,
 
   // Shared Bundles
   bundles: (
@@ -144,6 +151,20 @@ export function useSharedWordsByVersion(id: number, version: number) {
   });
 }
 
+export function useMySharedWordbooks(page: number, size: number) {
+  return useQuery({
+    queryKey: libraryKeys.myWordbooks(page, size),
+    queryFn: () => getMySharedWordbooks({ page, size }),
+  });
+}
+
+export function useMySharedBundles(page: number, size: number) {
+  return useQuery({
+    queryKey: libraryKeys.myBundles(page, size),
+    queryFn: () => getMySharedBundles({ page, size }),
+  });
+}
+
 export function useShareOwnWordbook() {
   const queryClient = useQueryClient();
 
@@ -197,6 +218,9 @@ export function useMakeNewVersion() {
       });
       queryClient.invalidateQueries({
         queryKey: ['library', 'wordbook', variables.id, 'versions'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [...libraryKeys.all, 'myWordbooks'],
       });
       toast.success('새 버전이 업데이트되었습니다.');
     },

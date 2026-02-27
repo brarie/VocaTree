@@ -30,6 +30,10 @@ class SharedWordbookService(
 ) {
 
     @Transactional(readOnly = true)
+    fun getMySharedWordbooks(userId: String, pageable: Pageable): Page<SharedWordbookListView> =
+        sharedWordbookRepository.paginateByCreatorId(userId, pageable)
+
+    @Transactional(readOnly = true)
     fun paginatePublicSharedWordbooks(
         titlePrefix: String?,
         trustedLevels: List<TrustedLevel>,
@@ -151,6 +155,7 @@ class SharedWordbookService(
         return savedRevision
     }
 
+    // todo: delete 할 때 State 가 BANNED 가 아니여야 할 듯.
     @Transactional
     fun deleteMySharedWordbook(userId: String, sharedWordbookId: Long): SharedWordbook {
         val shared = sharedWordbookRepository.findById(sharedWordbookId)

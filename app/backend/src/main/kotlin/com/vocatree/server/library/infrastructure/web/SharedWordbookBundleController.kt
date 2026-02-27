@@ -26,11 +26,33 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
+/**
+ * todo
+ * 지금 전체적으로 권한 체킹이 부족함
+ * SharedState 에 따라서 지금 권한 체킹이 되어야 함.
+ * PUBLIC의 경우 모두가 볼 수 있고,
+ * DELETED_BY_OWN의 경우 그거를 구독하고 있는 사람과 공유한 이만 볼 수 있고,
+ * BANNED의 경우에는 아무도 볼 수 없게 해야 함.
+ *
+ * 결국 구독 테이블을 만들어야 가능한거라서 일단 보류.
+ */
 @RestController
 @RequestMapping("/api/library/shared-wordbook-bundles")
 class SharedWordbookBundleController(
     private val sharedWordbookBundleService: SharedWordbookBundleService,
 ) {
+
+    @GetMapping("/my")
+    fun getMySharedBundles(
+        @AuthenticationPrincipal userPrincipal: UserPrincipal,
+        pageable: Pageable,
+    ): ResponseEntity<Page<SharedWordbookBundleListView>> {
+        val result = sharedWordbookBundleService.getMySharedBundles(
+            userId = userPrincipal.id,
+            pageable = pageable,
+        )
+        return ResponseEntity.ok(result)
+    }
 
     @GetMapping
     fun getSharedBundles(

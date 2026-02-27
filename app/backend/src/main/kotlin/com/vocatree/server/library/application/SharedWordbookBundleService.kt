@@ -45,6 +45,10 @@ class SharedWordbookBundleService(
         return sharedWordbookBundleRepository.paginateWordbooksInBundle(bundleId, pageable)
     }
 
+    @Transactional(readOnly = true)
+    fun getMySharedBundles(userId: String, pageable: Pageable): Page<SharedWordbookBundleListView> =
+        sharedWordbookBundleRepository.paginateByCreatorId(userId, pageable)
+
     @Transactional
     fun makeSharedBundle(userId: String, title: String, description: String?): SharedWordbookBundle {
         val temporarySaved = sharedWordbookBundleRepository.save(

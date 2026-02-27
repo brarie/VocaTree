@@ -10,13 +10,15 @@ import { LibraryFilterSidebar } from './_components/LibraryFilterSidebar';
 import { LibrarySearchBar } from './_components/LibrarySearchBar';
 import { SharedWordbookCard } from './_components/SharedWordbookCard';
 import { SharedWordbookBundleCard } from './_components/SharedWordbookBundleCard';
+import { AuthOnly } from '@/components/auth/AuthOnly';
 import {
   TrustedLevel,
   SharedWordbookSortType,
   SharedWordbookBundleSortType,
 } from '@/types/api/library';
 import { Button } from '@/components/ui/button';
-import { Filter } from 'lucide-react';
+import { Filter, Plus, Library, Layers } from 'lucide-react';
+import Link from 'next/link';
 import {
   Sheet,
   SheetContent,
@@ -73,10 +75,30 @@ function LibraryContent() {
 
       <div className="flex flex-col md:flex-row gap-6">
         {/* 데스크톱 사이드바 */}
-        <aside className="hidden md:block w-52 shrink-0 sticky top-24 self-start h-fit">
+        <aside className="hidden md:block w-52 shrink-0 sticky top-24 self-start h-fit space-y-3">
           <div className="bg-white/5 border border-white/10 rounded-lg p-4">
             <LibraryFilterSidebar type={type} />
           </div>
+
+          <AuthOnly>
+            <div className="bg-white/5 border border-white/10 rounded-lg p-4 space-y-2">
+              <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">
+                내 공유
+              </h3>
+              <Link
+                href="/dashboard/shared-wordbooks"
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors"
+              >
+                <Library className="w-3.5 h-3.5 shrink-0" />내 공유 단어장
+              </Link>
+              <Link
+                href="/dashboard/shared-bundles"
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors"
+              >
+                <Layers className="w-3.5 h-3.5 shrink-0" />내 공유 번들
+              </Link>
+            </div>
+          </AuthOnly>
         </aside>
 
         {/* 메인 컨텐츠 */}
@@ -114,8 +136,31 @@ function LibraryContent() {
                   <SheetHeader className="px-1 pb-0">
                     <SheetTitle className="text-white">필터</SheetTitle>
                   </SheetHeader>
-                  <div className="px-1">
+                  <div className="px-1 space-y-4">
                     <LibraryFilterSidebar type={type} />
+                    <AuthOnly>
+                      <div className="border-t border-white/10 pt-4 space-y-1">
+                        <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 px-2">
+                          내 공유
+                        </h3>
+                        <button
+                          onClick={() => {
+                            setIsMobileFilterOpen(false);
+                          }}
+                          className="w-full flex items-center gap-2 px-2 py-2 rounded-md text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors text-left"
+                        >
+                          <Plus className="w-3.5 h-3.5 shrink-0" />
+                          단어장 공유하기
+                        </button>
+                        <Link
+                          href="/dashboard/shared-wordbooks"
+                          className="w-full flex items-center gap-2 px-2 py-2 rounded-md text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors"
+                        >
+                          <Library className="w-3.5 h-3.5 shrink-0" />내 공유
+                          목록
+                        </Link>
+                      </div>
+                    </AuthOnly>
                   </div>
                 </SheetContent>
               </Sheet>
@@ -147,42 +192,54 @@ function LibraryContent() {
           )}
 
           {/* 컨텐츠 그리드 */}
-          {!isLoading && type === 'wordbook' && wordbooksQuery.data && wordbooksQuery.data.content.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {wordbooksQuery.data.content.map((item) => (
-                <SharedWordbookCard key={item.id} wordbook={item} />
-              ))}
-            </div>
-          )}
+          {!isLoading &&
+            type === 'wordbook' &&
+            wordbooksQuery.data &&
+            wordbooksQuery.data.content.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {wordbooksQuery.data.content.map((item) => (
+                  <SharedWordbookCard key={item.id} wordbook={item} />
+                ))}
+              </div>
+            )}
 
-          {!isLoading && type === 'bundle' && bundlesQuery.data && bundlesQuery.data.content.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {bundlesQuery.data.content.map((item) => (
-                <SharedWordbookBundleCard key={item.id} bundle={item} />
-              ))}
-            </div>
-          )}
+          {!isLoading &&
+            type === 'bundle' &&
+            bundlesQuery.data &&
+            bundlesQuery.data.content.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {bundlesQuery.data.content.map((item) => (
+                  <SharedWordbookBundleCard key={item.id} bundle={item} />
+                ))}
+              </div>
+            )}
 
           {/* 페이지네이션 */}
-          {!isLoading && type === 'wordbook' && wordbooksQuery.data && wordbooksQuery.data.content.length > 0 && (
-            <PaginationBar
-              pageData={wordbooksQuery.data}
-              onPageChange={setPage}
-              onItemsPerPageChange={setSize}
-              className="pt-2"
-              itemsPerPageOptions={[12, 24, 36]}
-            />
-          )}
+          {!isLoading &&
+            type === 'wordbook' &&
+            wordbooksQuery.data &&
+            wordbooksQuery.data.content.length > 0 && (
+              <PaginationBar
+                pageData={wordbooksQuery.data}
+                onPageChange={setPage}
+                onItemsPerPageChange={setSize}
+                className="pt-2"
+                itemsPerPageOptions={[12, 24, 36]}
+              />
+            )}
 
-          {!isLoading && type === 'bundle' && bundlesQuery.data && bundlesQuery.data.content.length > 0 && (
-            <PaginationBar
-              pageData={bundlesQuery.data}
-              onPageChange={setPage}
-              onItemsPerPageChange={setSize}
-              className="pt-2"
-              itemsPerPageOptions={[12, 24, 36]}
-            />
-          )}
+          {!isLoading &&
+            type === 'bundle' &&
+            bundlesQuery.data &&
+            bundlesQuery.data.content.length > 0 && (
+              <PaginationBar
+                pageData={bundlesQuery.data}
+                onPageChange={setPage}
+                onItemsPerPageChange={setSize}
+                className="pt-2"
+                itemsPerPageOptions={[12, 24, 36]}
+              />
+            )}
         </main>
       </div>
     </div>

@@ -18,6 +18,8 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Repository
+import java.util.UUID
+import java.util.UUID.*
 
 @Repository
 class SharedWordbookRepositoryImpl : SharedWordbookRepository {
@@ -85,6 +87,53 @@ class SharedWordbookRepositoryImpl : SharedWordbookRepository {
             .where(conditionBuilder)
             .groupBy(SharedWordbookTable.id, UserTable.id)
             .orderBy(trustedLevelOrder to SortOrder.ASC, sortOrder, SharedWordbookTable.id to SortOrder.DESC)
+            .limit(pageable.pageSize)
+            .offset(pageable.offset)
+            .map { row ->
+                SharedWordbookListView(
+                    id = row[SharedWordbookTable.id].value,
+                    title = row[SharedWordbookTable.title],
+                    slug = row[SharedWordbookTable.slug]!!,
+                    sharedState = row[SharedWordbookTable.sharedState],
+                    trustedLevel = row[SharedWordbookTable.trustedLevel],
+                    creator = SimpleUserView(
+                        id = row[UserTable.id].value.toString(),
+                        nickname = row[UserTable.nickname],
+                    ),
+                    latestVersion = row[maxVersionAlias]!!,
+                    createdAt = row[SharedWordbookTable.createdAt],
+                )
+            }
+
+        return PageImpl(content, pageable, total)
+    }
+
+    override fun paginateByCreatorId(creatorId: String, pageable: Pageable): Page<SharedWordbookListView> {
+        val condition: SqlExpressionBuilder.() -> Op<Boolean> = {
+            SharedWordbookTable.creatorId eq fromString(creatorId)
+        }
+
+        val total = SharedWordbookTable.selectAll().where(condition).count()
+
+        val maxVersionAlias = SharedWordbookRevisionTable.version.max().alias("latest_version")
+
+        val content = SharedWordbookTable
+            .innerJoin(UserTable, { SharedWordbookTable.creatorId }, { UserTable.id })
+            .innerJoin(SharedWordbookRevisionTable, { SharedWordbookTable.id }, { SharedWordbookRevisionTable.sharedWordbookId })
+            .select(
+                SharedWordbookTable.id,
+                SharedWordbookTable.title,
+                SharedWordbookTable.slug,
+                SharedWordbookTable.sharedState,
+                SharedWordbookTable.trustedLevel,
+                SharedWordbookTable.createdAt,
+                UserTable.id,
+                UserTable.nickname,
+                maxVersionAlias,
+            )
+            .where(condition)
+            .groupBy(SharedWordbookTable.id, UserTable.id)
+            .orderBy(SharedWordbookTable.createdAt to SortOrder.DESC, SharedWordbookTable.id to SortOrder.DESC)
             .limit(pageable.pageSize)
             .offset(pageable.offset)
             .map { row ->

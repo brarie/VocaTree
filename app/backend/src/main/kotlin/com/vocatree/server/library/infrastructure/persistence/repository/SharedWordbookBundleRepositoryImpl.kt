@@ -17,6 +17,7 @@ import com.vocatree.server.library.infrastructure.persistence.entity.SharedWordb
 import com.vocatree.server.user.infrastructure.persistence.entity.UserTable
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.*
+import java.util.UUID
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -216,6 +217,57 @@ class SharedWordbookBundleRepositoryImpl : SharedWordbookBundleRepository {
                     ),
                     latestVersion = row[maxVersionAlias]!!,
                     createdAt = row[SharedWordbookTable.createdAt],
+                )
+            }
+
+        return PageImpl(content, pageable, total)
+    }
+
+    override fun paginateByCreatorId(
+        creatorId: String,
+        pageable: Pageable,
+    ): Page<SharedWordbookBundleListView> {
+        val uuid = UUID.fromString(creatorId)
+
+        val total = SharedWordbookBundleTable
+            .selectAll()
+            .where { SharedWordbookBundleTable.creatorId eq uuid }
+            .count()
+
+        val wordbookCountAlias = SharedWordbookBundleItemTable.sharedWordbookId.count().alias("wordbook_count")
+
+        val content = SharedWordbookBundleTable
+            .join(UserTable, JoinType.INNER, SharedWordbookBundleTable.creatorId, UserTable.id)
+            .join(SharedWordbookBundleItemTable, JoinType.LEFT, SharedWordbookBundleTable.id, SharedWordbookBundleItemTable.bundleId)
+            .select(
+                SharedWordbookBundleTable.id,
+                SharedWordbookBundleTable.title,
+                SharedWordbookBundleTable.slug,
+                SharedWordbookBundleTable.sharedState,
+                SharedWordbookBundleTable.trustedLevel,
+                SharedWordbookBundleTable.createdAt,
+                UserTable.id,
+                UserTable.nickname,
+                wordbookCountAlias,
+            )
+            .where { SharedWordbookBundleTable.creatorId eq uuid }
+            .groupBy(SharedWordbookBundleTable.id, UserTable.id)
+            .orderBy(SharedWordbookBundleTable.createdAt to SortOrder.DESC, SharedWordbookBundleTable.id to SortOrder.DESC)
+            .limit(pageable.pageSize)
+            .offset(pageable.offset)
+            .map { row ->
+                SharedWordbookBundleListView(
+                    id = row[SharedWordbookBundleTable.id].value,
+                    title = row[SharedWordbookBundleTable.title],
+                    slug = row[SharedWordbookBundleTable.slug]!!,
+                    sharedState = row[SharedWordbookBundleTable.sharedState],
+                    trustedLevel = row[SharedWordbookBundleTable.trustedLevel],
+                    creator = SimpleUserView(
+                        id = row[UserTable.id].value.toString(),
+                        nickname = row[UserTable.nickname],
+                    ),
+                    wordbookCount = row[wordbookCountAlias].toInt(),
+                    createdAt = row[SharedWordbookBundleTable.createdAt],
                 )
             }
 
