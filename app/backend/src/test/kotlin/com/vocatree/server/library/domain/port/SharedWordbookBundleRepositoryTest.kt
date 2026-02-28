@@ -12,6 +12,7 @@ import io.kotest.core.extensions.ApplyExtension
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.extensions.spring.SpringExtension
 import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -361,7 +362,7 @@ class SharedWordbookBundleRepositoryTest(
             view.creator.id shouldBe creator.id
         }
 
-        it("PUBLIC 상태가 아닌 단어장은 조회되지 않는다.") {
+        it("PUBLIC 상태가 아닌 단어장들도 사용자 UX 개선을 위해 조회된다.") {
             val creator = userRepository.save(UserFixture.create(username = "bndwbl2", email = "bndwbl2@test.com"))
 
             val publicWb = sharedWordbookRepository.save(SharedWordbookFixture.create(creatorId = creator.id!!))
@@ -381,8 +382,7 @@ class SharedWordbookBundleRepositoryTest(
 
             val result = sharedWordbookBundleRepository.paginateWordbooksInBundle(bundle.id!!, PageRequest.of(0, 10))
 
-            result.content.map { it.id } shouldContain publicWb.id!!
-            result.content.map { it.id } shouldNotContain bannedWb.id!!
+            result.content.map { it.id } shouldContainAll listOf(publicWb.id!!, bannedWb.id!!)
         }
 
         it("페이지네이션이 동작한다.") {
