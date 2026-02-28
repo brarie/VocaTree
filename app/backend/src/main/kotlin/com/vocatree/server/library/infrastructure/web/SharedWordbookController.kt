@@ -30,22 +30,16 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
-/**
- * todo
- * 지금 전체적으로 권한 체킹이 부족함
- * SharedState 에 따라서 지금 권한 체킹이 되어야 함.
- * PUBLIC의 경우 모두가 볼 수 있고,
- * DELETED_BY_OWN의 경우 그거를 구독하고 있는 사람과 공유한 이만 볼 수 있고,
- * BANNED의 경우에는 아무도 볼 수 없게 해야 함.
- *
- * 결국 구독 테이블을 만들어야 가능한거라서 일단 보류.
- */
 @RestController
 @RequestMapping("/api/library/shared-wordbooks")
 class SharedWordbookController(
     private val sharedWordbookService: SharedWordbookService,
 ) {
 
+    /**
+     * 내가 공유한 단어장 목록 조회
+     * 모든 SharedState에 대해 조회됩니다.
+     */
     @GetMapping("/my")
     fun getMySharedWordbooks(
         @AuthenticationPrincipal userPrincipal: UserPrincipal,
@@ -55,6 +49,10 @@ class SharedWordbookController(
         return ResponseEntity.ok(result)
     }
 
+    /**
+     * ADMIN용 단어장 목록 조회
+     * 모든 사람들의 모든 SharedState에 대해 조회됩니다.
+     */
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
     fun getAllSharedWordbooks(
@@ -68,6 +66,10 @@ class SharedWordbookController(
         return ResponseEntity.ok(result)
     }
 
+    /**
+     * 공개된 단어장 목록 조회
+     * PUBLIC 상태의 단어장만 조회되며 Library page에 들어갔을 때 쏘는 API 입니다.
+     */
     @GetMapping
     fun getSharedWordbooks(
         @RequestParam(required = false) titlePrefix: String?,
@@ -84,6 +86,10 @@ class SharedWordbookController(
         return ResponseEntity.ok(result)
     }
 
+    /**
+     * 단어장에 적힌 Detail을 보는 API 입니다.
+     * PUBLIC 상태인 것만 조회됩니다.
+     */
     @GetMapping("/{sharedWordbookId}")
     fun getSharedWordbookDetail(
         @PathVariable sharedWordbookId: Long,
@@ -92,6 +98,10 @@ class SharedWordbookController(
         return ResponseEntity.ok(detail)
     }
 
+    /**
+     * 단어장 버전 조회 API 입니다.
+     * PUBLIC 상태인 것만 조회됩니다.
+     */
     @GetMapping("/{sharedWordbookId}/versions")
     fun getSharedWordbookVersions(
         @PathVariable sharedWordbookId: Long,
@@ -101,6 +111,10 @@ class SharedWordbookController(
         return ResponseEntity.ok(result)
     }
 
+    /**
+     * 단어장 버전별 단어 조회 API 입니다.
+     * PUBLIC 상태인 것만 조회됩니다.
+     */
     @GetMapping("/{sharedWordbookId}/versions/{version}/words")
     fun getSharedWordsByVersion(
         @PathVariable sharedWordbookId: Long,

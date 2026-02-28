@@ -18,12 +18,12 @@ class SharedWordbookRevisionNotFoundException() : NotFoundException(
     message = "해당 버전의 공유 단어장이 존재하지 않습니다."
 )
 
-class SharedWordbookBundleNotFoundException() : NotFoundException(
-    code = "SHARED_WORDBOOK_BUNDLE_NOT_FOUND",
-    message = "해당 공유 단어장 번들이 존재하지 않습니다."
+class BannedSharedWordbookNotInaccessibleException() : ForbiddenException(
+    code = "BANNED_SHARED_WORDBOOK_INACCESSIBLE",
+    message = "차단된 공유 단어장입니다."
 )
 
-class SharedWordbookBundleForbiddenException() : ForbiddenException(
-    code = "SHARED_WORDBOOK_BUNDLE_FORBIDDEN",
-    message = "공유 단어장 번들에 접근할 권한이 없습니다."
+class DeletedSharedWordbookInaccessibleException() : ForbiddenException(
+    code = "DELETED_SHARED_WORDBOOK_INACCESSIBLE",
+    message = "삭제된 공유 단어장입니다."
 )

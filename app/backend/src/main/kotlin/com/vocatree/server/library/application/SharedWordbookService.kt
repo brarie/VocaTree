@@ -49,26 +49,33 @@ class SharedWordbookService(
     ): Page<SharedWordbookListView> =
         sharedWordbookRepository.paginateAllViews(titlePrefix, pageable)
 
-    // 이것도 상태 분기를 좀 해야 할 수도...?
-    // 예를 들어 SCOPE가 PRIVATE이면 초대된 사용자만 볼 수 있고, BANNED 면 못 보고 그런 식으로.
     @Transactional(readOnly = true)
-    fun getSharedWordbookDetail(sharedWordbookId: Long): SharedWordbookDetailView =
-        sharedWordbookRepository.findDetailView(sharedWordbookId)
+    fun getSharedWordbookDetail(sharedWordbookId: Long): SharedWordbookDetailView {
+        val sharedWordbook = sharedWordbookRepository.findById(sharedWordbookId)
             ?: throw SharedWordbookNotFoundException()
 
-    // 이것도 마찬가지로 분기 해야 함 ㅋㅋ;
+        sharedWordbook.validatePublic()
+
+        return sharedWordbookRepository.findDetailView(sharedWordbookId)
+            ?: throw SharedWordbookNotFoundException()
+    }
+
     @Transactional(readOnly = true)
     fun getSharedWordbookVersions(sharedWordbookId: Long, pageable: Pageable): Page<SharedWordbookVersionView> {
-        sharedWordbookRepository.findById(sharedWordbookId)
+        val sharedWordbook = sharedWordbookRepository.findById(sharedWordbookId)
             ?: throw SharedWordbookNotFoundException()
+
+        sharedWordbook.validatePublic()
 
         return sharedWordbookRevisionRepository.findVersionViews(sharedWordbookId, pageable)
     }
 
     @Transactional(readOnly = true)
     fun getSharedWordsByVersion(sharedWordbookId: Long, version: Long): List<SharedWordSnapshot> {
-        sharedWordbookRepository.findById(sharedWordbookId)
+        val sharedWordbook = sharedWordbookRepository.findById(sharedWordbookId)
             ?: throw SharedWordbookNotFoundException()
+
+        sharedWordbook.validatePublic()
 
         val revision = sharedWordbookRevisionRepository.findByWordbookIdAndVersion(sharedWordbookId, version)
             ?: throw SharedWordbookRevisionNotFoundException()
@@ -162,7 +169,6 @@ class SharedWordbookService(
         return savedRevision
     }
 
-    // todo: delete 할 때 State 가 BANNED 가 아니여야 할 듯.
     @Transactional
     fun deleteMySharedWordbook(userId: String, sharedWordbookId: Long): SharedWordbook {
         val shared = sharedWordbookRepository.findById(sharedWordbookId)

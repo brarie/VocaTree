@@ -382,8 +382,8 @@ class DataInitializer(
         sharedWordbookBundleService.addSharedWordbookToBundle(adminAccount.id, bundle3.id!!, sw8.id!!)
         sharedWordbookBundleService.addSharedWordbookToBundle(adminAccount.id, bundle3.id!!, sw9.id!!)
 
-//        sharedWordbookService.banSharedWordbook(sw8.id!!)
-//        sharedWordbookService.deleteMySharedWordbook(userAccount.id, sw9.id!!)
+        sharedWordbookService.banSharedWordbook(sw8.id!!)
+        sharedWordbookService.deleteMySharedWordbook(userAccount.id, sw9.id!!)
 
         klogger.info { "===== 초기 데이터 삽입 완료 =====" }
     }

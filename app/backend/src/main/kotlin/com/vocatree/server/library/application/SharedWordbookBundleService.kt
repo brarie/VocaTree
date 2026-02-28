@@ -40,14 +40,22 @@ class SharedWordbookBundleService(
         sharedWordbookBundleRepository.paginateAllViews(titlePrefix, pageable)
 
     @Transactional(readOnly = true)
-    fun getSharedWordbookBundleDetail(bundleId: Long): SharedWordbookBundleDetailView =
-        sharedWordbookBundleRepository.findDetailView(bundleId)
+    fun getSharedWordbookBundleDetail(bundleId: Long): SharedWordbookBundleDetailView {
+        val sharedBundle = sharedWordbookBundleRepository.findById(bundleId)
             ?: throw SharedWordbookBundleNotFoundException()
+
+        sharedBundle.validatePublic()
+
+        return sharedWordbookBundleRepository.findDetailView(bundleId)
+            ?: throw SharedWordbookBundleNotFoundException()
+    }
 
     @Transactional(readOnly = true)
     fun paginatePublicSharedWordbooksInBundle(bundleId: Long, pageable: Pageable): Page<SharedWordbookListView> {
-        sharedWordbookBundleRepository.findById(bundleId)
+        val sharedBundle = sharedWordbookBundleRepository.findById(bundleId)
             ?: throw SharedWordbookBundleNotFoundException()
+
+        sharedBundle.validatePublic()
 
         return sharedWordbookBundleRepository.paginateWordbooksInBundle(bundleId, pageable)
     }

@@ -12,8 +12,9 @@ import {
 import { TrustedLevelBadge } from '../../_components/TrustedLevelBadge';
 import { SharedWordbookCard } from '../../_components/SharedWordbookCard';
 import { Button } from '@/components/ui/button';
-import { User, Calendar, Layers, ArrowLeft } from 'lucide-react';
+import { User, Calendar, Layers, ArrowLeft, Ban, Archive } from 'lucide-react';
 import Link from 'next/link';
+import { isApiError } from '@/lib/error';
 
 type Tab = 'info' | 'wordbooks';
 
@@ -33,7 +34,7 @@ function BundleDetailContent() {
     router.push(`?${next.toString()}`, { scroll: false });
   }
 
-  const { data: detail, isLoading, isError } = useSharedBundleDetail(slug);
+  const { data: detail, isLoading, isError, error } = useSharedBundleDetail(slug);
 
   // Canonical redirect: 타이틀이 바뀌어 slug가 달라진 경우 최신 URL로 이동
   useEffect(() => {
@@ -59,6 +60,44 @@ function BundleDetailContent() {
   }
 
   if (isError || !detail) {
+    const apiError = isApiError(error) ? error : null;
+
+    if (apiError?.isCode('BANNED_SHARED_WORDBOOK_BUNDLE_INACCESSIBLE')) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 bg-red-500/5 rounded-lg border border-red-500/20">
+          <Ban className="w-8 h-8 text-red-400 mb-3" />
+          <p className="text-sm font-medium text-red-400">차단된 번들입니다.</p>
+          <p className="text-xs text-zinc-500 mt-1">
+            관리자에 의해 차단되어 열람할 수 없습니다.
+          </p>
+          <Link
+            href="/library"
+            className="mt-4 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+          >
+            라이브러리로 돌아가기
+          </Link>
+        </div>
+      );
+    }
+
+    if (apiError?.isCode('DELETED_SHARED_WORDBOOK_BUNDLE_INACCESSIBLE')) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 bg-white/5 rounded-lg border border-white/10">
+          <Archive className="w-8 h-8 text-zinc-500 mb-3" />
+          <p className="text-sm font-medium text-gray-400">삭제된 번들입니다.</p>
+          <p className="text-xs text-zinc-500 mt-1">
+            작성자가 이 번들을 삭제하였습니다.
+          </p>
+          <Link
+            href="/library"
+            className="mt-4 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+          >
+            라이브러리로 돌아가기
+          </Link>
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col items-center justify-center py-20 bg-white/5 rounded-lg border border-white/10">
         <p className="text-sm font-medium text-gray-400">

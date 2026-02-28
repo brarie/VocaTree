@@ -26,22 +26,16 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
-/**
- * todo
- * 지금 전체적으로 권한 체킹이 부족함
- * SharedState 에 따라서 지금 권한 체킹이 되어야 함.
- * PUBLIC의 경우 모두가 볼 수 있고,
- * DELETED_BY_OWN의 경우 그거를 구독하고 있는 사람과 공유한 이만 볼 수 있고,
- * BANNED의 경우에는 아무도 볼 수 없게 해야 함.
- *
- * 결국 구독 테이블을 만들어야 가능한거라서 일단 보류.
- */
 @RestController
 @RequestMapping("/api/library/shared-wordbook-bundles")
 class SharedWordbookBundleController(
     private val sharedWordbookBundleService: SharedWordbookBundleService,
 ) {
 
+    /**
+     * 자신의 공유 번들을 다 볼 수 있음.
+     * SharedState가 무엇이든 간에 자신의 번들은 다 볼 수 있습니다.
+     */
     @GetMapping("/my")
     fun getMySharedBundles(
         @AuthenticationPrincipal userPrincipal: UserPrincipal,
@@ -54,6 +48,9 @@ class SharedWordbookBundleController(
         return ResponseEntity.ok(result)
     }
 
+    /**
+     * ADMIN은 상태에 관계 없이 모든 사람들의 공유 번들을 다 볼 수 있음.
+     */
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
     fun getAllSharedBundles(
@@ -67,6 +64,10 @@ class SharedWordbookBundleController(
         return ResponseEntity.ok(result)
     }
 
+    /**
+     * 공개된 번들 조회 API
+     * PUBLIC 상태의 번들만 조회되며 Library page에 들어갔을 때 쏘는 API 입니다.
+     */
     @GetMapping
     fun getSharedBundles(
         @RequestParam(required = false) titlePrefix: String?,
@@ -83,6 +84,10 @@ class SharedWordbookBundleController(
         return ResponseEntity.ok(result)
     }
 
+    /**
+     * 단어장 번들의 Detail을 보는 API 입니다.
+     * PUBLIC 상태인 것만 조회됩니다.
+     */
     @GetMapping("/{bundleId}")
     fun getSharedBundleDetail(
         @PathVariable bundleId: Long,
@@ -91,6 +96,11 @@ class SharedWordbookBundleController(
         return ResponseEntity.ok(detail)
     }
 
+    /**
+     * 단어장 번들에 속한 단어장들을 조회하는 API 입니다.
+     * PUBLIC 상태인 번들만 조회됩니다.
+     * 단, 여기서는 모든 상태의 단어장들이 조회됩니다. 사용자의 편의를 위해 그렇게 구성되었습니다.
+     */
     @GetMapping("/{bundleId}/wordbooks")
     fun getWordbooksInBundle(
         @PathVariable bundleId: Long,
